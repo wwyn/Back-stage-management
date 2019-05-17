@@ -103,7 +103,7 @@ export default new Router({
             ]
         },
         {
-            path: "services", 
+            path: "/services", 
             name: "services",
             component: () => import("./views/services"),
             redirect: { name: "servicesDispose" }, 
@@ -187,5 +187,8 @@ export default new Router({
                 },
             ]
         }
-    ]
+    ],
+    scrollBehavior (to, from, savedPosition) {
+        return { x: 0, y: 0 }
+      }
 });

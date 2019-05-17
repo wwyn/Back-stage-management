@@ -123,8 +123,8 @@
             <el-table-column prop="name" label="可约人数" width="180"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button type="text" size="small">查看</el-button>
-                <el-button type="text" size="small">编辑</el-button>
+                <el-button type="text" size="small" @click="handleEditor">编辑</el-button>
+                <el-button type="text" size="small">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -143,6 +143,35 @@
       <el-button v-show="this.value=='券码'" @click="goRevise">重新修改</el-button>
       <el-button v-show="this.value=='预定'" @click="goReviseTime">重新修改</el-button>
     </div>
+    <div v-if="showModal" class="show-modal">
+      <div class="modal-box">
+        <p>添加时间段</p>
+        <el-form :inline="true">
+          <div v-for="(item,index) in timeList" :key="index">
+            <el-form-item label="时间">
+              <el-time-select
+                v-model="item.time"
+                :picker-options="{
+                        start: '08:30',
+                        step: '00:30',
+                        end: '18:30'
+                    }"
+                placeholder="选择时间"
+              ></el-time-select>
+            </el-form-item>
+            <el-form-item label="可预约人数">
+              <el-input v-model="item.number" placeholder="请填写"></el-input>
+            </el-form-item>
+          </div>
+          <el-button type="primary" @click="handleTimeAdd">添加时间段</el-button>
+          <p></p>
+          <el-form-item class="button">
+            <el-button type="primary" @click="handleConfirm">确认</el-button>
+            <el-button @click="handleCancel">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -157,6 +186,7 @@ export default {
       showBasic: false,
       showSubmit: false,
       showTime: false,
+      showModal: false,
       // 基本信息
       imageUrl: "",
       ruleForm: {
@@ -187,7 +217,8 @@ export default {
           address: "上海市普陀区金沙江路 1517 弄",
           zip: 200333
         }
-      ]
+      ],
+      timeList: [{ time: "", number: "" }]
     };
   },
   methods: {
@@ -242,7 +273,7 @@ export default {
       this.showSubmit = false;
     },
     goReviseTime() {
-        this.active = 3;
+      this.active = 3;
       this.showSort = false;
       this.showBasic = false;
       this.showSubmit = false;
@@ -262,7 +293,20 @@ export default {
       this.showSubmit = true;
     },
     addTime() {
-        
+      this.showModal = true;
+    },
+    handleEditor() {
+        this.showModal = true;
+    },
+    handleConfirm() {
+      this.showModal = false;
+      console.log(this.timeList)
+    },
+    handleCancel() {
+      this.showModal = false;
+    },
+    handleTimeAdd() {
+      this.timeList.push({ time: "", number: "" });
     }
   }
 };
@@ -516,6 +560,48 @@ export default {
     .el-button--primary {
       background-color: @color;
       color: #fff;
+    }
+  }
+  .show-modal {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(12, 12, 12, 0.3);
+    z-index: 99;
+    .modal-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      border-radius: 2px;
+      p {
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: #f1f1f1;
+        margin-bottom: 20px;
+      }
+      form {
+        padding: 20px;
+        /deep/ .el-input__inner {
+          width: 220px;
+        }
+        p {
+          width: 100%;
+          height: 20px;
+          padding: 0;
+          background-color: #fff;
+          border-top: 1px solid #f1f1f1;
+          margin-top: 20px;
+        }
+        .button {
+          margin: 0;
+          width: 100%;
+          text-align: right;
+        }
+      }
     }
   }
 }
