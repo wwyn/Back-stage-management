@@ -160,16 +160,29 @@ export default new Router({
                     },
                 },
                 {
-                    path: "/services-commodity",
-                    name: "servicesCommodity",
+                    path: "/services-delivery",
+                    name: "servicesDelivery",
                     component: () => import("./views/services/delivery/commodity"),
-                                   },
+                 },
                 {
-                    path: "/services-commoditysort",
-                    name: "servicesCommoditysort",
+                    path: "/services-deliverycommoditysort",
+                    name: "servicesDeliveryCommoditysort",
                     component: () => import("./views/services/delivery/commoditysort"),
                     meta: {
-                        menu: 'servicesCommodity',
+                        menu: 'servicesDelivery',
+                    },
+                },
+                {
+                    path: "/services-service",
+                    name: "servicesService",
+                    component: () => import("./views/services/service/commodity"),
+                 },
+                 {
+                    path: "/services-servicecommoditysort",
+                    name: "servicesServiceCommoditysort",
+                    component: () => import("./views/services/service/commoditysort"),
+                    meta: {
+                        menu: 'servicesService',
                     },
                 },
             ]

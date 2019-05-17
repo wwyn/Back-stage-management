@@ -1,13 +1,18 @@
 <template>
   <div class="add-sort">
     <div class="title">
-      <span></span>配送选择商品分类
+      <span></span>服务选择商品分类
     </div>
     <div class="sign">
-      <el-steps :active="active" align-center>
+      <el-steps v-if="this.value=='券码'" :active="active" align-center>
         <el-step title="选择商品分类"></el-step>
         <el-step title="填写商品信息"></el-step>
-        <el-step title="填写商品规格"></el-step>
+        <el-step title="提交审核"></el-step>
+      </el-steps>
+      <el-steps v-if="this.value=='预定'" :active="active" align-center>
+        <el-step title="选择商品分类"></el-step>
+        <el-step title="填写商品信息"></el-step>
+        <el-step title="填写服务时间"></el-step>
         <el-step title="提交审核"></el-step>
       </el-steps>
     </div>
@@ -34,7 +39,7 @@
         <el-button type="primary" @click="goBasic">下一步，填写商品信息</el-button>
       </div>
     </div>
-    <div v-show="showBasic"  class="add-basic-box">
+    <div v-show="showBasic" class="add-basic-box">
       <div>
         <div>
           <p>基本信息</p>
@@ -67,54 +72,76 @@
           <el-form-item label="商品名称" prop="name">
             <el-input v-model="ruleForm.name"></el-input>
           </el-form-item>
+          <el-form-item label="商品标签" prop="tag">
+            <el-checkbox-group v-model="ruleForm.tag">
+              <el-checkbox label="随时退" name="tag"></el-checkbox>
+              <el-checkbox label="过期退" name="tag"></el-checkbox>
+              <el-checkbox label="支持退款" name="tag"></el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
           <el-form-item label="商品介绍" prop="name">
             <el-input type="textarea" v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="商品销售价" prop="name">
+          <el-form-item label="商品原价" prop="name">
             <el-input v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="折扣" prop="name">
+          <el-form-item label="商品现价" prop="name">
             <el-input v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="打包费" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+          <el-form-item v-show="this.value=='券码'" label="优惠详情" prop="name">
+            <el-input type="textarea" v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="计量单位" prop="region">
-            <el-select v-model="ruleForm.region" placeholder="请选择活动区域">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
+          <el-form-item v-show="this.value=='券码'" label="公告说明" prop="name">
+            <el-input type="textarea" v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="备注" prop="name">
+          <el-form-item v-show="this.value=='券码'" label="购买须知" prop="name">
+            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          </el-form-item>
+          <el-form-item v-show="this.value=='预定'" label="预定须知" prop="name">
             <el-input type="textarea" v-model="ruleForm.name"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button @click="goSort">上一步,选择商品分类</el-button>
-            <el-button type="primary" @click="goNorms">下一步,填写商品规格</el-button>
+            <el-button v-show="this.value=='券码'" type="primary" @click="goSubmit">提交</el-button>
+            <el-button v-show="this.value=='预定'" type="primary" @click="goTime">下一步,填写预定时间</el-button>
           </el-form-item>
         </el-form>
       </div>
     </div>
-    <div v-show="showNorms" class="add-norms-box">
+    <div v-show="showTime" class="add-time-box">
       <div>
         <div>
-          <p>商品规格</p>
+          <p>选择时间</p>
           <i class="iconfont icon-fenleizhedie"></i>
         </div>
       </div>
       <div>
-        <el-button @click="goBasic">上一步,填写商品信息</el-button>
-        <el-button type="primary" @click="goSubmit">提交</el-button>
+        <div>
+          <p @click="addTime">添加时间</p>
+          <el-table :data="tableData" border style="width: 100%">
+            <el-table-column prop="date" label="时间" width="180"></el-table-column>
+            <el-table-column prop="name" label="可约人数" width="180"></el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button type="text" size="small">查看</el-button>
+                <el-button type="text" size="small">编辑</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <el-button type="primary" @click="goBasic">上一步，填写商品信息</el-button>
+        <el-button @click="goSubmitTime">提交</el-button>
       </div>
     </div>
-    <div v-show="showSubmit"  class="show-submmit">
+    <div v-show="showSubmit" class="show-submmit">
       <p>
         <i class="el-icon-sold-out"></i>
       </p>
       <strong>商家资料提交成功</strong>
       <p>客户资料提交成功</p>
       <el-button type="primary" @click="goCommodity">返回列表</el-button>
-      <el-button @click="goRevise">重新修改</el-button>
+      <el-button v-show="this.value=='券码'" @click="goRevise">重新修改</el-button>
+      <el-button v-show="this.value=='预定'" @click="goReviseTime">重新修改</el-button>
     </div>
   </div>
 </template>
@@ -123,29 +150,44 @@ export default {
   data() {
     return {
       active: 1,
-      selectSortList: [
-        { name: "蔬菜", id: 0 },
-        { name: "水果", id: 1 },
-        { name: "海鲜", id: 2 },
-        { name: "零食", id: 3 }
-      ],
-      value: "",
-      count: Number,
+      selectSortList: [{ name: "券码", id: 0 }, { name: "预定", id: 1 }],
+      value: "券码",
+      count: 0,
       showSort: true,
       showBasic: false,
-      showNorms: false,
       showSubmit: false,
+      showTime: false,
       // 基本信息
-       imageUrl: "",
+      imageUrl: "",
       ruleForm: {
-        name: ""
+        name: "",
+        tag: ""
       },
       rules: {
         name: [
           { required: true, message: "请输入活动名称", trigger: "blur" },
           { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ]
-      }
+      },
+      //   预约
+      tableData: [
+        {
+          date: "2016-05-02",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1518 弄",
+          zip: 200333
+        },
+        {
+          date: "2016-05-04",
+          name: "王小虎",
+          province: "上海",
+          city: "普陀区",
+          address: "上海市普陀区金沙江路 1517 弄",
+          zip: 200333
+        }
+      ]
     };
   },
   methods: {
@@ -155,16 +197,17 @@ export default {
     },
     goBasic() {
       this.active = 2;
-     this.showSort = false;
-     this.showBasic = true;
-     this.showNorms = false;
+      this.showSort = false;
+      this.showSubmit = false;
+      this.showTime = false;
+      this.showBasic = true;
     },
     // 基本信息
-     handleAvatarSuccess(res, file) {
+    handleAvatarSuccess(res, file) {
       this.imageUrl = res.data[0];
     },
     beforeAvatarUpload(file) {
-       const isJPEG = file.type === "image/jpeg";
+      const isJPEG = file.type === "image/jpeg";
       const isPNG = file.type === "image/png";
       const isJPG = file.type === "image/jpg";
       const isLt2M = file.size / 1024 / 1024 < 2;
@@ -176,35 +219,50 @@ export default {
       }
       return (isJPG || isPNG || isJPEG) && isLt2M;
     },
-    goNorms() {
-        this.active = 3;
-        this.showBasic = false;
-        this.showNorms = true;
-    },
     goSort() {
       this.active = 1;
-     this.showSort = true;
-     this.showBasic = false;
-     this.showNorms = false;
+      this.showSort = true;
+      this.showBasic = false;
     },
     goSubmit() {
-       this.active = 4;
-       this.showSort = false;
-        this.showBasic = false;
-        this.showNorms = false;
-        this.showSubmit = true;
+      this.active = 3;
+      this.showSort = false;
+      this.showBasic = false;
+      this.showSubmit = true;
     },
-     goCommodity() {
-        this.$router.push({
-            path:'/services-delivery'
-        })
+    goCommodity() {
+      this.$router.push({
+        path: "/services-service"
+      });
     },
     goRevise() {
+      this.active = 2;
+      this.showSort = false;
+      this.showBasic = true;
+      this.showSubmit = false;
+    },
+    goReviseTime() {
         this.active = 3;
-       this.showSort = false;
-        this.showBasic = false;
-        this.showNorms = true;
-        this.showSubmit = false;
+      this.showSort = false;
+      this.showBasic = false;
+      this.showSubmit = false;
+      this.showTime = true;
+    },
+    goTime() {
+      this.active = 3;
+      this.showSort = false;
+      this.showBasic = false;
+      this.showTime = true;
+    },
+    goSubmitTime() {
+      this.active = 4;
+      this.showSort = false;
+      this.showBasic = false;
+      this.showTime = false;
+      this.showSubmit = true;
+    },
+    addTime() {
+        
     }
   }
 };
@@ -300,7 +358,7 @@ export default {
       }
     }
   }
-   .add-basic-box {
+  .add-basic-box {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -324,19 +382,67 @@ export default {
       }
     }
     > div:nth-child(2) {
-        border-left: 1px solid #999;
-        padding: 80px;
-        box-sizing: border-box;
+      border-left: 1px solid #999;
+      padding: 80px;
+      box-sizing: border-box;
+    }
+  }
+  .add-time-box {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    border: 1px solid #999;
+    > div:nth-child(1) {
+      width: 200px;
+      > div {
+        margin-top: 60px;
+        background-color: #999;
+        display: flex;
+        p {
+          padding: 10px 60px;
+          width: 100%;
+          color: #fff;
+        }
+        i {
+          color: #999;
+          font-size: 34px;
+          margin-right: -26px;
+        }
+      }
+    }
+    > div:nth-child(2) {
+      p {
+        padding: 10px 20px;
+        background-color: @color;
+        color: #fff;
+        display: inline-block;
+        margin-bottom: 10px;
+        border-radius: 4px;
+      }
+      flex: 1;
+      border-left: 1px solid #999;
+      padding: 80px;
+      box-sizing: border-box;
+      /deep/ table {
+        .el-button {
+          border: none;
+          margin: 0;
+          margin-right: 10px;
+        }
+      }
+      .el-button {
+        margin-top: 40px;
+      }
     }
   }
   /deep/ .el-input__inner {
-      width: 300px;
+    width: 300px;
   }
   .el-button {
-      border: 1px solid @color;
+    border: 1px solid @color;
   }
   .el-button--primary {
-      background-color: @color;
+    background-color: @color;
   }
   .avatar-uploader /deep/ .el-upload {
     border: 1px dashed #999;
@@ -385,9 +491,9 @@ export default {
       }
     }
     > div:nth-child(2) {
-        border-left: 1px solid #999;
-        padding: 80px;
-        box-sizing: border-box;
+      border-left: 1px solid #999;
+      padding: 80px;
+      box-sizing: border-box;
     }
   }
   .show-submmit {

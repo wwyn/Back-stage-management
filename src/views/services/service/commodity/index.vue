@@ -1,7 +1,7 @@
 <template>
   <div class="storecommodity">
     <div class="title">
-      <span></span>配送商品管理
+      <span></span>服务商品管理
     </div>
     <div class="storetype">
       <div
@@ -48,11 +48,11 @@
         </template>
       </el-table-column>
       <el-table-column prop="brandName" label="商品名称" width="107" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="价格" width="126" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="打包费" width="106" align="center"></el-table-column>
-      <el-table-column prop="createTime" label="类别" width="90" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="原价" width="116" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="现价" width="116" align="center"></el-table-column>
+      <el-table-column prop="券码" label="类别" width="90" align="center"></el-table-column>
       <el-table-column prop="upSelling" label="是否禁用" width="90" align="center"></el-table-column>
-      <el-table-column prop="upSelling" label="审核状态" width="116" align="center">
+      <el-table-column prop="upSelling" label="审核状态" width="136" align="center">
         <template slot-scope="scope">
           <p>未通过</p>
           <el-button @click="handleDetail(scope.row)" type="text" size="small">审核详情</el-button>
@@ -274,7 +274,7 @@ export default {
     // 添加
     handlerAddsort() {
       this.$router.push({
-        name: "servicesDeliveryCommoditysort"
+        name: "servicesServiceCommoditysort"
       });
     },
     // 修改
