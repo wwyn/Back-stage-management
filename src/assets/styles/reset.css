@@ -81,4 +81,7 @@ table {
 .el-textarea__inner {
     border-color: #999;
 }
+.el-button--text {
+    color: #1260FB;
+}
 

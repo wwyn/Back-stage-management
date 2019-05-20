@@ -29,12 +29,12 @@
         </div>
         <p>
           您当前选择的饮品是:
-          <span>{{ value }}</span>
+          <span>{{ sortValue }}</span>
         </p>
         <el-button type="primary" @click="goBasic">下一步，填写商品信息</el-button>
       </div>
     </div>
-    <div v-show="showBasic"  class="add-basic-box">
+    <div v-show="showBasic" class="add-basic-box">
       <div>
         <div>
           <p>基本信息</p>
@@ -50,7 +50,7 @@
           class="demo-ruleForm"
         >
           <el-form-item label="商品分类" prop="name">
-            <p>{{ this.value }}</p>
+            <p>{{ this.sortValue }}</p>
           </el-form-item>
           <el-form-item label="商品图片" prop="name">
             <el-upload
@@ -103,11 +103,120 @@
         </div>
       </div>
       <div>
+        <div class="add-norms-btn">
+          <div>
+            <p @click="addnormsBtn">添加商品规格</p>
+          </div>
+        </div>
+        <div>
+          <el-table :data="tableData" border style="width: 100%">
+            <el-table-column prop="name" label="规格名称" width="100"></el-table-column>
+            <el-table-column prop="amount1" width="100" label="规格值 1"></el-table-column>
+            <el-table-column prop="amount2" width="100" label="规格值 2"></el-table-column>
+            <el-table-column prop="amount3" width="100" label="规格值 3"></el-table-column>
+            <el-table-column label="操作" width="200">
+              <template slot-scope="scope">
+                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                <el-button size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <div class="add-norms-btn">
+          <div>
+            <p @click="addpriceBtn('标价')">添加商品标价</p>
+          </div>
+        </div>
+        <div>
+          <el-table :data="tableData" border style="width: 100%">
+            <el-table-column prop="name" label="规格名称" width="100"></el-table-column>
+            <el-table-column prop="amount1" width="100" label="规格值 1"></el-table-column>
+            <el-table-column prop="amount2" width="100" label="规格值 2"></el-table-column>
+            <el-table-column prop="amount3" width="100" label="规格值 3"></el-table-column>
+            <el-table-column label="操作" width="200">
+              <template slot-scope="scope">
+                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                <el-button size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+         <div class="add-norms-btn">
+          <div>
+            <p @click="addpriceBtn('加价')">添加规格加价</p>
+          </div>
+        </div>
+         <el-table :data="pricetableData" border style="width: 100%">
+            <el-table-column prop="name" label="规格"></el-table-column>
+            <el-table-column v-for="item in pricetable" :key="item" :label="item"></el-table-column>
+          </el-table>
         <el-button @click="goBasic">上一步,填写商品信息</el-button>
         <el-button type="primary" @click="goSubmit">提交</el-button>
       </div>
+      <div v-if="showAddnorms" class="addnorms-modal">
+        <div>
+          <p>添加商品规格</p>
+          <el-form :model="formAddnorms" label-width="80px" class="demo-form-inline">
+            <el-form-item label="规格名称:">
+              <el-input v-model="formAddnorms.name" placeholder="规格名称"></el-input>
+            </el-form-item>
+            <el-form-item label="规格值:">
+              <el-tag
+                :key="tag"
+                v-for="tag in dynamicTags"
+                closable
+                :disable-transitions="false"
+                @close="handleClose(tag)"
+              >{{tag}}</el-tag>
+              <el-input
+                class="input-new-tag"
+                v-if="inputVisible"
+                v-model="inputValue"
+                ref="saveTagInput"
+                size="small"
+                @keyup.enter.native="handleInputConfirm"
+                @blur="handleInputConfirm"
+              ></el-input>
+              <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 规格值</el-button>
+            </el-form-item>
+            <el-form-item label="是否必选:">
+              <el-switch v-model="formAddnorms.necessary"></el-switch>
+            </el-form-item>
+            <el-form-item style="text-align: right;">
+              <el-button type="primary" @click="hendleAddnorms">确定</el-button>
+              <el-button @click="hendleCancelnorms">取消</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+      <div v-if="showAddPrice" class="addprice-modal">
+        <div>
+          <p>添加商品标价</p>
+          <div>
+            <span>规格选择:</span>
+            <el-select v-model="optionsvalue" @change="selectNorms">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </div>
+          <el-table :data="pricetableData" border style="width: 100%">
+            <el-table-column prop="name" label="规格"></el-table-column>
+            <el-table-column v-for="item in pricetable" :key="item" :label="item">
+              <input type="text">
+            </el-table-column>
+          </el-table>
+          <div style="text-align: right;">
+            <el-button type="primary" @click="hendleAddprice">确定</el-button>
+            <el-button @click="hendleCancelprice">取消</el-button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div v-show="showSubmit"  class="show-submmit">
+    <div v-show="showSubmit" class="show-submmit">
       <p>
         <i class="el-icon-sold-out"></i>
       </p>
@@ -119,6 +228,7 @@
   </div>
 </template>
 <script>
+import { debug } from 'util';
 export default {
   data() {
     return {
@@ -129,14 +239,14 @@ export default {
         { name: "海鲜", id: 2 },
         { name: "零食", id: 3 }
       ],
-      value: "",
+      sortValue: "",
       count: Number,
       showSort: true,
       showBasic: false,
       showNorms: false,
       showSubmit: false,
       // 基本信息
-       imageUrl: "",
+      imageUrl: "",
       ruleForm: {
         name: ""
       },
@@ -145,26 +255,86 @@ export default {
           { required: true, message: "请输入活动名称", trigger: "blur" },
           { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ]
-      }
+      },
+      showAddnorms: false,
+      formAddnorms: {
+        name: "",
+        necessary: false
+      },
+      dynamicTags: [],
+      inputVisible: false,
+      inputValue: "",
+      tableData: [
+        {
+          id: "12987122",
+          name: "口味",
+          values: ["甜辣", "微辣", "麻辣"],
+          amount1: "甜辣",
+          amount2: "微辣",
+          amount3: "麻辣"
+        },
+        {
+          id: "12987123",
+          name: "容量",
+          values: ["1L", "2L", "3L"],
+          amount1: "1L",
+          amount2: "2L",
+          amount3: "3L"
+        },
+        {
+          id: "12987124",
+          name: "加料",
+          values: ["红豆", "马蹄", "粉圆"],
+          amount1: "红豆",
+          amount2: "马蹄",
+          amount3: "粉圆"
+        }
+      ],
+      showAddPrice: false,
+      options: [
+        {
+          value: "12987122",
+          label: "口味"
+        },
+        {
+          value: "12987123",
+          label: "容量"
+        },
+        {
+          value: "12987124",
+          label: "加料"
+        }
+      ],
+      optionsvalue: "",
+      pricetableData: [
+        {
+          id: "12987123",
+          name: "价格",
+          amount1: "1L",
+          amount2: "2L",
+          amount3: "3L"
+        }
+      ],
+      pricetable: []
     };
   },
   methods: {
     selectSort(index, val) {
       this.count = index;
-      this.value = val;
+      this.sortValue = val;
     },
     goBasic() {
       this.active = 2;
-     this.showSort = false;
-     this.showBasic = true;
-     this.showNorms = false;
+      this.showSort = false;
+      this.showBasic = true;
+      this.showNorms = false;
     },
     // 基本信息
-     handleAvatarSuccess(res, file) {
+    handleAvatarSuccess(res, file) {
       this.imageUrl = res.data[0];
     },
     beforeAvatarUpload(file) {
-       const isJPEG = file.type === "image/jpeg";
+      const isJPEG = file.type === "image/jpeg";
       const isPNG = file.type === "image/png";
       const isJPG = file.type === "image/jpg";
       const isLt2M = file.size / 1024 / 1024 < 2;
@@ -177,34 +347,89 @@ export default {
       return (isJPG || isPNG || isJPEG) && isLt2M;
     },
     goNorms() {
-        this.active = 3;
-        this.showBasic = false;
-        this.showNorms = true;
+      this.active = 3;
+      this.showBasic = false;
+      this.showNorms = true;
     },
     goSort() {
       this.active = 1;
-     this.showSort = true;
-     this.showBasic = false;
-     this.showNorms = false;
+      this.showSort = true;
+      this.showBasic = false;
+      this.showNorms = false;
     },
     goSubmit() {
-       this.active = 4;
-       this.showSort = false;
-        this.showBasic = false;
-        this.showNorms = false;
-        this.showSubmit = true;
+      this.active = 4;
+      this.showSort = false;
+      this.showBasic = false;
+      this.showNorms = false;
+      this.showSubmit = true;
     },
-     goCommodity() {
-        this.$router.push({
-            path:'/services-delivery'
-        })
+    goCommodity() {
+      this.$router.push({
+        path: "/services-delivery"
+      });
     },
     goRevise() {
-        this.active = 3;
-       this.showSort = false;
-        this.showBasic = false;
-        this.showNorms = true;
-        this.showSubmit = false;
+      this.active = 3;
+      this.showSort = false;
+      this.showBasic = false;
+      this.showNorms = true;
+      this.showSubmit = false;
+    },
+    handleClose(tag) {
+      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+    },
+
+    showInput() {
+      this.inputVisible = true;
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    },
+
+    handleInputConfirm() {
+      let inputValue = this.inputValue;
+      if (inputValue) {
+        this.dynamicTags.push(inputValue);
+      }
+      this.inputVisible = false;
+      this.inputValue = "";
+    },
+    addnormsBtn() {
+      this.showAddnorms = true;
+    },
+    hendleAddnorms() {
+      console.log(this.formAddnorms, this.dynamicTags, "添加规格");
+      this.showAddnorms = false;
+      this.formAddnorms = {
+        name: "",
+        necessary: false
+      };
+      this.dynamicTags = [];
+    },
+    hendleCancelnorms() {
+      this.showAddnorms = false;
+      this.formAddnorms = {
+        name: "",
+        necessary: false
+      };
+      this.dynamicTags = [];
+      console.log("取消");
+    },
+    selectNorms(val) {
+      let arr = this.tableData.filter(item => item.id === val);
+      this.pricetable = arr[0].values;
+    },
+    addpriceBtn(val) {
+      this.showAddPrice = true;
+    },
+    hendleAddprice() {
+      this.showAddPrice = false;
+      this.pricetable = [];
+    },
+    hendleCancelprice() {
+      this.showAddPrice = false;
+      this.pricetable = [];
     }
   }
 };
@@ -300,7 +525,7 @@ export default {
       }
     }
   }
-   .add-basic-box {
+  .add-basic-box {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -324,19 +549,19 @@ export default {
       }
     }
     > div:nth-child(2) {
-        border-left: 1px solid #999;
-        padding: 80px;
-        box-sizing: border-box;
+      border-left: 1px solid #999;
+      padding: 80px;
+      box-sizing: border-box;
     }
   }
   /deep/ .el-input__inner {
-      width: 300px;
+    width: 300px;
   }
   .el-button {
-      border: 1px solid @color;
+    border: 1px solid @color;
   }
   .el-button--primary {
-      background-color: @color;
+    background-color: @color;
   }
   .avatar-uploader /deep/ .el-upload {
     border: 1px dashed #999;
@@ -385,10 +610,135 @@ export default {
       }
     }
     > div:nth-child(2) {
-        border-left: 1px solid #999;
-        padding: 80px;
-        box-sizing: border-box;
+      border-left: 1px solid #999;
+      padding: 60px 80px;
+      box-sizing: border-box;
+      .add-norms-btn {
+        p {
+          display: inline-block;
+          background-color: @color;
+          color: #fff;
+          padding: 10px 10px;
+          margin-bottom: 20px;
+          border-radius: 4px;
+        }
+      }
     }
+    .addnorms-modal {
+      z-index: 99;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(143, 143, 143, 0.5);
+      > div {
+        width: 800px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        border-radius: 2px;
+        form {
+          padding: 20px;
+          box-sizing: border-box;
+        }
+        p {
+          padding: 16px 20px;
+          box-sizing: border-box;
+          background-color: #f1f1f1;
+        }
+        .el-input {
+          width: 100px;
+          height: 40px;
+          /deep/ input {
+            width: 100px;
+            height: 40px;
+          }
+        }
+      }
+      .el-tag {
+        height: 40px;
+        line-height: 40px;
+        background-color: #fff;
+        border: 1px dashed #999;
+        margin-bottom: 20px;
+        color: @color;
+        margin-right: 10px;
+      }
+      .el-tag /deep/ .el-icon-close {
+        color: @color;
+      }
+      .el-tag + .el-tag {
+        height: 40px;
+        line-height: 40px;
+        margin-right: 10px;
+        background-color: #fff;
+      }
+      .button-new-tag {
+        margin-right: 10px;
+        height: 40px;
+        line-height: 40px;
+        padding-top: 0;
+        padding-bottom: 0;
+        width: 100px;
+      }
+      .input-new-tag {
+        width: 90px;
+        margin-left: 10px;
+        vertical-align: top;
+      }
+    }
+    .addprice-modal {
+      z-index: 99;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(143, 143, 143, 0.5);
+      > div {
+        width: 600px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        border-radius: 2px;
+        span {
+          margin-right: 20px;
+        }
+        > div {
+          padding: 20px;
+          box-sizing: border-box;
+        }
+        p {
+          padding: 16px 20px;
+          box-sizing: border-box;
+          background-color: #f1f1f1;
+        }
+        .el-input {
+          width: 100px;
+          height: 40px;
+          /deep/ input {
+            width: 100px;
+            height: 40px;
+          }
+        }
+      }
+      .el-table {
+        input {
+          width: 80px;
+          height: 32px;
+          text-align: center;
+          border: 1px solid #f1f1f1;
+        }
+      }
+    }
+  }
+  .el-table--border {
+    margin-bottom: 20px;
   }
   .show-submmit {
     margin-top: 20%;
