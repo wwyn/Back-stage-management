@@ -18,6 +18,19 @@ export default new Router({
             component: () => import("./views/login")
         },
         {
+            path: "/homeManagement",
+            name: "homeManagement",
+            component: () => import("./views/homeManagement")
+        },
+        {
+            path: "/addhomeManagement",
+            name: "addhomeManagement",
+            component: () => import("./views/addhomeManagement"),
+            meta: {
+                menu: 'addhomeManagement'
+            },
+        },
+        {
             path: "e-commerce",
             name: "eCommerce",
             component: () => import("./views/e-commerce"),

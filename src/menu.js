@@ -5,7 +5,7 @@
 export default {
     home: [
         { name: "数据概括", link: "eCommerce" },
-        { name: "首页管理", link: "eCommerce" },
+        { name: "首页管理", link: "homeManagement" },
         { name: "智能控制", link: "eCommerce" },
         { name: "电商后台", link: "eCommerce" },
         { name: "新闻版块", link: "eCommerce" },

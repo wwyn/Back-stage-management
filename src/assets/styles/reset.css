@@ -84,4 +84,7 @@ table {
 .el-button--text {
     color: #1260FB;
 }
-
+.el-radio__input.is-checked .el-radio__inner {
+    border-color: #1260FB;
+    background: #1260FB;
+}
