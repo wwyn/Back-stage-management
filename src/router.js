@@ -203,6 +203,16 @@ export default new Router({
                         menu: 'servicesService',
                     },
                 },
+                {
+                    path: "/services-orderdelivery",
+                    name: "servicesOrderDelivery",
+                    component: () => import("./views/services/ordersystem/orderdelivery"),
+                 },
+                 {
+                    path: "/services-ordercoupon",
+                    name: "servicesOrderCoupon",
+                    component: () => import("./views/services/ordersystem/ordercoupon"),
+                 },
             ]
         }
     ],

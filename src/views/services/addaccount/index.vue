@@ -29,9 +29,11 @@
       <el-form-item label="Email:" prop="Email">
         <el-input v-model="userForm.Email"></el-input>
       </el-form-item>
+      <span class="asterisk1">*</span>
       <el-form-item label="密码:" prop="pass">
         <el-input type="password" v-model="userForm.pass" autocomplete="off"></el-input>
       </el-form-item>
+      <span class="asterisk2">*</span>
       <el-form-item label="确认密码:" prop="checkPass">
         <el-input type="password" v-model="userForm.checkPass" autocomplete="off"></el-input>
       </el-form-item>
@@ -150,6 +152,18 @@ export default {
       margin-right: 8px;
       vertical-align: sub;
     }
+  }
+  .asterisk1 {
+    color: red;
+    position: absolute;
+    top: 410px;
+    left: 392px;
+  }
+  .asterisk2 {
+    color: red;
+    position: absolute;
+    top: 470px;
+    left: 362px;
   }
   .account-set {
     width: 100%;

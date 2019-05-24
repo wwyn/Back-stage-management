@@ -1,23 +1,17 @@
 <template>
   <div class="list">
     <div class="title">
-      <span></span>商家管理
+      <span></span>配送商家订单管理
     </div>
     <el-form :inline="true" :model="storeForm" class="demo-form-inline">
-      <el-form-item label="输入查询">
-        <el-input v-model="storeForm.user" placeholder="用户名/姓名"></el-input>
+      <el-form-item label="输入搜索">
+        <el-input v-model="storeForm.code" placeholder="订单编号/商品货号"></el-input>
       </el-form-item>
-      <el-form-item label="所在地区">
-        <el-select v-model="storeForm.city" placeholder="全部">
-          <el-option label="区域一" value="shanghai"></el-option>
-          <el-option label="区域二" value="beijing"></el-option>
-        </el-select>
+      <el-form-item label="收货人">
+       <el-input v-model="storeForm.user" placeholder="用户名/手机号"></el-input>
       </el-form-item>
-      <el-form-item label="商家品类">
-        <el-select v-model="storeForm.class" placeholder="全部">
-          <el-option label="区域一" value="shanghai"></el-option>
-          <el-option label="区域二" value="beijing"></el-option>
-        </el-select>
+      <el-form-item label="提交时间">
+        <el-date-picker type="date" placeholder="选择日期" v-model="storeForm.data" style="width: 100%;"></el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleSearch">查询</el-button>
@@ -25,12 +19,8 @@
       </el-form-item>
     </el-form>
     <div class="shop-tools">
-      <div class="shop-type">
-        <p class="add" @click="handlerAddstore">添加</p>
-      </div>
       <div class="shop-batch">
-        <p @click="handleBatchLower">批量开通</p>
-        <p @click="handleBatchLower">批量禁用</p>
+        <p @click="handleBatchLower">批量关闭</p>
         <p @click="handleBatchDel">批量删除</p>
       </div>
     </div>
@@ -44,23 +34,20 @@
       style="width: 100%"
     >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
-      <el-table-column type="index" label="商家名称" width="154" ></el-table-column>
-      <el-table-column prop="brandName" label="所在地区" width="200" ></el-table-column>
-      <el-table-column prop="brandName" label="商家品类" width="136"></el-table-column>
-      <el-table-column prop="brandName" label="联系人" width="110"></el-table-column>
-      <el-table-column prop="brandName" label="联系方式" width="130"></el-table-column>
+      <el-table-column type="index" label="订单编号" width="154" ></el-table-column>
       <el-table-column label="创建时间" width="156">
         <template slot-scope="scope">
           <p>{{parseTime(scope.row.createTime || '')}}</p>
         </template>
       </el-table-column>
-      <el-table-column prop="upSelling" label="状态" width="90"></el-table-column>
+       <el-table-column prop="brandName" label="用户账号" width="136"></el-table-column>
+      <el-table-column prop="brandName" label="订单金额" width="110"></el-table-column>
+      <el-table-column prop="brandName" label="支付方式" width="130"></el-table-column>
+      <el-table-column prop="brandName" label="订单来源" width="130"></el-table-column>
+      <el-table-column prop="upSelling" label="订单状态" width="90"></el-table-column>
       <el-table-column label="操作" width="148">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="handleRevisetable(scope.row)">编辑</el-button>
-          <el-button @click="handleOpeningtable(scope.row)" type="text" size="small">开通</el-button>
-          <el-button @click="handleProhibittable(scope.row)" type="text" size="small">禁用</el-button>
-          <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button>
+          <el-button type="text" size="small" @click="handleLooktable(scope.row)">查看订单</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -81,9 +68,9 @@ export default {
   data() {
     return {
       storeForm: {
-        city: "",
+        code: "",
         user: "",
-        class:''
+        data:''
       },
       tableData: [],
       pageSize: 10,
@@ -154,62 +141,7 @@ export default {
         console.log(e.message);
       }
     },
-    // 单个删除
-    handleDeltable(options) {
-        this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });          
-        });
-    //   this.brandDel({ id: options.id });
-    },
-    // 开通
-    handleOpeningtable() {
-        this.$confirm('是否为客户开通服务?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '开通成功!'
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消开通'
-          });          
-        }); 
-    },
-     // 禁用
-    handleProhibittable() {
-        this.$confirm('是否为客户禁用服务?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '禁用成功!'
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消禁用'
-          });          
-        }); 
-    },
-
+   
     // 搜索
     handleSearch(data) {
       const query = {
@@ -225,57 +157,22 @@ export default {
         class:''
       };
     },
-    // 批量删除
-    handleBatchDel() {
-      const query = {
-        productIds: this.productIdList,
-        hide: "1"
-      };
-      this.batchPart(query);
-    },
-    // 批量下架
-    handleBatchLower() {
-      const query = {
-        productIds: this.productIdList,
-        upSelling: "0"
-      };
-      this.batchPart(query);
-    },
     handleCurrentChange(val) {
       this.currentPage = val;
       this.productList({ currentPage: val });
     },
-    // 单个下架
-    handleupSelling(type) {
-      let query = {
-        productId: type.id,
-        upSelling: "0"
-      };
-      this.setPart(query);
+    // 批量删除
+    handleBatchDel() {
+
     },
-    // 单个删除
-    handleDel(content) {
-      let query = {
-        productId: content.id,
-        hide: "1"
-      };
-      this.setPart(query);
+    // 批量关闭
+    handleBatchLower() {
+
     },
-    // 编辑
-    handleRevisetable(options) {
-      this.$router.push({
-        name: `servicesStoreAdd`,
-        params: {
-          id: options.id
-        }
-      });
-    },
-    // 添加
-    handlerAddstore() {
-      this.$router.push({
-        name: "servicesStoreAdd"
-      });
-    },
+    // 查看订单
+    handleLooktable() {
+
+    }
   }
 };
 </script>
@@ -331,7 +228,7 @@ export default {
     }
   }
   .el-input {
-    width: 220px;
+    width: 220px !important;
     height: 40px;
     margin-right: 20px;
   }

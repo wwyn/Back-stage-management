@@ -1,7 +1,7 @@
 <template>
   <div class="list">
     <div class="title">
-      <span></span>商家管理
+      <span></span>服务商家订单管理
     </div>
     <el-form :inline="true" :model="storeForm" class="demo-form-inline">
       <el-form-item label="输入查询">

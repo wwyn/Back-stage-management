@@ -10,11 +10,11 @@
       </div>
       <div>
         <el-table :data="tableData" border style="width: 100%">
-          <el-table-column prop="name" label="规格名称" width="100"></el-table-column>
-          <el-table-column prop="amount1" width="100" label="规格值 1"></el-table-column>
-          <el-table-column prop="amount2" width="100" label="规格值 2"></el-table-column>
-          <el-table-column prop="amount3" width="100" label="规格值 3"></el-table-column>
-          <el-table-column label="操作" width="200">
+          <el-table-column prop="name" label="规格名称" width="200"></el-table-column>
+          <el-table-column prop="amount1" width="200" label="规格值 1"></el-table-column>
+          <el-table-column prop="amount2" width="200" label="规格值 2"></el-table-column>
+          <el-table-column prop="amount3" width="200" label="规格值 3"></el-table-column>
+          <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
               <el-button size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>

@@ -80,5 +80,11 @@ export default {
                 { name: "服务商品管理", link: "servicesService", opened: '商家系统' },
             ],
          src: 'icon-xitongshouye-' },
+         { name: "订单系统",
+         children: [
+             { name: "配送商家订单管理", link: "servicesOrderDelivery", opened: '订单系统' },
+             { name: "服务券码订单管理", link: "servicesOrderCoupon", opened: '订单系统' },
+         ],
+      src: 'icon-xitongshouye-' },
     ]
 };
