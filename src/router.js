@@ -165,6 +165,11 @@ export default new Router({
                     component: () => import("./views/services/setting"),
                 },
                 {
+                    path: "/services-settingspecifications",
+                    name: "servicesSettingspecifications",
+                    component: () => import("./views/services/settingspecifications"),
+                },
+                {
                     path: "/services-settingAdd",
                     name: "servicesSettingAdd",
                     component: () => import("./views/services/settingAdd"),

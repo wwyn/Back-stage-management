@@ -75,6 +75,7 @@ export default {
             children: [
                 { name: "商家首页", link: "servicesStoreHome", opened: '商家系统' },
                 { name: "分类设置", link: "servicesSetting", opened: '商家系统' },
+                { name: "规格设置", link: "servicesSettingspecifications", opened: '商家系统' },
                 { name: "配送商品管理", link: "servicesDelivery", opened: '商家系统' },
                 { name: "服务商品管理", link: "servicesService", opened: '商家系统' },
             ],

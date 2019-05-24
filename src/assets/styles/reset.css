@@ -88,3 +88,7 @@ table {
     border-color: #1260FB;
     background: #1260FB;
 }
+.el-switch.is-checked .el-switch__core {
+    background-color: #1260FB;
+    border-color: #1260FB;
+}

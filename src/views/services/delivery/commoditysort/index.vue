@@ -105,7 +105,7 @@
       <div>
         <div class="add-norms-btn">
           <div>
-            <p @click="addnormsBtn">添加商品规格</p>
+            <p @click="selectnormsBtn">选择商品规格</p>
           </div>
         </div>
         <div>
@@ -116,7 +116,6 @@
             <el-table-column prop="amount3" width="100" label="规格值 3"></el-table-column>
             <el-table-column label="操作" width="200">
               <template slot-scope="scope">
-                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
                 <el-button size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
               </template>
             </el-table-column>
@@ -141,52 +140,39 @@
             </el-table-column>
           </el-table>
         </div>
-         <div class="add-norms-btn">
+        <div class="add-norms-btn">
           <div>
             <p @click="addpriceBtn('加价')">添加规格加价</p>
           </div>
         </div>
-         <el-table :data="pricetableData" border style="width: 100%">
-            <el-table-column prop="name" label="规格"></el-table-column>
-            <el-table-column v-for="item in pricetable" :key="item" :label="item"></el-table-column>
-          </el-table>
+        <el-table :data="pricetableData" border style="width: 100%">
+          <el-table-column prop="name" label="规格"></el-table-column>
+          <el-table-column v-for="item in pricetable" :key="item" :label="item"></el-table-column>
+        </el-table>
         <el-button @click="goBasic">上一步,填写商品信息</el-button>
         <el-button type="primary" @click="goSubmit">提交</el-button>
       </div>
       <div v-if="showAddnorms" class="addnorms-modal">
         <div>
-          <p>添加商品规格</p>
-          <el-form :model="formAddnorms" label-width="80px" class="demo-form-inline">
-            <el-form-item label="规格名称:">
-              <el-input v-model="formAddnorms.name" placeholder="规格名称"></el-input>
-            </el-form-item>
-            <el-form-item label="规格值:">
-              <el-tag
-                :key="tag"
-                v-for="tag in dynamicTags"
-                closable
-                :disable-transitions="false"
-                @close="handleClose(tag)"
-              >{{tag}}</el-tag>
-              <el-input
-                class="input-new-tag"
-                v-if="inputVisible"
-                v-model="inputValue"
-                ref="saveTagInput"
-                size="small"
-                @keyup.enter.native="handleInputConfirm"
-                @blur="handleInputConfirm"
-              ></el-input>
-              <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 规格值</el-button>
-            </el-form-item>
-            <el-form-item label="是否必选:">
-              <el-switch v-model="formAddnorms.necessary"></el-switch>
-            </el-form-item>
-            <el-form-item style="text-align: right;">
-              <el-button type="primary" @click="hendleAddnorms">确定</el-button>
-              <el-button @click="hendleCancelnorms">取消</el-button>
-            </el-form-item>
-          </el-form>
+          <p>选择商品规格</p>
+          <div>
+            <el-form :model="selectForm" label-width="80px">
+              <el-form-item
+                v-for="item in citiesList"
+                :key="item.name"
+                :label="item.name"
+                class="cities-list"
+              >
+                <el-checkbox-group v-model="item.checkedCities">
+                  <el-checkbox v-for="val in item.children" :label="val" :key="val">{{val}}</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="onSubmit">确认</el-button>
+                <el-button>取消</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
         </div>
       </div>
       <div v-if="showAddPrice" class="addprice-modal">
@@ -228,7 +214,7 @@
   </div>
 </template>
 <script>
-import { debug } from 'util';
+import { debug } from "util";
 export default {
   data() {
     return {
@@ -257,13 +243,11 @@ export default {
         ]
       },
       showAddnorms: false,
-      formAddnorms: {
-        name: "",
-        necessary: false
-      },
-      dynamicTags: [],
-      inputVisible: false,
-      inputValue: "",
+      selectForm: {},
+      citiesList: [
+        { name: "上海", children: ["闵行", "浦东", "宝山"], checkedCities: [] },
+        { name: "北京", children: ["闵行", "浦东", "宝山"], checkedCities: [] }
+      ],
       tableData: [
         {
           id: "12987122",
@@ -376,45 +360,8 @@ export default {
       this.showNorms = true;
       this.showSubmit = false;
     },
-    handleClose(tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
-    },
-
-    showInput() {
-      this.inputVisible = true;
-      this.$nextTick(_ => {
-        this.$refs.saveTagInput.$refs.input.focus();
-      });
-    },
-
-    handleInputConfirm() {
-      let inputValue = this.inputValue;
-      if (inputValue) {
-        this.dynamicTags.push(inputValue);
-      }
-      this.inputVisible = false;
-      this.inputValue = "";
-    },
-    addnormsBtn() {
+    selectnormsBtn() {
       this.showAddnorms = true;
-    },
-    hendleAddnorms() {
-      console.log(this.formAddnorms, this.dynamicTags, "添加规格");
-      this.showAddnorms = false;
-      this.formAddnorms = {
-        name: "",
-        necessary: false
-      };
-      this.dynamicTags = [];
-    },
-    hendleCancelnorms() {
-      this.showAddnorms = false;
-      this.formAddnorms = {
-        name: "",
-        necessary: false
-      };
-      this.dynamicTags = [];
-      console.log("取消");
     },
     selectNorms(val) {
       let arr = this.tableData.filter(item => item.id === val);
@@ -430,6 +377,9 @@ export default {
     hendleCancelprice() {
       this.showAddPrice = false;
       this.pricetable = [];
+    },
+    onSubmit() {
+      this.showAddnorms = false;
     }
   }
 };
@@ -640,54 +590,14 @@ export default {
         transform: translate(-50%, -50%);
         background-color: #fff;
         border-radius: 2px;
-        form {
-          padding: 20px;
-          box-sizing: border-box;
-        }
         p {
           padding: 16px 20px;
           box-sizing: border-box;
           background-color: #f1f1f1;
         }
-        .el-input {
-          width: 100px;
-          height: 40px;
-          /deep/ input {
-            width: 100px;
-            height: 40px;
-          }
-        }
       }
-      .el-tag {
-        height: 40px;
-        line-height: 40px;
-        background-color: #fff;
-        border: 1px dashed #999;
-        margin-bottom: 20px;
-        color: @color;
-        margin-right: 10px;
-      }
-      .el-tag /deep/ .el-icon-close {
-        color: @color;
-      }
-      .el-tag + .el-tag {
-        height: 40px;
-        line-height: 40px;
-        margin-right: 10px;
-        background-color: #fff;
-      }
-      .button-new-tag {
-        margin-right: 10px;
-        height: 40px;
-        line-height: 40px;
-        padding-top: 0;
-        padding-bottom: 0;
-        width: 100px;
-      }
-      .input-new-tag {
-        width: 90px;
-        margin-left: 10px;
-        vertical-align: top;
+      .cities-list {
+        margin-bottom: 0px;
       }
     }
     .addprice-modal {
