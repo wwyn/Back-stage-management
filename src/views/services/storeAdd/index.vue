@@ -19,8 +19,12 @@
           </el-form-item>
           <el-form-item label="商家类型" prop="class">
             <el-select v-model="formAddStore.basicForm.class" placeholder="请选择商家类型">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <el-option
+                v-for="item in classList"
+                :key="item.type"
+                :label="item.name"
+                :value="item.type"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="所属区域" prop="city">
@@ -81,10 +85,14 @@
               ></el-date-picker>
             </el-col>
           </el-form-item>
-          <el-form-item label="商家品类" prop="type">
-            <el-select v-model="formAddStore.detailForm.type" placeholder="请选择所属区域">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+          <el-form-item label="商家品类" prop="categories">
+            <el-select v-model="formAddStore.detailForm.categories" placeholder="请选择品类">
+              <el-option
+                v-for="item in categoriesList"
+                :key="item.id"
+                :label="item.categoryName"
+                :value="item.id"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="商家介绍" prop="introduction" class="introduction">
@@ -150,8 +158,12 @@
           </el-form-item>
           <el-form-item label="佣金方式" prop="mode">
             <el-select v-model="formAddStore.financeForm.mode" placeholder="请选择佣金方式">
-              <el-option label="按照比例" value="shanghai"></el-option>
-              <el-option label="固定抽取" value="beijing"></el-option>
+              <el-option
+                v-for="item in feeTypesList"
+                :key="item.type"
+                :label="item.name"
+                :value="item.type"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="抽成" prop="Royalty">
@@ -183,7 +195,14 @@
             <el-input v-model="formAddStore.signingForm.CODE"></el-input>
           </el-form-item>
           <el-form-item label="业务员" prop="salesman">
-            <el-input v-model="formAddStore.signingForm.salesman"></el-input>
+            <el-select v-model="formAddStore.signingForm.salesman" placeholder="请选择业务员">
+              <el-option
+                v-for="item in salesManList"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              ></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="备注" prop="remarks" class="remarks">
             <el-input v-model="formAddStore.signingForm.remarks"></el-input>
@@ -207,9 +226,15 @@
   </div>
 </template>
 <script>
+import * as api from "@/api";
+
 export default {
   data() {
     return {
+      classList: [],
+      categoriesList: [],
+      feeTypesList: [],
+      salesManList: [],
       formAddStore: {
         basicForm: {
           brandname: "",
@@ -228,7 +253,7 @@ export default {
           Fax: "",
           Website: "",
           data: "",
-          type: "",
+          categories: "",
           introduction: "",
           logoimageUrl: "",
           bgimageUrl: ""
@@ -298,7 +323,9 @@ export default {
             trigger: "blur"
           }
         ],
-        type: [{ required: true, message: "请选择品类", trigger: "change" }],
+        categories: [
+          { required: true, message: "请选择品类", trigger: "change" }
+        ],
         data: [{ required: true, message: "请选择时间", trigger: "change" }],
         mode: [{ required: true, message: "请选择方式", trigger: "change" }],
         tax: [
@@ -334,7 +361,69 @@ export default {
       showSubmmit: false
     };
   },
+  mounted() {
+    this.getShoptypes();
+    this.getCategoriesList();
+    this.getFeeTypes();
+    this.getSalesMan();
+  },
   methods: {
+    // 获取商家类型
+    async getShoptypes() {
+      try {
+        const ret = await api.getShoptypes();
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.classList = ret.data.data;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取商家品类
+    async getCategoriesList() {
+      const query = {
+        module: "shop"
+      };
+      try {
+        const ret = await api.getCategoriesList(query);
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.categoriesList = ret.data.data;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // getFeeTypes
+    async getFeeTypes() {
+      const query = {
+        module: "shop"
+      };
+      try {
+        const ret = await api.getFeeTypes(query);
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.feeTypesList = ret.data.data;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // getSalesMan
+    async getSalesMan() {
+      try {
+        const ret = await api.getSalesMan();
+        console.log(ret,'业务员');
+        if (ret.data.code == 200) {
+          console.log('业务员sss');
+          this.salesManList = ret.data.data;
+
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     //   logo
     handlelogoSuccess(res, file) {
       this.formAddStore.detailForm.logoimageUrl = res.data[0];

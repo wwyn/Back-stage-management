@@ -44,11 +44,11 @@
       style="width: 100%"
     >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
-      <el-table-column type="index" label="商家名称" width="154" ></el-table-column>
-      <el-table-column prop="brandName" label="所在地区" width="200" ></el-table-column>
+      <el-table-column prop="shopName" label="商家名称" width="154" ></el-table-column>
+      <el-table-column prop="addressDetail" label="所在地区" width="200" ></el-table-column>
       <el-table-column prop="brandName" label="商家品类" width="136"></el-table-column>
-      <el-table-column prop="brandName" label="联系人" width="110"></el-table-column>
-      <el-table-column prop="brandName" label="联系方式" width="130"></el-table-column>
+      <el-table-column prop="contact" label="联系人" width="110"></el-table-column>
+      <el-table-column prop="mobile" label="联系方式" width="130"></el-table-column>
       <el-table-column label="创建时间" width="156">
         <template slot-scope="scope">
           <p>{{parseTime(scope.row.createTime || '')}}</p>
@@ -98,7 +98,7 @@ export default {
   },
   mounted: function() {
     let currentPage = this.currentPage;
-    this.productList({ currentPage });
+    this.getShopList({ currentPage });
   },
   methods: {
     parseTime,
@@ -115,22 +115,17 @@ export default {
         console.log(e.message);
       }
     },
-    // 列表
-    async productList(params) {
+    // 商户列表
+    async getShopList(params) {
       const query = {
         ...params,
-        shopName: this.storeForm.title || "",
-        productId: this.storeForm.ID || "",
-        productName: this.storeForm.name || "",
-        minPrice: this.storeForm.minMoney || "",
-        maxPrice: this.storeForm.maxMoney || "",
-        minSaleCount: this.storeForm.minNumber || "",
-        maxSaleCount: this.storeForm.maxNumber || "",
-        upSelling: "1",
+        name: this.storeForm.user || "",
+        categoryId: this.storeForm.class || "",
         pageSize: 10
       };
       try {
-        const ret = await api.productList(query);
+        const ret = await api.getShopList(query);
+        console.log(ret)
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
           this.tableData = ret.data.data.pageData;
@@ -138,6 +133,24 @@ export default {
         } else {
           this.tableData = [];
           this.total = 0;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 删除商户
+     async shopDel(params) {
+      try {
+        const ret = await api.shopDel(query);
+        console.log(ret)
+        if (ret.data.code == 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+          this.getShopList({ currentPage: this.currentPage })
+        } else {
+          alert("商户删除失败")
         }
       } catch (e) {
         console.log(e.message);
@@ -161,17 +174,13 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+          this.shopDel({ id: options.id });
         }).catch(() => {
           this.$message({
             type: 'info',
             message: '已取消删除'
           });          
         });
-    //   this.brandDel({ id: options.id });
     },
     // 开通
     handleOpeningtable() {

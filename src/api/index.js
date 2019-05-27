@@ -360,6 +360,64 @@ export function updateBanner(data) {
     data
   });
 }
+
+// 020部分
+// 商家管理首页--商家列表
+export function getShopList(query) {
+  return request({
+    url: "sfy-mall-v2/m/shop/list/",
+    method: "get",
+    params:  query
+  });
+}
+// 删除商户
+export function shopDel(data) {
+  return request({
+    url: "sfy-mall-v2/m/shop/del/",
+    method: "post",
+    data
+  });
+}
+
+// 获取商家类型
+export function getShoptypes(query) {
+  return request({
+    url: "sfy-mall-v2/m/shop/getTypes",
+    method: "get",
+    params:  query
+  });
+}
+
+// 获取商家品类
+export function getCategoriesList(query) {
+  return request({
+    url: "sfy-mall-v2/m/categories/getList/",
+    method: "get",
+    params:  query
+  });
+}
+
+// 获取佣金方式
+export function getFeeTypes(query) {
+  return request({
+    url: "sfy-mall-v2/m/shop/getFeeTypes/",
+    method: "get",
+    params:  query
+  });
+}
+
+// 获取业务员
+export function getSalesMan(query) {
+  return request({
+    url: "sfy-mall-v2/m/shop/getSalesMan/",
+    method: "get",
+    params:  query
+  });
+}
+
+
+
+
 export function updateArticle(data) {
   return request({
     url: "http://192.168.1.34:5006/",
