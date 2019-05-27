@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Message } from "element-ui";
 import store from "@/store";
-const BASE_API = "http://192.168.1.23:8899/sfy-mall-v2/";
+const BASE_API = "http://192.168.1.23:8899/";
 
 const service = axios.create({
   baseURL: BASE_API,

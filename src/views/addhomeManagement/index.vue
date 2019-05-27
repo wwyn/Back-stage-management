@@ -15,8 +15,14 @@
             :on-success="handleImgSuccess"
             :before-upload="beforeImgUpload"
           >
-            <img v-if="LanunchScreenForm.imageUrl" :src="LanunchScreenForm.imageUrl" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            <img v-if="!isVideo && LanunchScreenForm.imageUrl" :src="LanunchScreenForm.imageUrl || ''" class="avatar">
+            <video
+              v-if="isVideo"
+              :src="LanunchScreenForm.imageUrl"
+              class="avatar"
+              controls="controls"
+            >您的浏览器不支持视频播放</video>
+            <i v-if="!LanunchScreenForm.imageUrl" class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
         <el-form-item label="引导说法" class="guide">
@@ -24,12 +30,12 @@
         </el-form-item>
         <el-form-item label="功能类型">
           <el-radio-group v-model="LanunchScreenForm.resource">
-            <el-radio label="图片"></el-radio>
-            <el-radio label="音频"></el-radio>
-            <el-radio label="视频"></el-radio>
-            <el-radio label="电商"></el-radio>
-            <el-radio label="社区"></el-radio>
-            <el-radio label="老人"></el-radio>
+            <el-radio label="0">图片</el-radio>
+            <el-radio label="1">视频</el-radio>
+            <el-radio label="2">音频</el-radio>
+            <el-radio label="3">电商</el-radio>
+            <el-radio label="4">社区</el-radio>
+            <el-radio label="5">老人</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="跳转链接" class="link">
@@ -40,6 +46,8 @@
   </g-layout>
 </template>
 <script>
+import * as api from "@/api";
+
 import menu from "@/menu";
 import * as auth from "@/utils/auth";
 
@@ -47,6 +55,7 @@ export default {
   data: () => ({
     menu: menu.home,
     userInfo: {},
+    isVideo: false,
     LanunchScreenForm: {
       guide: "",
       resource: "",
@@ -56,6 +65,9 @@ export default {
   }),
   mounted() {
     this.getCookie();
+    if(this.$route.params.bannerId != ''){
+      this.getBanner(this.$route.params.bannerId)
+    }
   },
   methods: {
     async getCookie() {
@@ -72,55 +84,132 @@ export default {
         console.log(err);
       }
     },
-    // 获取品牌详情
-    async getById(query) {
+    // 获取详情
+    async getBanner(query) {
       try {
-        let ret = await api.getById(query);
-        if (ret.data.code == 200) {
+        let ret = await api.getBanner(query);
+        console.log(ret,'获取详情')
+        if (ret.data.code == 200 && ret.data.data) {
+          let _type = {"图片":0,'视频':1,'音频':2,'电商':3,'社区':4,'老人':5}[ret.data.data.type];
+          console.log(_type)
           this.LanunchScreenForm = {
-            guide: ret.data.data.brandName || "",
-            resource: ret.data.data.company || "",
-            imageUrl: ret.data.data.logo || ""
+            guide: ret.data.data.voiceDesc || "",
+            resource: _type.toString() || "",
+            imageUrl: ret.data.data.backgroundUrl || "",
+            link: ret.data.data.infoFileUrl || "",
           };
+          console.log(this.LanunchScreenForm)
         } else {
         }
       } catch (err) {
         console.log(err);
       }
     },
+    // addBanner
+    async addBanner(data) {
+      try {
+        let ret = await api.addBanner(data);
+        if (ret.data.code == 200) {
+          this.$router.push({
+            name: "homeManagement"
+          });
+        } else {
+          alert("数据添加失败");
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    // 修改
+    async updateBanner(data) {
+      try {
+        let ret = await api.updateBanner(data);
+        if (ret.data.code == 200) {
+          console.log('修改了')
+          this.$router.push({
+            name: "homeManagement"
+          });
+        } else {
+          alert("数据修改失败");
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    // 编辑Banner
     handleImgSuccess(res, file) {
       this.LanunchScreenForm.imageUrl = res.data[0];
     },
     beforeImgUpload(file) {
       var testmsg = file.name.substring(file.name.lastIndexOf(".") + 1);
-      const extension = testmsg === "jpeg";
-      const extension1 = testmsg === "png";
-      const extension2 = testmsg === "jpg";
-      const isLt2M = file.size / 1024 / 1024 < 1;
-      if (!extension && !extension1 && !extension2) {
-        this.$message({
-          message: "上传文件只能是 jpg,jpeg,png格式!",
-          type: "warning"
-        });
+      const extensionV = testmsg === "mp4";
+      if (!extensionV) {
+        this.isVideo = false;
+        const extension = testmsg === "jpeg";
+        const extension1 = testmsg === "png";
+        const extension2 = testmsg === "jpg";
+        const isLt2M = file.size / 1024 / 1024 < 1;
+        if (!extension && !extension1 && !extension2) {
+          this.$message({
+            message: "上传文件只能是 jpg,jpeg,png格式!",
+            type: "warning"
+          });
+        }
+        if (!isLt2M) {
+          this.$message({
+            message: "上传文件大小不能超过 2MB!",
+            type: "warning"
+          });
+        }
+        return (extension || extension1 || extension2) && isLt2M;
+      } else {
+        this.isVideo = true;
+        const isLt10M = file.size / 1024 / 1024 < 10;
+        if (
+          [
+            "video/mp4",
+            "video/ogg",
+            "video/flv",
+            "video/avi",
+            "video/wmv",
+            "video/rmvb"
+          ].indexOf(file.type) == -1
+        ) {
+          this.$message.error("请上传正确的视频格式");
+          return false;
+        }
+        if (!isLt10M) {
+          this.$message.error("上传视频大小不能超过10MB哦!");
+          return false;
+        }
       }
-      if (!isLt2M) {
-        this.$message({
-          message: "上传文件大小不能超过 2MB!",
-          type: "warning"
-        });
-      }
-      return (extension || extension1 || extension2) && isLt2M;
     },
     submitManagement() {
+      console.log(this.LanunchScreenForm)
+      const options = {
+        infoFileUrl: this.LanunchScreenForm.link,
+        type: this.LanunchScreenForm.resource,
+        voiceDesc: this.LanunchScreenForm.guide,
+        backgroundUrl: this.LanunchScreenForm.imageUrl
+      };
+      if (this.$route.params.bannerId === "") {
+        let data = {
+          ...options
+        };
+        this.addBanner(data);
+      } else {
+        let data = {
+          ...options,
+          bannerId: this.$route.params.bannerId
+        };
+        this.updateBanner(data);
+      }
       this.LanunchScreenForm = {
         guide: "",
         resource: "",
         link: "",
         imageUrl: ""
       };
-      this.$router.push({
-        name: "homeManagement"
-      });
     }
   }
 };
