@@ -339,7 +339,7 @@ export default {
           {
             min: 7,
             max: 20,
-            message: "长度在 2 到 20 个字符",
+            message: "长度在 7 到 20 个字符",
             trigger: "blur"
           }
         ],
@@ -453,9 +453,7 @@ export default {
     async getSalesMan() {
       try {
         const ret = await api.getSalesMan();
-        console.log(ret, "业务员");
         if (ret.data.code == 200) {
-          console.log("业务员sss");
           this.salesManList = ret.data.data;
         }
       } catch (e) {
@@ -469,7 +467,7 @@ export default {
         console.log(ret)
         if (ret.data.code == 200) {
           console.log("新增成功");
-          // this.showSubmmit = true;
+          this.showSubmmit = true;
         }
       } catch (e) {
         console.log(e.message);
@@ -497,6 +495,45 @@ export default {
     },
     // 返回列表
     goStore() {
+       this.formAddStore = {
+        basicForm: {
+          brandname: "",
+          class: "",
+          city: "",
+          zipcode: "",
+          username: "",
+          job: "",
+          phone: "",
+          QQ: "",
+          Emile: "",
+          vip: false,
+        },
+        detailForm: {
+          adress: "",
+          call: "",
+          Fax: "",
+          Website: "",
+          data: "",
+          type: "",
+          introduction: "",
+          logoimageUrl: "",
+          bgimageUrl: ""
+        },
+        financeForm: {
+          tax: "",
+          invoice: "",
+          Bank: "",
+          bankAccount: "",
+          mode: "",
+          Royalty: ""
+        },
+        signingForm: {
+          time: "",
+          CODE: "",
+          salesman: "",
+          remarks: ""
+        }
+      };
       this.$router.push({
         path: "/services-store"
       });

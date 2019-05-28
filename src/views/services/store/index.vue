@@ -30,8 +30,8 @@
         <p class="add" @click="handlerAddstore">添加</p>
       </div>
       <div class="shop-batch">
-        <p @click="handleBatchLower">批量开通</p>
-        <p @click="handleBatchLower">批量禁用</p>
+        <p @click="handleOpen">批量开通</p>
+        <p @click="handleProhibit">批量禁用</p>
         <p @click="handleBatchDel">批量删除</p>
       </div>
     </div>
@@ -58,14 +58,14 @@
       </el-table-column>
       <el-table-column label="状态" width="90">
         <template slot-scope="scope">
-          <p>{{ scope.row.status == 1?'待开通':'已禁用' }}</p>
+          <p>{{ scope.row.status == 1?'待开通':scope.row.status == 2?'已开通':'已禁用' }}</p>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="148">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleRevisetable(scope.row)">编辑</el-button>
-          <el-button @click="handleOpeningtable(scope.row)" type="text" size="small">开通</el-button>
-          <el-button @click="handleProhibittable(scope.row)" type="text" size="small">禁用</el-button>
+          <el-button v-if="scope.row.status != 2" @click="handleOpeningtable(scope.row)" type="text" size="small">开通</el-button>
+          <el-button v-if="scope.row.status == 2" @click="handleProhibittable(scope.row)" type="text" size="small">禁用</el-button>
           <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -140,7 +140,7 @@ export default {
       try {
         const ret = await api.shopBatchChecked(data);
         if (ret.data.code == 200) {
-          this.productList({ currentPage: this.currentPage });
+          this.getShopList({ currentPage: this.currentPage });
         } else {
           console.log("设置列表失败");
         }
@@ -263,7 +263,7 @@ export default {
         });
     },
     // 单个禁用
-    handleProhibittable() {
+    handleProhibittable(options) {
       this.$confirm("是否为客户禁用服务?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -303,38 +303,30 @@ export default {
     // 批量删除
     handleBatchDel() {
       const query = {
-        productIds: this.shopIds,
-        hide: "1"
+        shopIds: this.shopIds,
+        checked: 0
       };
-      this.batchPart(query);
+      this.shopBatchChecked(query);
     },
-    // 批量下架
-    handleBatchLower() {
+    // 批量开通
+    handleOpen() {
       const query = {
-        productIds: this.shopIds,
-        upSelling: "0"
+        shopIds: this.shopIds,
+        checked: 2
       };
-      this.batchPart(query);
+      this.shopBatchChecked(query);
+    },
+    // 批量禁用
+    handleProhibit() {
+      const query = {
+        shopIds: this.shopIds,
+        checked: 3
+      };
+      this.shopBatchChecked(query);
     },
     handleCurrentChange(val) {
       this.currentPage = val;
-      this.productList({ currentPage: val });
-    },
-    // 单个下架
-    handleupSelling(type) {
-      let query = {
-        productId: type.id,
-        upSelling: "0"
-      };
-      this.setPart(query);
-    },
-    // 单个删除
-    handleDel(content) {
-      let query = {
-        productId: content.id,
-        hide: "1"
-      };
-      this.setPart(query);
+      this.getShopList({ currentPage: val });
     },
     // 编辑
     handleRevisetable(options) {
