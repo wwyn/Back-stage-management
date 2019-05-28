@@ -337,7 +337,7 @@ export function delBanner(param) {
     method: "delete",
   });
 }
-// 上线
+// 上线/下线
 export function changeStatusbanner(data) {
   return request({
     url: "resource-service-v1/banner/changeStatus/",
@@ -360,7 +360,14 @@ export function updateBanner(data) {
     data
   });
 }
-
+// 移动
+export function changeWeightBanner(data) {
+  return request({
+    url: "resource-service-v1/banner/changeWeight/",
+    method: "put",
+    data
+  });
+}
 // 020部分
 // 商家管理首页--商家列表
 export function getShopList(query) {

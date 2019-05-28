@@ -21,8 +21,8 @@
         <el-table-column prop="type" label="类型" width="84" align="center"></el-table-column>
         <el-table-column prop="name" label="排序" width="106" align="center">
           <template slot-scope="scope">
-            <i class="move iconfont icon-shangyi" @click="handleSort(scope.row.id,'up')"></i>
-            <i class="iconfont icon-xiayi" @click="handleSort(scope.row.id,'down')"></i>
+            <i :class="scope.$index==0?'move mr iconfont icon-shangyi':'mr iconfont icon-shangyi'" @click="handleSort(scope.row.bannerId,'up')"></i>
+            <i :class="scope.$index==tableData.length-1?'move iconfont icon-xiayi':'iconfont icon-xiayi'" @click="handleSort(scope.row.bannerId,'down')"></i>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="103" align="center">
@@ -39,20 +39,21 @@
               v-if="scope.row.status=='使用中'"
               size="mini"
               type="text"
-              @click="handleDel(scope.row.bannerId)"
-            >删除</el-button>
-            <el-button
-              v-if="scope.row.status=='已下线'"
-              size="mini"
-              type="text"
-              @click="handleDel(scope.row.bannerId)"
-            >删除</el-button>
-            <el-button
+              @click="handleOffline(scope.row.bannerId)"
+            >下线</el-button>
+             <el-button
               v-if="scope.row.status==='待上线'"
               size="mini"
               type="text"
               @click="handleOnline(scope.row.bannerId)"
             >上线</el-button>
+            <el-button
+              v-if="scope.row.status=='待上线'"
+              size="mini"
+              type="text"
+              @click="handleDel(scope.row.bannerId)"
+            >删除</el-button>
+           
           </template>
         </el-table-column>
         <el-table-column prop="author" label="发布者" align="center"></el-table-column>
@@ -154,18 +155,49 @@ export default {
         console.log(err);
       }
     },
+    // changeWeightBanner
+     async changeWeightBanner(query) {
+      try {
+        let ret = await api.changeWeightBanner(query);
+        console.log(ret,'xiugaiquanzhong')
+        if (ret.data.code == 200) {
+          this.getBannerList({ current: this.currentPage });
+        } else {
+          alert("移动失败");
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
     // 删除
     handleDel(id) {
       this.delBanner(id);
+    },
+    // 修改权重
+    handleSort(id,type) {
+      let query={
+        bannerId: id,
+        action: type
+      }
+      this.changeWeightBanner(query)
     },
     // 上线
     handleOnline(id) {
       let query = {
         bannerId: id,
+        status: 0
+      };
+      this.changeStatusbanner(query);
+    },
+    // 下线
+    handleOffline(id) {
+       let query = {
+        bannerId: id,
         status: 1
       };
       this.changeStatusbanner(query);
     },
+
     handleCurrentChange(val) {
       this.currentPage = val;
       this.getBannerList({ current: val });
@@ -176,13 +208,13 @@ export default {
         params: { bannerId: "" }
       });
     },
+    // 编辑
     handleRevise(id) {
       this.$router.push({
         name: "addhomeManagement",
         params: { bannerId: id }
       });
     },
-    handleSort() {}
   }
 };
 </script>
@@ -219,6 +251,9 @@ export default {
     top: -5px;
   }
   .move {
+    color: #999;
+  }
+  .mr {
     margin-right: 14px;
   }
   .Lanunch-img {

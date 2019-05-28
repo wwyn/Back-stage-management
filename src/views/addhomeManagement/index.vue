@@ -6,8 +6,8 @@
         LanunchScreen{{ this.$route.params.type }}
       </div>
       <p class="add-btn" @click="submitManagement">提交</p>
-      <el-form ref="form" :rules="rules" :model="LanunchScreenForm" label-width="80px">
-        <el-form-item label="背景图片">
+      <el-form ref="LanunchScreenForm" :rules="rules" :model="LanunchScreenForm" label-width="80px">
+        <el-form-item label="背景图片" prop="imageUrl">
           <el-upload
             class="avatar-uploader"
             action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
@@ -28,12 +28,7 @@
             >您的浏览器不支持视频播放</video>
             <i v-if="!LanunchScreenForm.imageUrl" class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
-          <p
-            style="position: absolute;
-    top: 70px;
-    left: 180px;
-    color: #999;"
-          >支持图片、GIF、小视频上传，尺寸1920*1200</p>
+          <p style="position: absolute;top: 70px;left: 180px;color: #999;">支持图片、GIF、小视频上传，尺寸1920*1200</p>
         </el-form-item>
         <el-form-item label="引导说法" class="guide" prop="guide">
           <el-input placeholder="最多可输入20个字符" maxlength="20" v-model="LanunchScreenForm.guide"></el-input>
@@ -44,7 +39,7 @@
             <el-option label="区域二" value="beijing"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="功能类型">
+        <el-form-item label="功能类型" prop="resource">
           <el-radio-group v-model="LanunchScreenForm.resource">
             <el-radio label="0">图片</el-radio>
             <el-radio label="1">视频</el-radio>
@@ -74,7 +69,7 @@ export default {
     isVideo: false,
     LanunchScreenForm: {
       guide: "",
-      resource: "",
+      resource: "0",
       link: "",
       imageUrl: "",
       villa: ""
@@ -83,7 +78,13 @@ export default {
       guide: [
         { required: true, message: "请输入活动名称", trigger: "blur" },
         { min: 1, max: 20, message: "长度在 1 到 20 个字符", trigger: "blur" }
-      ]
+      ],
+       imageUrl: [
+        { required: true, message: "请上传背景图片", trigger: "blur" },
+      ],
+      resource: [
+            { required: true, message: '请选择活动资源', trigger: 'change' }
+          ],
     }
   }),
   mounted() {
