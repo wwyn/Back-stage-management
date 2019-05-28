@@ -6,7 +6,7 @@
         LanunchScreen{{ this.$route.params.type }}
       </div>
       <p class="add-btn" @click="submitManagement">提交</p>
-      <el-form ref="form" :model="LanunchScreenForm" label-width="80px">
+      <el-form ref="form" :rules="rules" :model="LanunchScreenForm" label-width="80px">
         <el-form-item label="背景图片">
           <el-upload
             class="avatar-uploader"
@@ -35,7 +35,7 @@
     color: #999;"
           >支持图片、GIF、小视频上传，尺寸1920*1200</p>
         </el-form-item>
-        <el-form-item label="引导说法" class="guide">
+        <el-form-item label="引导说法" class="guide" prop="guide">
           <el-input placeholder="最多可输入20个字符" maxlength="20" v-model="LanunchScreenForm.guide"></el-input>
         </el-form-item>
         <el-form-item label="小区名称" class="villa">
@@ -78,6 +78,12 @@ export default {
       link: "",
       imageUrl: "",
       villa: ""
+    },
+    rules: {
+      guide: [
+        { required: true, message: "请输入活动名称", trigger: "blur" },
+        { min: 1, max: 20, message: "长度在 1 到 20 个字符", trigger: "blur" }
+      ]
     }
   }),
   mounted() {
@@ -168,7 +174,7 @@ export default {
         const extension0 = testmsg === "gif";
         const extension1 = testmsg === "png";
         const extension2 = testmsg === "jpg";
-        const isLt2M = file.size / 1024 / 1024 < 1;
+        const isLt2M = file.size / 1024 / 1024 < 10;
         if (!extension && !extension0 && !extension1 && !extension2) {
           this.$message({
             message: "上传文件只能是 jpg,jpeg,png,gif格式!",
@@ -177,11 +183,11 @@ export default {
         }
         if (!isLt2M) {
           this.$message({
-            message: "上传文件大小不能超过 2MB!",
+            message: "上传文件大小不能超过 10MB!",
             type: "warning"
           });
         }
-        return (extension ||extension0 || extension1 || extension2) && isLt2M;
+        return (extension || extension0 || extension1 || extension2) && isLt2M;
       } else {
         this.isVideo = true;
         const isLt10M = file.size / 1024 / 1024 < 10;

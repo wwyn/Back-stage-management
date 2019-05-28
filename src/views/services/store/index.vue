@@ -136,9 +136,9 @@ export default {
       console.log(val)
     },
     // 批量设置商品列表
-    async batchPart(data) {
+    async shopBatchChecked(data) {
       try {
-        const ret = await api.batchPart(data);
+        const ret = await api.shopBatchChecked(data);
         if (ret.data.code == 200) {
           this.productList({ currentPage: this.currentPage });
         } else {
@@ -204,17 +204,18 @@ export default {
         console.log(e.message);
       }
     },
-    // 单个设置商品
-    async setPart(query) {
+    // 单个开通或者禁用
+    async shopChecked(query) {
       try {
-        const ret = await api.setPart(query);
+        const ret = await api.shopChecked(query);
         if (ret.data.code == 200) {
-          this.productList({ currentPage: this.currentPage });
+          this.getShopList({ currentPage: this.currentPage });
         }
       } catch (e) {
         console.log(e.message);
       }
     },
+
     // 多选
     handleSelectionChange(val) {
       let arr = val.map(item => {
@@ -240,18 +241,19 @@ export default {
           });
         });
     },
-    // 开通
-    handleOpeningtable() {
+    // 单个开通
+    handleOpeningtable(options) {
       this.$confirm("是否为客户开通服务?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "开通成功!"
-          });
+          let query = {
+            shopId: options.id,
+            checked: 2
+          }
+          this.shopChecked(query)
         })
         .catch(() => {
           this.$message({
@@ -260,7 +262,7 @@ export default {
           });
         });
     },
-    // 禁用
+    // 单个禁用
     handleProhibittable() {
       this.$confirm("是否为客户禁用服务?", "提示", {
         confirmButtonText: "确定",
@@ -268,10 +270,11 @@ export default {
         type: "warning"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "禁用成功!"
-          });
+          let query = {
+            shopId: options.id,
+            checked: 3
+          }
+          this.shopChecked(query)
         })
         .catch(() => {
           this.$message({

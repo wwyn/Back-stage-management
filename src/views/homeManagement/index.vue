@@ -36,6 +36,12 @@
               @click="handleRevise(scope.row.bannerId)"
             >编辑</el-button>
             <el-button
+              v-if="scope.row.status=='使用中'"
+              size="mini"
+              type="text"
+              @click="handleDel(scope.row.bannerId)"
+            >删除</el-button>
+            <el-button
               v-if="scope.row.status=='已下线'"
               size="mini"
               type="text"

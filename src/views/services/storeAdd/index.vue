@@ -209,7 +209,7 @@
                 v-for="item in salesManList"
                 :key="item.id"
                 :label="item.nickname"
-                :value="item.id"
+                :value="item.userId"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -339,7 +339,7 @@ export default {
           {
             min: 7,
             max: 20,
-            message: "长度在 2 到 100 个字符",
+            message: "长度在 2 到 20 个字符",
             trigger: "blur"
           }
         ],

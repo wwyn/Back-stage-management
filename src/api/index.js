@@ -379,7 +379,23 @@ export function shopDel(query) {
   });
 }
 
-// 开通/禁用
+// 单个开通/禁用
+export function shopChecked(query) {
+  return request({
+    url: "sfy-mall-v2/m/shop/checked/",
+    method: "post",
+    params:  query
+  });
+}
+
+// 批量开通/禁用/删除
+export function shopBatchChecked(data) {
+  return request({
+    url: "sfy-mall-v2/m/shop/batchChecked",
+    method: "post",
+    data
+  });
+}
 
 
 // 获取商家类型
