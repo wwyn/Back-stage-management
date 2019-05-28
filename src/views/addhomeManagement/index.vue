@@ -165,12 +165,13 @@ export default {
       if (!extensionV) {
         this.isVideo = false;
         const extension = testmsg === "jpeg";
+        const extension0 = testmsg === "gif";
         const extension1 = testmsg === "png";
         const extension2 = testmsg === "jpg";
         const isLt2M = file.size / 1024 / 1024 < 1;
-        if (!extension && !extension1 && !extension2) {
+        if (!extension && !extension0 && !extension1 && !extension2) {
           this.$message({
-            message: "上传文件只能是 jpg,jpeg,png格式!",
+            message: "上传文件只能是 jpg,jpeg,png,gif格式!",
             type: "warning"
           });
         }
@@ -180,7 +181,7 @@ export default {
             type: "warning"
           });
         }
-        return (extension || extension1 || extension2) && isLt2M;
+        return (extension ||extension0 || extension1 || extension2) && isLt2M;
       } else {
         this.isVideo = true;
         const isLt10M = file.size / 1024 / 1024 < 10;
