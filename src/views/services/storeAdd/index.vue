@@ -28,12 +28,18 @@
             </el-select>
           </el-form-item>
           <el-form-item label="所属区域" prop="city">
-            <el-select v-model="formAddStore.basicForm.city" placeholder="请选择所属区域">
+            <!-- <el-select v-model="formAddStore.basicForm.city" placeholder="请选择所属区域">
               <el-option label="区域一" value="shanghai"></el-option>
               <el-option label="区域二" value="beijing"></el-option>
-            </el-select>
+            </el-select>-->
+            <el-cascader
+              :props="newProps"
+              :options="cityList"
+              v-model="formAddStore.basicForm.city"
+              @change="handleCityChange"
+            ></el-cascader>
           </el-form-item>
-          <el-form-item label="邮编" prop="username">
+          <el-form-item label="邮编" prop="zipcode">
             <el-input v-model="formAddStore.basicForm.zipcode"></el-input>
           </el-form-item>
           <el-form-item label="联系人">
@@ -50,6 +56,9 @@
           </el-form-item>
           <el-form-item label="邮箱">
             <el-input v-model="formAddStore.basicForm.Emile"></el-input>
+          </el-form-item>
+          <el-form-item label="是否为品牌直供商家">
+            <el-switch v-model="formAddStore.basicForm.vip"></el-switch>
           </el-form-item>
         </el-form>
       </el-form-item>
@@ -235,17 +244,24 @@ export default {
       categoriesList: [],
       feeTypesList: [],
       salesManList: [],
+      cityList: [],
+      newProps: {
+        value: "id",
+        label: "name",
+        children: "subclass"
+      },
       formAddStore: {
         basicForm: {
           brandname: "",
           class: "",
-          city: "",
+          city: [],
           zipcode: "",
           username: "",
           job: "",
           phone: "",
           QQ: "",
-          Emile: ""
+          Emile: "",
+          vip: false
         },
         detailForm: {
           adress: "",
@@ -281,6 +297,10 @@ export default {
         username: [
           { required: true, message: "请输入用户名称", trigger: "blur" },
           { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
+        ],
+        zipcode:[
+           { required: true, message: "请输入正确的邮编", trigger: "blur" },
+          { min: 6, max: 6, message: "长度在 6 个字符", trigger: "blur" }
         ],
         phone: [
           { required: true, message: "请输入手机号", trigger: "blur" },
@@ -334,7 +354,7 @@ export default {
         ],
         invoice: [
           { required: true, message: "请输入发票抬头", trigger: "blur" },
-          { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
+          { min: 2, max: 30, message: "长度在 2 到 30 个字符", trigger: "blur" }
         ],
         Bank: [
           { required: true, message: "请输入开户银行", trigger: "blur" },
@@ -342,11 +362,11 @@ export default {
         ],
         bankAccount: [
           { required: true, message: "请输入银行账号", trigger: "blur" },
-          { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
+          { min: 16, max: 20, message: "长度在 16 到 20 个字符", trigger: "blur" }
         ],
         Royalty: [
           { required: true, message: "请输入提成", trigger: "blur" },
-          { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
+          { min: 1, max: 10, message: "长度在 1 到 10 个字符", trigger: "blur" }
         ],
         time: [{ required: true, message: "请选择时间", trigger: "change" }],
         CODE: [
@@ -366,8 +386,27 @@ export default {
     this.getCategoriesList();
     this.getFeeTypes();
     this.getSalesMan();
+    this.geoList();
   },
   methods: {
+    // 获取地区
+    async geoList() {
+      const query = {
+        levelType: 2
+      };
+      try {
+        const ret = await api.geoList(query);
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.cityList = ret.data.data;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    handleCityChange(val) {
+      console.log(val);
+    },
     // 获取商家类型
     async getShoptypes() {
       try {
@@ -414,11 +453,23 @@ export default {
     async getSalesMan() {
       try {
         const ret = await api.getSalesMan();
-        console.log(ret,'业务员');
+        console.log(ret, "业务员");
         if (ret.data.code == 200) {
-          console.log('业务员sss');
+          console.log("业务员sss");
           this.salesManList = ret.data.data;
-
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // setShop
+    async setShop(data) {
+      try {
+        const ret = await api.setShop(data);
+        console.log(ret)
+        if (ret.data.code == 200) {
+          console.log("新增成功");
+          // this.showSubmmit = true;
         }
       } catch (e) {
         console.log(e.message);
@@ -454,11 +505,50 @@ export default {
       this.showSubmmit = false;
     },
     onSubmit() {
-      this.showSubmmit = true;
       console.log(this.formAddStore);
+      let basic = this.formAddStore.basicForm;
+      let detail = this.formAddStore.detailForm;
+      let finance = this.formAddStore.financeForm;
+      let signing = this.formAddStore.signingForm;
+      
+      let data = {
+        shopName: basic.brandname || "",
+        type: basic.class || "",
+        regions: basic.city || [],
+        zipCode: basic.zipcode || "",
+        contact: basic.username || "",
+        contactPosition: basic.job || "",
+        mobile: basic.phone || "",
+        qq: basic.QQ || "",
+        email: basic.Emile || "",
+        vip: basic.vip? 0: 1,
+
+        addressDetail: detail.adress || "",
+        tel: detail.call || "",
+        fax: detail.Fax || "",
+        webUrl: detail.Website || "",
+        businessHours: detail.data || "",
+        categoryId: detail.categories || "",
+        description: detail.introduction || "",
+        logo: detail.logoimageUrl || "",
+        banner: detail.bgimageUrl || "",
+
+        taxNumber: finance.tax || "",
+        invoiceTitle: finance.invoice || "",
+        taxBank: finance.Bank || "",
+        taxBankNo: finance.bankAccount || "",
+        serviceFeeType: finance.mode || "",
+        serviceFee: finance.Royalty || "",
+
+        signedTime: signing.time || "",
+        contractNo: signing.CODE || "",
+        salemanId: signing.salesman || "",
+        remark: signing.remarks || "",
+      };
+      this.setShop(data);
     },
     onResetting() {
-      formAddStore = {
+      this.formAddStore = {
         basicForm: {
           brandname: "",
           class: "",
@@ -468,7 +558,8 @@ export default {
           job: "",
           phone: "",
           QQ: "",
-          Emile: ""
+          Emile: "",
+          vip: false,
         },
         detailForm: {
           adress: "",
@@ -526,6 +617,9 @@ export default {
       margin-right: 85px;
       margin-bottom: 10px;
       .el-select {
+        width: 300px;
+      }
+      .el-cascader {
         width: 300px;
       }
     }

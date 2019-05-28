@@ -371,13 +371,16 @@ export function getShopList(query) {
   });
 }
 // 删除商户
-export function shopDel(data) {
+export function shopDel(query) {
   return request({
     url: "sfy-mall-v2/m/shop/del/",
     method: "post",
-    data
+    params:  query
   });
 }
+
+// 开通/禁用
+
 
 // 获取商家类型
 export function getShoptypes(query) {
@@ -412,6 +415,15 @@ export function getSalesMan(query) {
     url: "sfy-mall-v2/m/shop/getSalesMan/",
     method: "get",
     params:  query
+  });
+}
+
+// 新增商家
+export function setShop(data) {
+  return request({
+    url: "sfy-mall-v2/m/shop/set/",
+    method: "post",
+    data
   });
 }
 

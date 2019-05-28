@@ -15,7 +15,11 @@
             :on-success="handleImgSuccess"
             :before-upload="beforeImgUpload"
           >
-            <img v-if="!isVideo && LanunchScreenForm.imageUrl" :src="LanunchScreenForm.imageUrl || ''" class="avatar">
+            <img
+              v-if="!isVideo && LanunchScreenForm.imageUrl"
+              :src="LanunchScreenForm.imageUrl || ''"
+              class="avatar"
+            >
             <video
               v-if="isVideo"
               :src="LanunchScreenForm.imageUrl"
@@ -24,9 +28,21 @@
             >您的浏览器不支持视频播放</video>
             <i v-if="!LanunchScreenForm.imageUrl" class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
+          <p
+            style="position: absolute;
+    top: 70px;
+    left: 180px;
+    color: #999;"
+          >支持图片、GIF、小视频上传，尺寸1920*1200</p>
         </el-form-item>
         <el-form-item label="引导说法" class="guide">
           <el-input placeholder="最多可输入20个字符" maxlength="20" v-model="LanunchScreenForm.guide"></el-input>
+        </el-form-item>
+        <el-form-item label="小区名称" class="villa">
+          <el-select v-model="LanunchScreenForm.villa" placeholder="请选择小区名称">
+            <el-option label="区域一" value="shanghai"></el-option>
+            <el-option label="区域二" value="beijing"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="功能类型">
           <el-radio-group v-model="LanunchScreenForm.resource">
@@ -60,13 +76,14 @@ export default {
       guide: "",
       resource: "",
       link: "",
-      imageUrl: ""
+      imageUrl: "",
+      villa: ""
     }
   }),
   mounted() {
     this.getCookie();
-    if(this.$route.params.bannerId != ''){
-      this.getBanner(this.$route.params.bannerId)
+    if (this.$route.params.bannerId != "") {
+      this.getBanner(this.$route.params.bannerId);
     }
   },
   methods: {
@@ -88,17 +105,19 @@ export default {
     async getBanner(query) {
       try {
         let ret = await api.getBanner(query);
-        console.log(ret,'获取详情')
+        console.log(ret, "获取详情");
         if (ret.data.code == 200 && ret.data.data) {
-          let _type = {"图片":0,'视频':1,'音频':2,'电商':3,'社区':4,'老人':5}[ret.data.data.type];
-          console.log(_type)
+          let _type = { 图片: 0, 视频: 1, 音频: 2, 电商: 3, 社区: 4, 老人: 5 }[
+            ret.data.data.type
+          ];
+          console.log(_type);
           this.LanunchScreenForm = {
             guide: ret.data.data.voiceDesc || "",
             resource: _type.toString() || "",
             imageUrl: ret.data.data.backgroundUrl || "",
-            link: ret.data.data.infoFileUrl || "",
+            link: ret.data.data.infoFileUrl || ""
           };
-          console.log(this.LanunchScreenForm)
+          console.log(this.LanunchScreenForm);
         } else {
         }
       } catch (err) {
@@ -125,7 +144,7 @@ export default {
       try {
         let ret = await api.updateBanner(data);
         if (ret.data.code == 200) {
-          console.log('修改了')
+          console.log("修改了");
           this.$router.push({
             name: "homeManagement"
           });
@@ -185,7 +204,7 @@ export default {
       }
     },
     submitManagement() {
-      console.log(this.LanunchScreenForm)
+      console.log(this.LanunchScreenForm);
       const options = {
         infoFileUrl: this.LanunchScreenForm.link,
         type: this.LanunchScreenForm.resource,
@@ -252,6 +271,13 @@ export default {
     input {
       width: 360px;
       height: 40px;
+    }
+  }
+  .villa {
+    width: 360px;
+    height: 40px;
+    .el-select {
+      width: 100%;
     }
   }
   .link {

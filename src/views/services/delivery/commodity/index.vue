@@ -101,7 +101,8 @@ export default {
         { name: "全部商品", number: 10000 },
         { name: "已上架", number: 10000 },
         { name: "未上架", number: 10000 },
-        { name: "待审核", number: 10000 }
+        { name: "待审核", number: 10000 },
+        { name: "未通过", number: 10000 }
       ],
       tableData: [
         {

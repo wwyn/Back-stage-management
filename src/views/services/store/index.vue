@@ -8,15 +8,16 @@
         <el-input v-model="storeForm.user" placeholder="用户名/姓名"></el-input>
       </el-form-item>
       <el-form-item label="所在地区">
-        <el-select v-model="storeForm.city" placeholder="全部">
-          <el-option label="区域一" value="shanghai"></el-option>
-          <el-option label="区域二" value="beijing"></el-option>
-        </el-select>
+        <el-cascader :props="newProps" :options="cityList" v-model="storeForm.city" @change="handleCityChange"></el-cascader>
       </el-form-item>
       <el-form-item label="商家品类">
         <el-select v-model="storeForm.class" placeholder="全部">
-          <el-option label="区域一" value="shanghai"></el-option>
-          <el-option label="区域二" value="beijing"></el-option>
+          <el-option
+            v-for="item in categoriesList"
+            :key="item.id"
+            :label="item.categoryName"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -42,10 +43,11 @@
       :data="tableData"
       border
       style="width: 100%"
+      @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
-      <el-table-column prop="shopName" label="商家名称" width="154" ></el-table-column>
-      <el-table-column prop="addressDetail" label="所在地区" width="200" ></el-table-column>
+      <el-table-column prop="shopName" label="商家名称" width="154"></el-table-column>
+      <el-table-column prop="addressDetail" label="所在地区" width="200"></el-table-column>
       <el-table-column prop="brandName" label="商家品类" width="136"></el-table-column>
       <el-table-column prop="contact" label="联系人" width="110"></el-table-column>
       <el-table-column prop="mobile" label="联系方式" width="130"></el-table-column>
@@ -54,7 +56,11 @@
           <p>{{parseTime(scope.row.createTime || '')}}</p>
         </template>
       </el-table-column>
-      <el-table-column prop="upSelling" label="状态" width="90"></el-table-column>
+      <el-table-column label="状态" width="90">
+        <template slot-scope="scope">
+          <p>{{ scope.row.status == 1?'待开通':'已禁用' }}</p>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="148">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleRevisetable(scope.row)">编辑</el-button>
@@ -80,17 +86,24 @@ import pagination from "@/components/pagination";
 export default {
   data() {
     return {
+      newProps:{
+        value: 'id',
+        label:'name',
+        children: 'subclass'
+      },
+      cityList:[],
       storeForm: {
-        city: "",
+        city: [],
         user: "",
-        class:''
+        class: ""
       },
       tableData: [],
       pageSize: 10,
       currentPage: 1,
       total: 0,
-      productIdList: [],
-      loading: true
+      shopIds: [],
+      loading: true,
+      categoriesList: []
     };
   },
   components: {
@@ -99,9 +112,29 @@ export default {
   mounted: function() {
     let currentPage = this.currentPage;
     this.getShopList({ currentPage });
+    this.getCategoriesList();
+    this.geoList();
   },
   methods: {
     parseTime,
+    // 获取地区
+    async geoList() {
+      const query = {
+        levelType: 2
+      };
+      try {
+        const ret = await api.geoList(query);
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.cityList = ret.data.data;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    handleCityChange(val) {
+      console.log(val)
+    },
     // 批量设置商品列表
     async batchPart(data) {
       try {
@@ -110,6 +143,21 @@ export default {
           this.productList({ currentPage: this.currentPage });
         } else {
           console.log("设置列表失败");
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取商家品类
+    async getCategoriesList() {
+      const query = {
+        module: "shop"
+      };
+      try {
+        const ret = await api.getCategoriesList(query);
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.categoriesList = ret.data.data;
         }
       } catch (e) {
         console.log(e.message);
@@ -125,7 +173,7 @@ export default {
       };
       try {
         const ret = await api.getShopList(query);
-        console.log(ret)
+        console.log(ret);
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
           this.tableData = ret.data.data.pageData;
@@ -139,18 +187,18 @@ export default {
       }
     },
     // 删除商户
-     async shopDel(params) {
+    async shopDel(query) {
       try {
         const ret = await api.shopDel(query);
-        console.log(ret)
+        console.log(ret);
         if (ret.data.code == 200) {
           this.$message({
-            type: 'success',
-            message: '删除成功!'
+            type: "success",
+            message: "删除成功!"
           });
-          this.getShopList({ currentPage: this.currentPage })
+          this.getShopList({ currentPage: this.currentPage });
         } else {
-          alert("商户删除失败")
+          alert("商户删除失败");
         }
       } catch (e) {
         console.log(e.message);
@@ -167,77 +215,92 @@ export default {
         console.log(e.message);
       }
     },
+    // 多选
+    handleSelectionChange(val) {
+      let arr = val.map(item => {
+        return item.id
+      })
+      console.log(arr)
+      this.shopIds = arr;
+    },
     // 单个删除
     handleDeltable(options) {
-        this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
+      this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
           this.shopDel({ id: options.id });
-        }).catch(() => {
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });          
+            type: "info",
+            message: "已取消删除"
+          });
         });
     },
     // 开通
     handleOpeningtable() {
-        this.$confirm('是否为客户开通服务?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
+      this.$confirm("是否为客户开通服务?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
           this.$message({
-            type: 'success',
-            message: '开通成功!'
+            type: "success",
+            message: "开通成功!"
           });
-        }).catch(() => {
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消开通'
-          });          
-        }); 
+            type: "info",
+            message: "已取消开通"
+          });
+        });
     },
-     // 禁用
+    // 禁用
     handleProhibittable() {
-        this.$confirm('是否为客户禁用服务?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
+      this.$confirm("是否为客户禁用服务?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
           this.$message({
-            type: 'success',
-            message: '禁用成功!'
+            type: "success",
+            message: "禁用成功!"
           });
-        }).catch(() => {
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消禁用'
-          });          
-        }); 
+            type: "info",
+            message: "已取消禁用"
+          });
+        });
     },
 
     // 搜索
     handleSearch(data) {
+      console.log(this.storeForm,'搜索')
       const query = {
         currentPage: 1
       };
-      this.productList(query);
+      this.getShopList(query);
     },
     // 重置
     resetForm() {
       this.storeForm = {
-        city: "",
+        city: [],
         user: "",
-        class:''
+        class: ""
       };
     },
     // 批量删除
     handleBatchDel() {
       const query = {
-        productIds: this.productIdList,
+        productIds: this.shopIds,
         hide: "1"
       };
       this.batchPart(query);
@@ -245,7 +308,7 @@ export default {
     // 批量下架
     handleBatchLower() {
       const query = {
-        productIds: this.productIdList,
+        productIds: this.shopIds,
         upSelling: "0"
       };
       this.batchPart(query);
@@ -284,7 +347,7 @@ export default {
       this.$router.push({
         name: "servicesStoreAdd"
       });
-    },
+    }
   }
 };
 </script>
@@ -344,6 +407,9 @@ export default {
     height: 40px;
     margin-right: 20px;
   }
+  .el-cascader {
+     margin-right: 20px;
+  }
   .el-form--inline .el-form-item {
     margin-right: 0;
   }
@@ -372,7 +438,7 @@ export default {
   padding: 0;
 }
 /deep/ .el-table th > .cell {
-  padding: 0;
+  padding: 0 10px;
   font-size: 14px;
   color: #101010;
 }
@@ -386,7 +452,7 @@ export default {
   border: none;
 }
 /deep/ .el-table .cell {
-  padding: 0 20px 0 0;
+  // padding: 0 20px 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
