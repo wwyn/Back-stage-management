@@ -458,6 +458,71 @@ export function setShop(data) {
   });
 }
 
+// 020规格设置---获取规格列表
+export function getSpecsByShopId(query) {
+  return request({
+    url: "sfy-mall-v2/m/common/getSpecsByShopId",
+    method: "get",
+    params:  query
+  });
+}
+// 获取规格值
+export function getSpec(query) {
+  return request({
+    url: "sfy-mall-v2/m/common/getSpec",
+    method: "get",
+    params:  query
+  });
+}
+// 设置规格值
+export function setSpecValue(data) {
+  return request({
+    url: "sfy-mall-v2/m/common/setSpecValue",
+    method: "post",
+    data
+  });
+}
+// 获取配料列表
+export function getParts(query) {
+  return request({
+    url: "sfy-mall-v2/m/parts/getParts",
+    method: "get",
+    params:  query
+  });
+}
+// 批量设置配料
+export function batchAddParts(data) {
+  return request({
+    url: "sfy-mall-v2/m/parts/batchAddParts",
+    method: "post",
+    data
+  });
+}
+// 设置配料
+export function setParts(data) {
+  return request({
+    url: "sfy-mall-v2/m/parts/setParts",
+    method: "post",
+    data
+  });
+}
+// 删除配料
+export function removeParts(data) {
+  return request({
+    url: "sfy-mall-v2/m/parts/remove",
+    method: "post",
+    data
+  });
+}
+// 获取配料信息
+export function getPart(query) {
+  return request({
+    url: "sfy-mall-v2/m/parts/getPart",
+    method: "get",
+    params:  query
+  });
+}
+
 
 
 
