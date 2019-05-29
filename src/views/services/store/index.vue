@@ -5,7 +5,7 @@
     </div>
     <el-form :inline="true" :model="storeForm" class="demo-form-inline">
       <el-form-item label="输入查询">
-        <el-input v-model="storeForm.user" placeholder="用户名/姓名"></el-input>
+        <el-input v-model="storeForm.user" placeholder="商家名称/联系人"></el-input>
       </el-form-item>
       <el-form-item label="所在地区">
         <el-cascader :props="newProps" :options="cityList" v-model="storeForm.city" @change="handleCityChange"></el-cascader>
@@ -288,6 +288,9 @@ export default {
     handleSearch(data) {
       console.log(this.storeForm,'搜索')
       const query = {
+        regions: this.storeForm.city || '',
+        name: this.storeForm.user || '',
+        categoryId: this.storeForm.class || '',
         currentPage: 1
       };
       this.getShopList(query);

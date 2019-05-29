@@ -298,8 +298,8 @@ export default {
           { required: true, message: "请输入用户名称", trigger: "blur" },
           { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
         ],
-        zipcode:[
-           { required: true, message: "请输入正确的邮编", trigger: "blur" },
+        zipcode: [
+          { required: true, message: "请输入正确的邮编", trigger: "blur" },
           { min: 6, max: 6, message: "长度在 6 个字符", trigger: "blur" }
         ],
         phone: [
@@ -362,7 +362,12 @@ export default {
         ],
         bankAccount: [
           { required: true, message: "请输入银行账号", trigger: "blur" },
-          { min: 16, max: 20, message: "长度在 16 到 20 个字符", trigger: "blur" }
+          {
+            min: 16,
+            max: 20,
+            message: "长度在 16 到 20 个字符",
+            trigger: "blur"
+          }
         ],
         Royalty: [
           { required: true, message: "请输入提成", trigger: "blur" },
@@ -382,6 +387,9 @@ export default {
     };
   },
   mounted() {
+    if (this.$route.params.id) {
+      this.getShopById();
+    }
     this.getShoptypes();
     this.getCategoriesList();
     this.getFeeTypes();
@@ -389,6 +397,60 @@ export default {
     this.geoList();
   },
   methods: {
+    // 获取商家信息
+    async getShopById() {
+      const query = {
+        id: this.$route.params.id
+      };
+      try {
+        const ret = await api.getShopById(query);
+        console.log(ret, "获取商家信息");
+        if (ret.data.code == 200 && ret.data.data) {
+          let val = ret.data.data;
+          this.formAddStore = {
+            basicForm: {
+              brandname: val.shopName || "",
+              class: val.type || "",
+              city: [val.provinceId,val.cityId,val.countryId],
+              zipcode: val.zipCode || "",
+              username: val.contact || "",
+              job: val.contactPosition || "",
+              phone: val.mobile || "",
+              QQ: val.qq || "",
+              Emile: val.email || "",
+              vip: val.vip == 0?false:true || false
+            },
+            detailForm: {
+              adress: val.addressDetail || "",
+              call: val.tel || "",
+              Fax: val.fax || "",
+              Website: val.webUrl || "",
+              data: val.businessHours || "",
+              categories: val.categoryId || "",
+              introduction: val.description || "",
+              logoimageUrl: val.logo || "",
+              bgimageUrl: val.banner || ""
+            },
+            financeForm: {
+              tax: val.taxNumber || "",
+              invoice: val.invoiceTitle || "",
+              Bank: val.taxBank || "",
+              bankAccount: val.taxBankNo || "",
+              mode: val.serviceFeeType || "",
+              Royalty: val.serviceFee || ""
+            },
+            signingForm: {
+              time: val.signedTime || "",
+              CODE: val.contractNo || "",
+              salesman: val.salemanId || "",
+              remarks: val.remark || ""
+            }
+          };
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     // 获取地区
     async geoList() {
       const query = {
@@ -411,7 +473,6 @@ export default {
     async getShoptypes() {
       try {
         const ret = await api.getShoptypes();
-        console.log(ret);
         if (ret.data.code == 200) {
           this.classList = ret.data.data;
         }
@@ -426,7 +487,6 @@ export default {
       };
       try {
         const ret = await api.getCategoriesList(query);
-        console.log(ret);
         if (ret.data.code == 200) {
           this.categoriesList = ret.data.data;
         }
@@ -441,7 +501,6 @@ export default {
       };
       try {
         const ret = await api.getFeeTypes(query);
-        console.log(ret);
         if (ret.data.code == 200) {
           this.feeTypesList = ret.data.data;
         }
@@ -462,9 +521,49 @@ export default {
     },
     // setShop
     async setShop(data) {
+      let basic = this.formAddStore.basicForm;
+      let detail = this.formAddStore.detailForm;
+      let finance = this.formAddStore.financeForm;
+      let signing = this.formAddStore.signingForm;
+
+      let _data = {
+        ...data,
+        shopName: basic.brandname || "",
+        type: basic.class || "",
+        regions: basic.city || [],
+        zipCode: basic.zipcode || "",
+        contact: basic.username || "",
+        contactPosition: basic.job || "",
+        mobile: basic.phone || "",
+        qq: basic.QQ || "",
+        email: basic.Emile || "",
+        vip: basic.vip ? 0 : 1,
+
+        addressDetail: detail.adress || "",
+        tel: detail.call || "",
+        fax: detail.Fax || "",
+        webUrl: detail.Website || "",
+        businessHours: detail.data || "",
+        categoryId: detail.categories || "",
+        description: detail.introduction || "",
+        logo: detail.logoimageUrl || "",
+        banner: detail.bgimageUrl || "",
+
+        taxNumber: finance.tax || "",
+        invoiceTitle: finance.invoice || "",
+        taxBank: finance.Bank || "",
+        taxBankNo: finance.bankAccount || "",
+        serviceFeeType: finance.mode || "",
+        serviceFee: finance.Royalty || "",
+
+        signedTime: signing.time || "",
+        contractNo: signing.CODE || "",
+        salemanId: signing.salesman || "",
+        remark: signing.remarks || ""
+      };
       try {
-        const ret = await api.setShop(data);
-        console.log(ret)
+        const ret = await api.setShop(_data);
+        console.log(ret,'xinzeng')
         if (ret.data.code == 200) {
           console.log("新增成功");
           this.showSubmmit = true;
@@ -495,7 +594,7 @@ export default {
     },
     // 返回列表
     goStore() {
-       this.formAddStore = {
+      this.formAddStore = {
         basicForm: {
           brandname: "",
           class: "",
@@ -506,7 +605,7 @@ export default {
           phone: "",
           QQ: "",
           Emile: "",
-          vip: false,
+          vip: false
         },
         detailForm: {
           adress: "",
@@ -514,7 +613,7 @@ export default {
           Fax: "",
           Website: "",
           data: "",
-          type: "",
+          categories: "",
           introduction: "",
           logoimageUrl: "",
           bgimageUrl: ""
@@ -542,47 +641,16 @@ export default {
       this.showSubmmit = false;
     },
     onSubmit() {
-      console.log(this.formAddStore);
-      let basic = this.formAddStore.basicForm;
-      let detail = this.formAddStore.detailForm;
-      let finance = this.formAddStore.financeForm;
-      let signing = this.formAddStore.signingForm;
-      
-      let data = {
-        shopName: basic.brandname || "",
-        type: basic.class || "",
-        regions: basic.city || [],
-        zipCode: basic.zipcode || "",
-        contact: basic.username || "",
-        contactPosition: basic.job || "",
-        mobile: basic.phone || "",
-        qq: basic.QQ || "",
-        email: basic.Emile || "",
-        vip: basic.vip? 0: 1,
-
-        addressDetail: detail.adress || "",
-        tel: detail.call || "",
-        fax: detail.Fax || "",
-        webUrl: detail.Website || "",
-        businessHours: detail.data || "",
-        categoryId: detail.categories || "",
-        description: detail.introduction || "",
-        logo: detail.logoimageUrl || "",
-        banner: detail.bgimageUrl || "",
-
-        taxNumber: finance.tax || "",
-        invoiceTitle: finance.invoice || "",
-        taxBank: finance.Bank || "",
-        taxBankNo: finance.bankAccount || "",
-        serviceFeeType: finance.mode || "",
-        serviceFee: finance.Royalty || "",
-
-        signedTime: signing.time || "",
-        contractNo: signing.CODE || "",
-        salemanId: signing.salesman || "",
-        remark: signing.remarks || "",
-      };
-      this.setShop(data);
+      if(this.$route.params.id) {
+        let data = {
+          id: this.$route.params.id
+        }
+        this.setShop(data);
+      } else {
+        console.log('11')
+        let data = {};
+        this.setShop(data);
+      }
     },
     onResetting() {
       this.formAddStore = {
@@ -596,7 +664,7 @@ export default {
           phone: "",
           QQ: "",
           Emile: "",
-          vip: false,
+          vip: false
         },
         detailForm: {
           adress: "",
@@ -604,7 +672,7 @@ export default {
           Fax: "",
           Website: "",
           data: "",
-          type: "",
+          categories: "",
           introduction: "",
           logoimageUrl: "",
           bgimageUrl: ""

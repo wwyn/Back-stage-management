@@ -377,6 +377,14 @@ export function getShopList(query) {
     params:  query
   });
 }
+// 商家信息
+export function getShopById(query) {
+  return request({
+    url: "sfy-mall-v2/m/shop/getById/",
+    method: "get",
+    params:  query
+  });
+}
 // 删除商户
 export function shopDel(query) {
   return request({
