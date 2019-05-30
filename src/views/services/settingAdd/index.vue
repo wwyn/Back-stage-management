@@ -7,34 +7,34 @@
       <p>添加分类</p>
       <div>
         <el-form
-          :model="ruleForm"
+          :model="categoryForm"
           :rules="rules"
-          ref="ruleForm"
+          ref="categoryForm"
           label-width="100px"
-          class="demo-ruleForm"
+          class="demo-categoryForm"
         >
           <el-form-item label="分类名称" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+            <el-input v-model="categoryForm.name"></el-input>
           </el-form-item>
           <el-form-item label="上级分类" prop="superior">
-            <el-select v-model="ruleForm.superior" placeholder="不选择分类默认为顶级分类">
-              <el-option label="一级" value="一级"></el-option>
+            <el-select v-model="categoryForm.superior" placeholder="不选择分类默认为顶级分类">
+              <el-option label="一级" value="1"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="排序" prop="sort">
-            <el-input v-model="ruleForm.sort"></el-input>
+            <el-input v-model="categoryForm.sort"></el-input>
           </el-form-item>
           <el-form-item label="是否显示" prop="show">
-            <el-radio-group v-model="ruleForm.show">
-              <el-radio label="是"></el-radio>
-              <el-radio label="否"></el-radio>
+            <el-radio-group v-model="categoryForm.show">
+              <el-radio label="1">是</el-radio>
+              <el-radio label="0">否</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="活动形式" prop="desc">
-            <el-input type="textarea" v-model="ruleForm.desc"></el-input>
+          <el-form-item label="分类描述" prop="desc">
+            <el-input type="textarea" v-model="categoryForm.desc"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
+            <el-button type="primary" @click="submitForm('categoryForm')">提交</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -42,10 +42,12 @@
   </div>
 </template>
 <script>
+import * as api from "@/api";
+
 export default {
   data() {
     return {
-      ruleForm: {
+      categoryForm: {
         name: "",
         superior: "",
         sort: "",
@@ -54,17 +56,58 @@ export default {
       },
       rules: {
         name: [
-          { required: true, message: "请输入活动名称", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+          { required: true, message: "请输入分类名称", trigger: "blur" },
+          { min: 1, max: 10, message: "长度在 1 到 10 个字符", trigger: "blur" }
         ]
       }
     };
   },
+  mounted() {
+    console.log(this.$route.params.options);
+    if (this.$route.params.options) {
+      this.categoryForm = {
+        name: this.$route.params.options.categoryName || "",
+        superior: "1",
+        sort: this.$route.params.options.sortBy || "",
+        show: this.$route.params.options.activate.toString(),
+        desc: this.$route.params.options.description || ""
+      };
+    }
+  },
   methods: {
+    // 增删改分类
+    async addProductCategory(query) {
+      const data = {
+        ...query,
+        categoryName: this.categoryForm.name || "",
+        pid: 0,
+        shopId: 5,
+        description: this.categoryForm.desc || "",
+        sortBy: this.categoryForm.sort || "",
+        activate: this.categoryForm.show || ""
+      };
+      try {
+        const ret = await api.addProductCategory(data);
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.$router.push({
+            name: "servicesSetting"
+          });
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     submitForm() {
-        this.$router.push({
-            name:'servicesSetting'
-        })
+      if (this.$route.params.options) {
+        let query = {
+          id: this.$route.params.options.id
+        };
+        this.addProductCategory(query);
+      } else {
+        let query = {};
+        this.addProductCategory(query);
+      }
     }
   }
 };
@@ -99,7 +142,7 @@ export default {
       border-bottom: 1px solid #999;
     }
     > div {
-        text-align: center;
+      text-align: center;
       .el-form {
         display: inline-block;
         margin: 50px auto;
@@ -112,8 +155,8 @@ export default {
         /deep/ .el-textarea__inner {
           width: 300px;
         }
-         /deep/ .el-button--primary {
-            background-color: @color;
+        /deep/ .el-button--primary {
+          background-color: @color;
         }
       }
     }

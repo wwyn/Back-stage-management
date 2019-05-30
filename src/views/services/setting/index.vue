@@ -13,22 +13,22 @@
       element-loading-text="拼命加载中"
       element-loading-spinner="el-icon-loading"
       element-loading-background="#fff"
-      :data="tableData"
+      :data="categorytableData"
       border
       style="width: 100%"
     >
-      <el-table-column type="index" label="编号" width="180" align="center">
-        <el-input></el-input>
+      <el-table-column type="index" label="编号" width="180" align="center"></el-table-column>
+      <el-table-column prop="categoryName" label="分类名称" width="180" align="center"></el-table-column>
+      <el-table-column label="级别" width="180" align="center">1</el-table-column>
+      <el-table-column prop="activate" label="是否显示" width="180" align="center">
+        <template slot-scope="scope">
+          <p>{{ scope.row.activate==0?'否':'是' }}</p>
+        </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="分类名称" width="180" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="级别" width="180" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="是否显示" width="180" align="center"></el-table-column>
-      <el-table-column prop="createTime" label="排序" width="150" align="center">
-        <el-input></el-input>
-      </el-table-column>
+      <el-table-column prop="sortBy" label="排序" width="150" align="center"></el-table-column>
       <el-table-column fixed="right" label="操作" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="small">编辑</el-button>
+          <el-button type="text" size="small" @click="handleEdittable(scope.row)">编辑</el-button>
           <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -36,21 +36,47 @@
   </div>
 </template>
 <script>
+import * as api from "@/api";
 export default {
   data() {
     return {
       loading: true,
-      tableData: []
+      categorytableData: []
     };
   },
   mounted() {
     this.loading = false;
+    this.categoryList();
   },
   methods: {
+    // 获取分类列表
+    async categoryList() {
+      const query = {
+        pid: 0,
+        shopId: 5,
+        depth: 1,
+        activate: 2
+      };
+      try {
+        const ret = await api.categoryList(query);
+        console.log(ret);
+        if (ret.data.code == 200) {
+          this.categorytableData = ret.data.data.categories;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    handleEdittable(options) {
+      this.$router.push({
+        name: "servicesSettingAdd",
+        params: { options }
+      });
+    },
     handlerAddsort() {
       this.$router.push({
-        name:'servicesSettingAdd'
-      })
+        name: "servicesSettingAdd"
+      });
     }
   }
 };
