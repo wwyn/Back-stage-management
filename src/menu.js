@@ -69,6 +69,8 @@ export default {
                 { name: "App配置", link: "servicesDispose", opened: 'o2o服务管理' },
                 { name: "商家管理", link: "servicesStore", opened: 'o2o服务管理' },
                 { name: "账户管理", link: "servicesAccount", opened: 'o2o服务管理' },
+                { name: "商家审核", link: "servicesExaminestore", opened: 'o2o服务管理' },
+                { name: "商品审核", link: "servicesExaminegoods", opened: 'o2o服务管理' },
             ],
          src: 'icon-xitongshouye-' },
          { name: "商家系统",
@@ -86,5 +88,11 @@ export default {
              { name: "服务券码订单管理", link: "servicesOrderCoupon", opened: '订单系统' },
          ],
       src: 'icon-xitongshouye-' },
+      { name: "财务管理",
+      children: [
+          { name: "综合统计", link: "servicesFinanceStatis", opened: '财务管理' },
+          { name: "账单管理", link: "servicesFinanceBill", opened: '财务管理' },
+      ],
+   src: 'icon-xitongshouye-' },
     ]
 };

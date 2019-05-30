@@ -3,15 +3,28 @@
     <div class="title">
       <span></span>配送商家订单管理
     </div>
+    <div class="storetype">
+      <div
+        v-for="(item,index) in storetype"
+        :key="index"
+        :class="{active:count===index}"
+        @click="hendleType(index)"
+      >{{ item.name }}({{item.number}})</div>
+    </div>
     <el-form :inline="true" :model="storeForm" class="demo-form-inline">
       <el-form-item label="输入搜索">
         <el-input v-model="storeForm.code" placeholder="订单编号/商品货号"></el-input>
       </el-form-item>
       <el-form-item label="收货人">
-       <el-input v-model="storeForm.user" placeholder="用户名/手机号"></el-input>
+        <el-input v-model="storeForm.user" placeholder="用户名/手机号"></el-input>
       </el-form-item>
       <el-form-item label="提交时间">
-        <el-date-picker type="date" placeholder="选择日期" v-model="storeForm.data" style="width: 100%;"></el-date-picker>
+        <el-date-picker
+          type="date"
+          placeholder="选择日期"
+          v-model="storeForm.data"
+          style="width: 100%;"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleSearch">查询</el-button>
@@ -33,19 +46,20 @@
       border
       style="width: 100%"
     >
-      <el-table-column type="selection" width="55" align="center"></el-table-column>
-      <el-table-column type="index" label="订单编号" width="154" ></el-table-column>
-      <el-table-column label="创建时间" width="156">
+      <el-table-column type="selection" width="50" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="订单编号" width="140" align="center"></el-table-column>
+      <el-table-column label="提交时间" width="140" align="center">
         <template slot-scope="scope">
           <p>{{parseTime(scope.row.createTime || '')}}</p>
         </template>
       </el-table-column>
-       <el-table-column prop="brandName" label="用户账号" width="136"></el-table-column>
-      <el-table-column prop="brandName" label="订单金额" width="110"></el-table-column>
-      <el-table-column prop="brandName" label="支付方式" width="130"></el-table-column>
-      <el-table-column prop="brandName" label="订单来源" width="130"></el-table-column>
-      <el-table-column prop="upSelling" label="订单状态" width="90"></el-table-column>
-      <el-table-column label="操作" width="148">
+      <el-table-column prop="brandName" label="用户账号" width="140" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="订单金额" width="100" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="支付方式" width="100" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="支付状态" width="100" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="订单来源" width="100" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="订单状态" width="100" align="center"></el-table-column>
+      <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleLooktable(scope.row)">查看订单</el-button>
         </template>
@@ -67,10 +81,20 @@ import pagination from "@/components/pagination";
 export default {
   data() {
     return {
+      storetype: [
+        { name: "全部订单", number: 10000 },
+        { name: "待付款", number: 10000 },
+        { name: "待确认", number: 10000 },
+        { name: "待配送", number: 10000 },
+        { name: "配送中", number: 10000 },
+        { name: "已完成", number: 10000 },
+        { name: "已取消", number: 10000 }
+      ],
+      count: 0,
       storeForm: {
         code: "",
         user: "",
-        data:''
+        data: ""
       },
       tableData: [],
       pageSize: 10,
@@ -130,18 +154,10 @@ export default {
         console.log(e.message);
       }
     },
-    // 单个设置商品
-    async setPart(query) {
-      try {
-        const ret = await api.setPart(query);
-        if (ret.data.code == 200) {
-          this.productList({ currentPage: this.currentPage });
-        }
-      } catch (e) {
-        console.log(e.message);
-      }
+
+    hendleType(index) {
+      this.count = index;
     },
-   
     // 搜索
     handleSearch(data) {
       const query = {
@@ -154,7 +170,7 @@ export default {
       this.storeForm = {
         city: "",
         user: "",
-        class:''
+        class: ""
       };
     },
     handleCurrentChange(val) {
@@ -162,17 +178,11 @@ export default {
       this.productList({ currentPage: val });
     },
     // 批量删除
-    handleBatchDel() {
-
-    },
+    handleBatchDel() {},
     // 批量关闭
-    handleBatchLower() {
-
-    },
+    handleBatchLower() {},
     // 查看订单
-    handleLooktable() {
-
-    }
+    handleLooktable() {}
   }
 };
 </script>
@@ -194,6 +204,24 @@ export default {
       background: @color;
       margin-right: 8px;
       vertical-align: sub;
+    }
+  }
+  .storetype {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border-bottom: 1px solid #f1f1f1;
+    margin-bottom: 20px;
+    > div {
+      border: 1px solid #999;
+      margin: 10px 10px 20px 0;
+      padding: 6px 10px;
+      border-radius: 2px;
+    }
+    .active {
+      background-color: @color;
+      color: #fff;
+      border: 1px solid @color;
     }
   }
   .shop-tools {
@@ -223,7 +251,7 @@ export default {
         height: 34px;
         line-height: 34px;
         background-color: #f1f1f1;
-        margin-left: 10px;
+        margin-right: 10px;
       }
     }
   }
@@ -274,7 +302,6 @@ export default {
   border: none;
 }
 /deep/ .el-table .cell {
-  padding: 0 20px 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

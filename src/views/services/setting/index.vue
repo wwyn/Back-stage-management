@@ -29,20 +29,34 @@
       <el-table-column fixed="right" label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleEdittable(scope.row)">编辑</el-button>
-          <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button>
+          <!-- <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
+    <pagination
+      :page-size="pageSize"
+      :current-page="currentPage"
+      :total="total"
+      @handleCurrentChange="handleCurrentChange"
+    ></pagination>
   </div>
 </template>
 <script>
 import * as api from "@/api";
+import pagination from "@/components/pagination";
+
 export default {
   data() {
     return {
       loading: true,
-      categorytableData: []
+      categorytableData: [],
+      total: 0,
+      pageSize: 10,
+      currentPage: 1
     };
+  },
+  components: {
+    pagination
   },
   mounted() {
     this.loading = false;
@@ -62,11 +76,30 @@ export default {
         console.log(ret);
         if (ret.data.code == 200) {
           this.categorytableData = ret.data.data.categories;
+          this.total = ret.data.data.categories.length;
         }
       } catch (e) {
         console.log(e.message);
       }
     },
+    // 删除分类
+    async categoryListDel(query) {
+      try {
+        const ret = await api.categoryListDel(query);
+        console.log(ret, "del");
+        if (ret.data.code == 200) {
+          this.categoryList();
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // handleDeltable(options) {
+    //   const query = {
+    //     id: options.id
+    //   };
+    //   this.categoryListDel(query);
+    // },
     handleEdittable(options) {
       this.$router.push({
         name: "servicesSettingAdd",
@@ -77,6 +110,9 @@ export default {
       this.$router.push({
         name: "servicesSettingAdd"
       });
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
     }
   }
 };

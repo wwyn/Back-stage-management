@@ -28,6 +28,7 @@
       </div>
       <div class="shop-batch">
         <p @click="handleBatchLower">批量下架</p>
+        <p @click="handleBatchUp">批量上架</p>
         <p @click="handleBatchDel">批量删除</p>
       </div>
     </div>
@@ -42,7 +43,7 @@
     >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
       <el-table-column type="index" label="编号" width="54" align="center"></el-table-column>
-      <el-table-column label="品牌商标" width="106">
+      <el-table-column label="商品图片" width="106" align="center">
         <template slot-scope="scope">
           <img class="brandImg" :src="scope.row.logo" alt>
         </template>
@@ -61,9 +62,10 @@
       <el-table-column fixed="right" label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small">查看</el-button>
-          <el-button type="text" size="small">编辑</el-button>
-          <el-button type="text" size="small" @click="handleRevisetable(scope.row)">上架</el-button>
-          <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button>
+          <el-button type="text" size="small" @click="handleEditBtn(scope.row)">编辑</el-button>
+          <el-button type="text" size="small" @click="handleupSelling(scope.row)">上架</el-button>
+          <el-button type="text" size="small" @click="handledownSelling(scope.row)">下架</el-button>
+          <el-button @click="handleDelBtn(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -204,10 +206,6 @@ export default {
         console.log(e.message);
       }
     },
-    // 单个删除
-    handleDeltable(options) {
-      this.brandDel({ id: options.id });
-    },
     // 搜索
     handleSearch(data) {
       const query = {
@@ -227,6 +225,10 @@ export default {
         maxNumber: ""
       };
     },
+     // 单个删除
+    handleDelBtn(options) {
+      this.brandDel({ id: options.id });
+    },
     // 批量删除
     handleBatchDel() {
       const query = {
@@ -235,19 +237,7 @@ export default {
       };
       this.batchPart(query);
     },
-    // 批量下架
-    handleBatchLower() {
-      const query = {
-        productIds: this.productIdList,
-        upSelling: "0"
-      };
-      this.batchPart(query);
-    },
-    handleCurrentChange(val) {
-      this.currentPage = val;
-      this.productList({ currentPage: val });
-    },
-    // 单个下架
+     // 单个上架
     handleupSelling(type) {
       let query = {
         productId: type.id,
@@ -255,16 +245,27 @@ export default {
       };
       this.setPart(query);
     },
-    // 单个删除
-    handleDel(content) {
-      let query = {
-        productId: content.id,
-        hide: "1"
-      };
-      this.setPart(query);
+    
+    // 批量上架
+    handleBatchUp() {
+
     },
+    // 单个下架
+    handledownSelling() {
+
+    },
+    // 批量下架
+    handleBatchLower() {
+
+    },
+
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.productList({ currentPage: val });
+    },
+   
     // 编辑
-    handleEditor(options) {
+    handleEditBtn(options) {
       this.$router.push({
         name: `eCommerceCommodity`,
         params: {
@@ -276,12 +277,6 @@ export default {
     handlerAddsort() {
       this.$router.push({
         name: "servicesDeliveryCommoditysort"
-      });
-    },
-    // 修改
-    handleRevisetable(options) {
-      this.$router.push({
-        name: "servicesAddaccount"
       });
     },
     // 审核详情

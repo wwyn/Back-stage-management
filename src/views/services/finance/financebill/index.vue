@@ -1,30 +1,31 @@
 <template>
-  <div class="list">
+  <div class="finan-bill">
     <div class="title">
-      <span></span>服务券码订单管理
+      <span></span>账单管理
     </div>
-    <div class="storetype">
-      <div
-        v-for="(item,index) in storetype"
-        :key="index"
-        :class="{active:count===index}"
-        @click="hendleType(index)"
-      >{{ item.name }}({{item.number}})</div>
-    </div>
-    <el-form :inline="true" :model="storeForm" class="demo-form-inline">
-      <el-form-item label="输入搜索">
-        <el-input v-model="storeForm.user" placeholder="订单编号/商品货号"></el-input>
+    <el-form :inline="true" :model="billForm" class="demo-form-inline">
+      <el-form-item label="订单编号">
+        <el-input v-model="billForm.code" placeholder="订单编号"></el-input>
       </el-form-item>
-      <el-form-item label="用户">
-        <el-input v-model="storeForm.code" placeholder="订单编号/商品货号"></el-input>
+      <el-form-item label="金额范围">
+        <el-select v-model="billForm.money" placeholder="请选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
       </el-form-item>
-       <el-form-item label="提交时间">
-        <el-date-picker
-          type="date"
-          placeholder="选择日期"
-          v-model="storeForm.data"
-          style="width: 100%;"
-        ></el-date-picker>
+      <el-form-item label="对账状态">
+        <el-select v-model="billForm.status" placeholder="请选择">
+          <el-option
+            v-for="item in statusList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleSearch">查询</el-button>
@@ -33,8 +34,7 @@
     </el-form>
     <div class="shop-tools">
       <div class="shop-batch">
-        <p @click="handleBatchLower">批量关闭</p>
-        <p @click="handleBatchDel">批量删除</p>
+        <p @click="handleBillCheck">批量对账</p>
       </div>
     </div>
     <el-table
@@ -48,17 +48,20 @@
     >
       <el-table-column type="selection" width="50" align="center"></el-table-column>
       <el-table-column prop="brandName" label="订单编号" width="140" align="center"></el-table-column>
-      <el-table-column label="提交时间" width="140" align="center">
+      <el-table-column prop="brandName" label="订单金额" width="120" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="支付方式" width="120" align="center"></el-table-column>
+      <el-table-column label="支付时间" width="140" align="center">
         <template slot-scope="scope">
           <p>{{parseTime(scope.row.createTime || '')}}</p>
         </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="用户账号" width="140" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="订单金额" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="支付方式" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="支付状态" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="订单来源" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="订单状态" width="100" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="对账人员" width="120" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="对账时间" width="140" align="center">
+        <template slot-scope="scope">
+          <p>{{parseTime(scope.row.createTime || '')}}</p>
+        </template>
+      </el-table-column>
+      <el-table-column prop="brandName" label="状态" width="100" align="center"></el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleLooktable(scope.row)">查看订单</el-button>
@@ -81,21 +84,39 @@ import pagination from "@/components/pagination";
 export default {
   data() {
     return {
-      storetype: [
-        { name: "全部商品", number: 10000 },
-        { name: "待付款", number: 10000 },
-        { name: "已消费", number: 10000 },
-        { name: "已完成", number: 10000 },
-        { name: "已取消", number: 10000 },
-        { name: "已退款", number: 10000 }
-      ],
-      count: 0,
-
-      storeForm: {
+      billForm: {
         caode: "",
-        user: "",
-        data: ""
+        money: "",
+        status: ""
       },
+      options: [
+        {
+          value: "1",
+          label: "1-100"
+        },
+        {
+          value: "2",
+          label: "100-500"
+        }
+      ],
+      statusList: [
+        {
+          value: "1",
+          label: "已对账"
+        },
+        {
+          value: "2",
+          label: "异常"
+        },
+        {
+          value: "3",
+          label: "已冲正"
+        },
+        {
+          value: "4",
+          label: "未对账"
+        }
+      ],
       tableData: [],
       pageSize: 10,
       currentPage: 1,
@@ -130,13 +151,13 @@ export default {
     async productList(params) {
       const query = {
         ...params,
-        shopName: this.storeForm.title || "",
-        productId: this.storeForm.ID || "",
-        productName: this.storeForm.name || "",
-        minPrice: this.storeForm.minMoney || "",
-        maxPrice: this.storeForm.maxMoney || "",
-        minSaleCount: this.storeForm.minNumber || "",
-        maxSaleCount: this.storeForm.maxNumber || "",
+        shopName: this.billForm.title || "",
+        productId: this.billForm.ID || "",
+        productName: this.billForm.name || "",
+        minPrice: this.billForm.minMoney || "",
+        maxPrice: this.billForm.maxMoney || "",
+        minSaleCount: this.billForm.minNumber || "",
+        maxSaleCount: this.billForm.maxNumber || "",
         upSelling: "1",
         pageSize: 10
       };
@@ -155,10 +176,6 @@ export default {
       }
     },
 
-    hendleType(index) {
-      this.count = index;
-    },
-
     // 搜索
     handleSearch(data) {
       const query = {
@@ -168,24 +185,15 @@ export default {
     },
     // 重置
     resetForm() {
-      this.storeForm = {
+      this.billForm = {
         city: "",
         user: "",
         class: ""
       };
     },
-    // 批量关闭订单
-    handleBatchLower() {
+    // 批量对账
+    handleBillCheck() {},
 
-    },
-    // 批量删除
-    handleBatchDel() {
-      const query = {
-        productIds: this.productIdList,
-        hide: "1"
-      };
-      this.batchPart(query);
-    },
     handleCurrentChange(val) {
       this.currentPage = val;
       this.productList({ currentPage: val });
@@ -198,13 +206,13 @@ export default {
           id: options.id
         }
       });
-    },
+    }
   }
 };
 </script>
 <style lang="less" scoped>
 @color: #1260fb;
-.list {
+.finan-bill {
   font-size: 14px;
   position: relative;
   .title {
@@ -220,24 +228,6 @@ export default {
       background: @color;
       margin-right: 8px;
       vertical-align: sub;
-    }
-  }
-  .storetype {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    border-bottom: 1px solid #f1f1f1;
-    margin-bottom: 20px;
-    > div {
-      border: 1px solid #999;
-      margin: 10px 10px 20px 0;
-      padding: 6px 10px;
-      border-radius: 2px;
-    }
-    .active {
-      background-color: @color;
-      color: #fff;
-      border: 1px solid @color;
     }
   }
   .shop-tools {
@@ -274,10 +264,10 @@ export default {
   .el-input {
     width: 220px;
     height: 40px;
-    margin-right: 20px;
+    margin-right: 16px;
   }
   .el-date-editor {
-     width: 220px !important;
+    width: 220px !important;
     height: 40px;
     margin-right: 20px;
   }

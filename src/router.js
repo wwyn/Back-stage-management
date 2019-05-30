@@ -155,6 +155,16 @@ export default new Router({
                     },
                 },
                 {
+                    path: "/services-examinestore",
+                    name: "servicesExaminestore",
+                    component: () => import("./views/services/examinestore"),
+                 },
+                 {
+                    path: "/services-examinegoods",
+                    name: "servicesExaminegoods",
+                    component: () => import("./views/services/examinesgoods"),
+                 },
+                {
                     path: "/services-storehome",
                     name: "servicesStoreHome",
                     component: () => import("./views/services/storehome"),
@@ -212,6 +222,16 @@ export default new Router({
                     path: "/services-ordercoupon",
                     name: "servicesOrderCoupon",
                     component: () => import("./views/services/ordersystem/ordercoupon"),
+                 },
+                 {
+                    path: "/services-financestatis",
+                    name: "servicesFinanceStatis",
+                    component: () => import("./views/services/finance/financestatis"),
+                 },
+                 {
+                    path: "/services-financebill",
+                    name: "servicesFinanceBill",
+                    component: () => import("./views/services/finance/financebill"),
                  },
             ]
         }
