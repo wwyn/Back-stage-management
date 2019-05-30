@@ -152,8 +152,7 @@ export default {
       try {
         const ret = await api.setSpecValue(query);
         if (ret.data.code == 200) {
-          console.log("设置规格成功");
-
+          console.log(ret,"设置规格成功");
           this.showAddnorms = false;
           this.formAddnorms = {
             name: ""
@@ -186,27 +185,35 @@ export default {
         const ret = await api.getSpecsByShopId(query);
         console.log(ret, "获取规格列表");
         if (ret.data.code == 200 && ret.data.data) {
-          this.tableData = ret.data.data;
+          // this.tableData = ret.data.data;
+          console.log(this.tableData,'tableData11')
           const max = Math.max(
-            ...this.tableData.map(item => item.values.length)
+            ...ret.data.data.map(item => item.values.length)
           );
+          console.log(max,'max')
           // 构建table数据
-          this.columns = [{ label: "规格名称", prop: "specName" }];
+          const souceData = [{ label: "规格名称", prop: "specName" }];
           for (let i = 1; i <= max; i++) {
-            this.columns.push({ label: `规格值${i}`, prop: `value${i}` });
-          }          
-          this.tableData.forEach(item => {
+            souceData.push({ label: `规格值${i}`, prop: `value${i}` });
+          }   
+          console.log(souceData,'souceData')  
+          this.columns = souceData;
+          console.log(this.columns,'columns') 
+          const tableData = [];
+          ret.data.data.forEach(item => {
             const values = item.values.reduce(
               (obj, child, i) =>
                 Object.assign(obj, { [`value${i + 1}`]: child.value }),
               {}
             );
-            this.tableData.push({
+            tableData.push({
               specName: item.spec,
               id: item.id,
               ...values
             });
           });
+          this.tableData = tableData;
+          console.log(this.tableData,'this.tableData')
         } else {
           this.tableData = [];
         }
