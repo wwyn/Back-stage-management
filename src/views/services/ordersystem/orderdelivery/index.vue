@@ -182,7 +182,11 @@ export default {
     // 批量关闭
     handleBatchLower() {},
     // 查看订单
-    handleLooktable() {}
+    handleLooktable() {
+      this.$router.push({
+        name: `servicesOrderDeliveryDetail`
+      });
+    }
   }
 };
 </script>

@@ -92,3 +92,17 @@ table {
     background-color: #1260FB;
     border-color: #1260FB;
 }
+.el-step__description.is-finish {
+    color: #1260FB;
+}
+.el-step__title.is-finish {
+    color: #1260FB;
+}
+.el-step__head.is-finish {
+    color: #1260FB;
+    border-color: #1260FB;
+}
+.el-button--primary {
+    background-color: #1260FB;
+    border-color: #1260FB; 
+}

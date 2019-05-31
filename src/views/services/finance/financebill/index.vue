@@ -201,7 +201,7 @@ export default {
     // 查看订单
     handleLooktable(options) {
       this.$router.push({
-        name: `servicesStoreAdd`,
+        name: `servicesFinanceDetail`,
         params: {
           id: options.id
         }

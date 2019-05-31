@@ -219,6 +219,22 @@ export default new Router({
                     component: () => import("./views/services/ordersystem/orderdelivery"),
                  },
                  {
+                    path: "/services-orderdeliverydetail",
+                    name: "servicesOrderDeliveryDetail",
+                    component: () => import("./views/services/ordersystem/orderdeliverydetail"),
+                    meta: {
+                        menu: 'servicesOrderDelivery',
+                    },
+                 },
+                 {
+                    path: "/services-orderdeliverytrack",
+                    name: "servicesOrderDeliveryTrack",
+                    component: () => import("./views/services/ordersystem/orderdeliverytrack"),
+                    meta: {
+                        menu: 'servicesOrderDelivery',
+                    },
+                 },
+                 {
                     path: "/services-ordercoupon",
                     name: "servicesOrderCoupon",
                     component: () => import("./views/services/ordersystem/ordercoupon"),
@@ -232,6 +248,14 @@ export default new Router({
                     path: "/services-financebill",
                     name: "servicesFinanceBill",
                     component: () => import("./views/services/finance/financebill"),
+                 },
+                 {
+                    path: "/services-financedetail",
+                    name: "servicesFinanceDetail",
+                    component: () => import("./views/services/finance/financedetail"),
+                    meta: {
+                        menu: 'servicesFinanceBill',
+                    },
                  },
             ]
         }
