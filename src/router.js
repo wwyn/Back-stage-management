@@ -240,6 +240,14 @@ export default new Router({
                     component: () => import("./views/services/ordersystem/ordercoupon"),
                  },
                  {
+                    path: "/services-ordercoupondetail",
+                    name: "servicesOrderCouponDetail",
+                    component: () => import("./views/services/ordersystem/ordercoupondetail"),
+                    meta: {
+                        menu: 'servicesOrderCoupon',
+                    },
+                 },
+                 {
                     path: "/services-financestatis",
                     name: "servicesFinanceStatis",
                     component: () => import("./views/services/finance/financestatis"),

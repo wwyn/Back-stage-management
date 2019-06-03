@@ -193,7 +193,7 @@ export default {
     // 查看订单
     handleLooktable(options) {
       this.$router.push({
-        name: `servicesStoreAdd`,
+        name: `servicesOrderCouponDetail`,
         params: {
           id: options.id
         }

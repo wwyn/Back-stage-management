@@ -13,13 +13,21 @@
     </div>
     <el-form :inline="true" :model="formInline" class="demo-form-inline">
       <el-form-item label="输入搜索">
-        <el-input v-model="formInline.user" placeholder="用户名/姓名"></el-input>
+        <el-input v-model="formInline.user" placeholder="商品名称/商品货号"></el-input>
       </el-form-item>
-      <el-form-item label="所属商家">
-        <el-input v-model="formInline.business" placeholder="全部"></el-input>
+      <el-form-item label="商品分类">
+        <el-select v-model="formInline.business" placeholder="全部">
+          <el-option
+            v-for="item in businessList"
+            :key="item.id"
+            :label="item.categoryName"
+            :value="item.id"
+          ></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleSearch">查询结果</el-button>
+        <el-button @click="handleReset">重置</el-button>
       </el-form-item>
     </el-form>
     <div class="shop-tools">
@@ -27,6 +35,7 @@
         <p class="add" @click="handlerAddsort">添加</p>
       </div>
       <div class="shop-batch">
+        <p @click="handleBatchUp">批量上架</p>
         <p @click="handleBatchLower">批量下架</p>
         <p @click="handleBatchDel">批量删除</p>
       </div>
@@ -36,23 +45,23 @@
       element-loading-text="拼命加载中"
       element-loading-spinner="el-icon-loading"
       element-loading-background="#fff"
-      :data="tableData"
+      :data="tableServerData"
       border
+      @selection-change="handleSelectionChange"
       style="width: 100%"
     >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
-      <el-table-column type="index" label="编号" width="54" align="center"></el-table-column>
-      <el-table-column label="品牌商标" width="106">
+      <el-table-column prop="brandName" label="编号" width="150" align="center"></el-table-column>
+      <el-table-column label="品牌商标" width="120" align="center">
         <template slot-scope="scope">
           <img class="brandImg" :src="scope.row.logo" alt>
         </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="商品名称" width="107" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="原价" width="116" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="现价" width="116" align="center"></el-table-column>
-      <el-table-column prop="券码" label="类别" width="90" align="center"></el-table-column>
-      <el-table-column prop="upSelling" label="是否禁用" width="90" align="center"></el-table-column>
-      <el-table-column prop="upSelling" label="审核状态" width="136" align="center">
+      <el-table-column prop="brandName" label="商品名称" width="180" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="原价" width="120" align="center"></el-table-column>
+      <el-table-column prop="brandName" label="现价" width="120" align="center"></el-table-column>
+      <el-table-column prop="券码" label="类别" width="100" align="center"></el-table-column>
+      <el-table-column prop="upSelling" label="审核状态" width="130" align="center">
         <template slot-scope="scope">
           <p>未通过</p>
           <el-button @click="handleDetail(scope.row)" type="text" size="small">审核详情</el-button>
@@ -61,8 +70,21 @@
       <el-table-column fixed="right" label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small">查看</el-button>
-          <el-button type="text" size="small">编辑</el-button>
-          <el-button type="text" size="small" @click="handleRevisetable(scope.row)">上架</el-button>
+          <el-button type="text" size="small" @click="handleEditor">编辑</el-button>
+          <el-button
+            type="text"
+            size="small"
+            style="margin-left:0px"
+            v-if="scope.row.upSelling==0"
+            @click="handleupSelling(scope.row)"
+          >上架</el-button>
+          <el-button
+            type="text"
+            size="small"
+            style="margin-left:0px"
+            v-if="scope.row.upSelling==1"
+            @click="handledownSelling(scope.row)"
+          >下架</el-button>
           <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -80,10 +102,14 @@
           <i class="iconfont icon-gongjutianjia" @click="hendleclose"></i>
         </div>
         <el-table :data="tableData" border style="width: 100%">
-          <el-table-column prop="date" label="审核时间" width="160" align="center"></el-table-column>
-          <el-table-column prop="name" label="审核人员" width="150" align="center"></el-table-column>
+          <el-table-column prop="createTime" label="审核时间" width="160" align="center">
+            <template slot-scope="scope">
+              <p>{{ parseTime(scope.row.createTime) }}</p>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createBy" label="审核人员" width="150" align="center"></el-table-column>
           <el-table-column prop="name" label="审核结果" width="120" align="center"></el-table-column>
-          <el-table-column prop="address" label="反馈" width="220" align="center"></el-table-column>
+          <el-table-column prop="content" label="反馈" width="220" align="center"></el-table-column>
         </el-table>
       </div>
     </div>
@@ -103,40 +129,20 @@ export default {
         { name: "未上架", number: 10000 },
         { name: "待审核", number: 10000 }
       ],
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        }
-      ],
+      tableData: [],
       count: 0,
       formInline: {
         business: "",
         user: ""
       },
-      tableData: [],
+      businessList: [],
+      tableServerData: [],
       pageSize: 10,
       currentPage: 1,
       total: 0,
       productIdList: [],
       loading: true,
-      showModal: false,
+      showModal: false
     };
   },
   components: {
@@ -145,12 +151,25 @@ export default {
   mounted: function() {
     let currentPage = this.currentPage;
     this.productList({ currentPage });
+    this.categoryList();
   },
   methods: {
     hendleType(index) {
       this.count = index;
     },
     parseTime,
+    // 商品分类列表
+    async categoryList() {
+      const query = {
+        pid: 1000
+      };
+      try {
+        const ret = await api.categoryList(query);
+        this.businessList = ret.data.data.categories;
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     // 批量设置商品列表
     async batchPart(data) {
       try {
@@ -164,28 +183,26 @@ export default {
         console.log(e.message);
       }
     },
-    // 列表
+    // 服务列表
     async productList(params) {
       const query = {
         ...params,
-        shopName: this.formInline.title || "",
-        productId: this.formInline.ID || "",
-        productName: this.formInline.name || "",
-        minPrice: this.formInline.minMoney || "",
-        maxPrice: this.formInline.maxMoney || "",
-        minSaleCount: this.formInline.minNumber || "",
-        maxSaleCount: this.formInline.maxNumber || "",
-        upSelling: "1",
-        pageSize: 10
+        upSelling: 2,
+        shopName: this.formInline.user || "",
+        bigCategoryId: this.formInline.business || "",
+        pageSize: 10,
+        virtual: 1
       };
       try {
         const ret = await api.productList(query);
+        console.log(ret, "服务列表");
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
-          this.tableData = ret.data.data.pageData;
+          this.tableServerData = ret.data.data.pageData;
           this.total = ret.data.data.totalCount;
         } else {
-          this.tableData = [];
+          this.loading = false;
+          this.tableServerData = [];
           this.total = 0;
         }
       } catch (e) {
@@ -196,6 +213,7 @@ export default {
     async setPart(query) {
       try {
         const ret = await api.setPart(query);
+        console.log(ret, "shezhishangpin");
         if (ret.data.code == 200) {
           this.productList({ currentPage: this.currentPage });
         }
@@ -203,9 +221,8 @@ export default {
         console.log(e.message);
       }
     },
-    // 单个删除
-    handleDeltable(options) {
-      this.brandDel({ id: options.id });
+    handleSelectionChange(val) {
+      this.productIdList = val;
     },
     // 搜索
     handleSearch(data) {
@@ -215,53 +232,80 @@ export default {
       this.productList(query);
     },
     // 重置
-    resetForm() {
+    handleReset() {
       this.formInline = {
-        title: "",
-        ID: "",
-        name: "",
-        minMoney: "",
-        maxMoney: "",
-        minNumber: "",
-        maxNumber: ""
+        business: "",
+        user: ""
       };
+      const query = {
+        currentPage: 1
+      };
+      this.productList(query);
+    },
+    // 单个删除
+    handleDeltable(content) {
+      let query = {
+        productId: content.id,
+        status: 0
+      };
+      this.setPart(query);
     },
     // 批量删除
     handleBatchDel() {
+      let ids = this.productIdList.map(item => {
+        return item.id;
+      });
       const query = {
-        productIds: this.productIdList,
-        hide: "1"
+        productIds: ids,
+        status: 0
       };
       this.batchPart(query);
     },
+    // 单个上架
+    handleupSelling(type) {
+      const query = {
+        productId: type.id,
+        upSelling: 1
+      };
+      this.setPart(query);
+    },
+    // 批量上架
+    handleBatchUp() {
+      let ids = this.productIdList.map(item => {
+        return item.id;
+      });
+      const query = {
+        productIds: ids,
+        upSelling: 1
+      };
+      this.batchPart(query);
+    },
+    // 单个下架
+    handledownSelling(type) {
+      const query = {
+        productId: type.id,
+        upSelling: 0
+      };
+      this.setPart(query);
+    },
+
     // 批量下架
     handleBatchLower() {
+      let ids = this.productIdList.map(item => {
+        return item.id;
+      });
       const query = {
-        productIds: this.productIdList,
-        upSelling: "0"
+        productIds: ids,
+        upSelling: 0
       };
       this.batchPart(query);
     },
+
     handleCurrentChange(val) {
       this.currentPage = val;
       this.productList({ currentPage: val });
     },
-    // 单个下架
-    handleupSelling(type) {
-      let query = {
-        productId: type.id,
-        upSelling: "0"
-      };
-      this.setPart(query);
-    },
-    // 单个删除
-    handleDel(content) {
-      let query = {
-        productId: content.id,
-        hide: "1"
-      };
-      this.setPart(query);
-    },
+
     // 编辑
     handleEditor(options) {
       this.$router.push({
@@ -277,19 +321,13 @@ export default {
         name: "servicesServiceCommoditysort"
       });
     },
-    // 修改
-    handleRevisetable(options) {
-      this.$router.push({
-        name: "servicesAddaccount"
-      });
-    },
     // 审核详情
     handleDetail(options) {
       let id = options.id;
       this.showModal = true;
     },
     hendleclose() {
-        this.showModal = false;
+      this.showModal = false;
     }
   }
 };
@@ -443,9 +481,9 @@ export default {
   border: none;
 }
 /deep/ .el-table .cell {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
+  // white-space: nowrap;
 }
 /deep/ .el-table--border th,
 .el-table__fixed-right-patch {

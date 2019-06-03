@@ -4,6 +4,7 @@
       <span></span>
       配送订单-待付款
     </div>
+    <div class="close" @click="handleClose">关闭</div>
     <el-steps :active="2" align-center>
       <el-step title="提交订单" description="2019-05-31"></el-step>
       <el-step title="支付订单" description="未支付"></el-step>
@@ -266,6 +267,12 @@ export default {
     this.geoList();
   },
   methods: {
+    //   关闭页面
+    handleClose() {
+      this.$router.push({
+        name: `servicesOrderDelivery`
+      });
+    },
     // 获取地区
     async geoList() {
       const query = {
@@ -364,7 +371,7 @@ export default {
     // 订单追踪
     orderTrack() {
       this.$router.push({
-        name: `servicesOrderDeliveryTrack`,
+        name: `servicesOrderDeliveryTrack`
       });
     },
     //   备注订单
@@ -411,6 +418,16 @@ export default {
       margin-right: 8px;
       vertical-align: sub;
     }
+  }
+  .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 1px solid #f1f1f1;
+    padding: 6px 14px;
+    background-color: @color;
+    color: #fff;
+    border-radius: 2px;
   }
   .orderdelivery-detail-contant {
     margin-top: 20px;

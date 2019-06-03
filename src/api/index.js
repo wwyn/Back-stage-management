@@ -523,6 +523,41 @@ export function getPart(query) {
   });
 }
 
+// 配送商品管理--获取审核详情
+export function getLogList(query) {
+  return request({
+    url: "sfy-mall-v2/m/log/list",
+    method: "get",
+    params:  query
+  });
+}
+// 审核商品
+export function productCheckProduct(query) {
+  return request({
+    url: "sfy-mall-v2/m/product/checkProduct",
+    method: "post",
+    params:  query
+  });
+}
+// APP配置--首页配置
+export function getPageList(query) {
+  return request({
+    url: "sfy-mall-v2/m/resources/getPageList",
+    method: "get",
+    params:  query
+  });
+}
+
+// 商家是否显示
+export function setShow(query) {
+  return request({
+    url: "sfy-mall-v2/m/categories/setShow",
+    method: "post",
+    params:  query
+  });
+}
+
+
 
 
 

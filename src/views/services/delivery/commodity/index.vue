@@ -13,13 +13,21 @@
     </div>
     <el-form :inline="true" :model="formInline" class="demo-form-inline">
       <el-form-item label="输入搜索">
-        <el-input v-model="formInline.user" placeholder="用户名/姓名"></el-input>
+        <el-input v-model="formInline.user" placeholder="商品名称/商品货号"></el-input>
       </el-form-item>
-      <el-form-item label="所属商家">
-        <el-input v-model="formInline.business" placeholder="全部"></el-input>
+      <el-form-item label="商品分类">
+        <el-select v-model="formInline.business" placeholder="全部">
+          <el-option
+            v-for="item in businessList"
+            :key="item.id"
+            :label="item.categoryName"
+            :value="item.id"
+          ></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleSearch">查询结果</el-button>
+        <el-button @click="handleReset">重置</el-button>
       </el-form-item>
     </el-form>
     <div class="shop-tools">
@@ -37,25 +45,30 @@
       element-loading-text="拼命加载中"
       element-loading-spinner="el-icon-loading"
       element-loading-background="#fff"
-      :data="tableData"
+      :data="tableproductList"
       border
+      @selection-change="handleSelectionChange"
       style="width: 100%"
     >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
-      <el-table-column type="index" label="编号" width="54" align="center"></el-table-column>
+      <el-table-column prop="productCode" label="编号" width="120" align="center"></el-table-column>
       <el-table-column label="商品图片" width="106" align="center">
         <template slot-scope="scope">
-          <img class="brandImg" :src="scope.row.logo" alt>
+          <img class="thumbnailsUrl" :src="scope.row.logo" alt>
         </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="商品名称" width="107" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="价格" width="126" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="打包费" width="106" align="center"></el-table-column>
-      <el-table-column prop="createTime" label="类别" width="90" align="center"></el-table-column>
-      <el-table-column prop="upSelling" label="是否禁用" width="90" align="center"></el-table-column>
-      <el-table-column prop="upSelling" label="审核状态" width="116" align="center">
+      <el-table-column prop="productName" label="商品名称" width="170" align="center"></el-table-column>
+      <el-table-column prop="salePrice" label="价格" width="126" align="center"></el-table-column>
+      <el-table-column prop="packFee" label="打包费" width="96" align="center"></el-table-column>
+      <el-table-column prop="typeName" label="类别" width="90" align="center"></el-table-column>
+      <el-table-column label="规格" width="90" align="center">
         <template slot-scope="scope">
-          <p>未通过</p>
+          <p>{{ scope.row.upSelling==1?'是':'否' }}</p>
+        </template>
+      </el-table-column>
+      <el-table-column label="审核状态" width="116" align="center">
+        <template slot-scope="scope">
+          <p>{{ scope.row.status==2?'审核通过':'未通过' }}</p>
           <el-button @click="handleDetail(scope.row)" type="text" size="small">审核详情</el-button>
         </template>
       </el-table-column>
@@ -63,8 +76,20 @@
         <template slot-scope="scope">
           <el-button type="text" size="small">查看</el-button>
           <el-button type="text" size="small" @click="handleEditBtn(scope.row)">编辑</el-button>
-          <el-button type="text" size="small" @click="handleupSelling(scope.row)">上架</el-button>
-          <el-button type="text" size="small" @click="handledownSelling(scope.row)">下架</el-button>
+          <el-button
+            style="margin-left:0px"
+            v-if="scope.row.upSelling==0"
+            type="text"
+            size="small"
+            @click="handleupSelling(scope.row)"
+          >上架</el-button>
+          <el-button
+            style="margin-left:0px"
+            v-if="scope.row.upSelling==1"
+            type="text"
+            size="small"
+            @click="handledownSelling(scope.row)"
+          >下架</el-button>
           <el-button @click="handleDelBtn(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -81,11 +106,15 @@
           <p>审核详情</p>
           <i class="iconfont icon-gongjutianjia" @click="hendleclose"></i>
         </div>
-        <el-table :data="tableData" border style="width: 100%">
-          <el-table-column prop="date" label="审核时间" width="160" align="center"></el-table-column>
-          <el-table-column prop="name" label="审核人员" width="150" align="center"></el-table-column>
+        <el-table :data="detailTableData" border style="width: 100%">
+          <el-table-column prop="createTime" label="审核时间" width="160" align="center">
+            <template slot-scope="scope">
+              <div>{{ parseTime(scope.row.createTime) }}</div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createBy" label="审核人员" width="150" align="center"></el-table-column>
           <el-table-column prop="name" label="审核结果" width="120" align="center"></el-table-column>
-          <el-table-column prop="address" label="反馈" width="220" align="center"></el-table-column>
+          <el-table-column prop="content" label="反馈" width="220" align="center"></el-table-column>
         </el-table>
       </div>
     </div>
@@ -106,40 +135,20 @@ export default {
         { name: "待审核", number: 10000 },
         { name: "未通过", number: 10000 }
       ],
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        }
-      ],
+      detailTableData: [],
       count: 0,
       formInline: {
         business: "",
         user: ""
       },
-      tableData: [],
+      businessList: [],
+      tableproductList: [],
       pageSize: 10,
       currentPage: 1,
       total: 0,
       productIdList: [],
       loading: true,
-      showModal: false,
+      showModal: false
     };
   },
   components: {
@@ -148,16 +157,71 @@ export default {
   mounted: function() {
     let currentPage = this.currentPage;
     this.productList({ currentPage });
+    this.categoryList();
   },
   methods: {
     hendleType(index) {
       this.count = index;
     },
     parseTime,
+    // 商品分类列表
+    async categoryList() {
+      const query = {
+        shopId: 5,
+        pid: 0
+      };
+      try {
+        const ret = await api.categoryList(query);
+        this.businessList = ret.data.data.categories;
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 配送列表
+    async productList(params) {
+      const query = {
+        ...params,
+        upSelling: 2,
+        shopName: this.formInline.user || "",
+        bigCategoryId: this.formInline.business || "",
+        pageSize: 10,
+        virtual: 0
+      };
+      try {
+        const ret = await api.productList(query);
+        console.log(ret, "配送列表");
+        if (ret.data.code == 200 && ret.data.data) {
+          this.loading = false;
+          this.tableproductList = ret.data.data.pageData;
+          this.total = ret.data.data.totalCount;
+        } else {
+          this.loading = false;
+          this.tableproductList = [];
+          this.total = 0;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 审核详情
+    async getLogList(query) {
+      try {
+        const ret = await api.getLogList(query);
+        console.log(ret, "审核详情");
+        if (ret.data.code == 200 && ret.data.data) {
+          this.detailTableData = ret.data.data;
+        } else {
+          this.detailTableData = [];
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     // 批量设置商品列表
     async batchPart(data) {
       try {
         const ret = await api.batchPart(data);
+        console.log(ret, "批量设置");
         if (ret.data.code == 200) {
           this.productList({ currentPage: this.currentPage });
         } else {
@@ -167,44 +231,22 @@ export default {
         console.log(e.message);
       }
     },
-    // 列表
-    async productList(params) {
-      const query = {
-        ...params,
-        shopName: this.formInline.title || "",
-        productId: this.formInline.ID || "",
-        productName: this.formInline.name || "",
-        minPrice: this.formInline.minMoney || "",
-        maxPrice: this.formInline.maxMoney || "",
-        minSaleCount: this.formInline.minNumber || "",
-        maxSaleCount: this.formInline.maxNumber || "",
-        upSelling: "1",
-        pageSize: 10
-      };
-      try {
-        const ret = await api.productList(query);
-        if (ret.data.code == 200 && ret.data.data) {
-          this.loading = false;
-          this.tableData = ret.data.data.pageData;
-          this.total = ret.data.data.totalCount;
-        } else {
-          this.tableData = [];
-          this.total = 0;
-        }
-      } catch (e) {
-        console.log(e.message);
-      }
-    },
+
     // 单个设置商品
     async setPart(query) {
       try {
         const ret = await api.setPart(query);
+        console.log(ret, "shezhidangeshangpin");
         if (ret.data.code == 200) {
           this.productList({ currentPage: this.currentPage });
         }
       } catch (e) {
         console.log(e.message);
       }
+    },
+
+    handleSelectionChange(val) {
+      this.productIdList = val;
     },
     // 搜索
     handleSearch(data) {
@@ -214,56 +256,80 @@ export default {
       this.productList(query);
     },
     // 重置
-    resetForm() {
+    handleReset() {
       this.formInline = {
-        title: "",
-        ID: "",
-        name: "",
-        minMoney: "",
-        maxMoney: "",
-        minNumber: "",
-        maxNumber: ""
+        business: "",
+        user: ""
       };
-    },
-     // 单个删除
-    handleDelBtn(options) {
-      this.brandDel({ id: options.id });
-    },
-    // 批量删除
-    handleBatchDel() {
       const query = {
-        productIds: this.productIdList,
-        hide: "1"
+        currentPage: 1
       };
-      this.batchPart(query);
+      this.productList(query);
     },
-     // 单个上架
-    handleupSelling(type) {
-      let query = {
-        productId: type.id,
-        upSelling: "0"
+    // 单个删除
+    handleDelBtn(options) {
+      const query = {
+        productId: options.id,
+        status: 0
       };
       this.setPart(query);
     },
-    
+    // 批量删除
+    handleBatchDel() {
+      let ids = this.productIdList.map(item => {
+        return item.id;
+      });
+      const query = {
+        productIds: ids,
+        status: 0
+      };
+      this.batchPart(query);
+    },
+    // 单个上架
+    handleupSelling(type) {
+      let query = {
+        productId: type.id,
+        upSelling: 1
+      };
+      this.setPart(query);
+    },
+
     // 批量上架
     handleBatchUp() {
-
+      let ids = this.productIdList.map(item => {
+        return item.id;
+      });
+      const query = {
+        productIds: ids,
+        upSelling: 1
+      };
+      this.batchPart(query);
     },
     // 单个下架
-    handledownSelling() {
-
+    handledownSelling(type) {
+      const query = {
+        productId: type.id,
+        upSelling: 0
+      };
+      this.setPart(query);
     },
     // 批量下架
     handleBatchLower() {
-
+      let ids = this.productIdList.map(item => {
+        return item.id;
+      });
+      const query = {
+        productIds: ids,
+        upSelling: 0
+      };
+      this.batchPart(query);
     },
 
     handleCurrentChange(val) {
       this.currentPage = val;
       this.productList({ currentPage: val });
     },
-   
+
     // 编辑
     handleEditBtn(options) {
       this.$router.push({
@@ -281,11 +347,15 @@ export default {
     },
     // 审核详情
     handleDetail(options) {
-      let id = options.id;
       this.showModal = true;
+      const query = {
+        logType: "check_product",
+        target: options.id
+      };
+      this.getLogList(query);
     },
     hendleclose() {
-        this.showModal = false;
+      this.showModal = false;
     }
   }
 };
@@ -439,9 +509,9 @@ export default {
   border: none;
 }
 /deep/ .el-table .cell {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
+  // white-space: nowrap;
 }
 /deep/ .el-table--border th,
 .el-table__fixed-right-patch {

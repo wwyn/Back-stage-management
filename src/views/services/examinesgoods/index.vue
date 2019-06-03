@@ -7,9 +7,14 @@
       <el-form-item label="输入搜索">
         <el-input v-model="examineForm.name" placeholder="商品名称"></el-input>
       </el-form-item>
-      <el-form-item label="商家分类">
+      <el-form-item label="商品分类">
         <el-select v-model="examineForm.type" placeholder="请选择">
-          <el-option v-for="item in options" :key="item.type" :label="item.name" :value="item.type"></el-option>
+          <el-option
+            v-for="item in options"
+            :key="item.id"
+            :label="item.categoryName"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="商家名称">
@@ -37,7 +42,7 @@
       element-loading-text="拼命加载中"
       element-loading-spinner="el-icon-loading"
       element-loading-background="#fff"
-      :data="tableData"
+      :data="tableShopData"
       border
       style="width: 100%"
     >
@@ -81,8 +86,8 @@
             </el-form-item>
             <el-form-item label="商家审核">
               <el-radio-group v-model="goodsExamineForm.examine">
-                <el-radio label="审核通过"></el-radio>
-                <el-radio label="审核不通过"></el-radio>
+                <el-radio label="2">审核通过</el-radio>
+                <el-radio label="3">审核不通过</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="反馈详情">
@@ -118,10 +123,11 @@ export default {
       },
       options: [],
       storeNameList: [],
-      tableData: [],
+      tableShopData: [],
       pageSize: 10,
       currentPage: 1,
       total: 0,
+      productId: "",
       productIdList: [],
       loading: true,
       showModal: false
@@ -133,10 +139,67 @@ export default {
   mounted: function() {
     let currentPage = this.currentPage;
     this.productList({ currentPage });
-    this.getShoptypes();
+    this.categoryList();
   },
   methods: {
     parseTime,
+    // 商品分类列表
+    async categoryList() {
+      const query = {
+        pid: 0,
+        shopId: 5
+      };
+      try {
+        const ret = await api.categoryList(query);
+        this.options = ret.data.data.categories;
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+
+    // 商品列表
+    async productList(params) {
+      const query = {
+        ...params,
+        productName: this.examineForm.name || "",
+        bigCategoryId: this.examineForm.type || "",
+        upSelling: 2,
+        pageSize: 10
+      };
+      try {
+        const ret = await api.productList(query);
+        console.log(ret,'liebia0')
+        if (ret.data.code == 200 && ret.data.data) {
+          this.loading = false;
+          this.tableShopData = ret.data.data.pageData;
+          this.total = ret.data.data.totalCount;
+        } else {
+          this.tableShopData = [];
+          this.total = 0;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 商品审核
+    async productCheckProduct(data) {
+      try {
+        const ret = await api.productCheckProduct(data);
+        if (ret.data.code == 200 && ret.data.data) {
+          this.goodsExamineForm = {
+            goodsName: "",
+            examine: "",
+            desc: ""
+          };
+          this.productId = "";
+          this.showModal = false;
+        } else {
+          console.log("审核失败");
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     // 批量设置商品列表
     async batchPart(data) {
       try {
@@ -145,48 +208,6 @@ export default {
           this.productList({ currentPage: this.currentPage });
         } else {
           console.log("设置列表失败");
-        }
-      } catch (e) {
-        console.log(e.message);
-      }
-    },
-    // 列表
-    async productList(params) {
-      const query = {
-        ...params,
-        shopName: this.examineForm.title || "",
-        productId: this.examineForm.ID || "",
-        productName: this.examineForm.name || "",
-        minPrice: this.examineForm.minMoney || "",
-        maxPrice: this.examineForm.maxMoney || "",
-        minSaleCount: this.examineForm.minNumber || "",
-        maxSaleCount: this.examineForm.maxNumber || "",
-        upSelling: "1",
-        pageSize: 10
-      };
-      try {
-        const ret = await api.productList(query);
-        if (ret.data.code == 200 && ret.data.data) {
-          this.loading = false;
-          this.tableData = ret.data.data.pageData;
-          this.total = ret.data.data.totalCount;
-        } else {
-          this.tableData = [];
-          this.total = 0;
-        }
-      } catch (e) {
-        console.log(e.message);
-      }
-    },
-    // 获取商家类型
-    async getShoptypes(data) {
-      try {
-        const ret = await api.getShoptypes(data);
-        if (ret.data.code == 200 && ret.data.data) {
-          console.log(ret, "fenlei");
-          this.options = ret.data.data;
-        } else {
-          this.options = [];
         }
       } catch (e) {
         console.log(e.message);
@@ -224,10 +245,17 @@ export default {
     // 审核
     handleExaminetable(options) {
       this.showModal = true;
+      this.goodsExamineForm.goodsName = options.productName;
+      this.productId = options.id;
     },
     // 审核确认
     onExamineFormSubmit() {
-      console.log(this.goodsExamineForm, "审核表单");
+      const query = {
+        productId: this.productId,
+        status: this.goodsExamineForm.examine,
+        reason: this.goodsExamineForm.desc
+      };
+      this.productCheckProduct(query);
     },
     // 审核取消
     onExamineFormCancel() {
@@ -340,14 +368,14 @@ export default {
   padding: 0;
 }
 .el-table {
-    img {
-        display: inline-block;
-        width: 50px;
-        height: 50px;
-        border: 1px solid #ccc;
-        vertical-align: middle;
-        margin: 10px 0;
-    }
+  img {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 1px solid #ccc;
+    vertical-align: middle;
+    margin: 10px 0;
+  }
 }
 /deep/ .el-table th > .cell {
   padding: 0;
