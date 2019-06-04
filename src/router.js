@@ -125,13 +125,19 @@ export default new Router({
                     path: "/services-dispose",
                     name: "servicesDispose",
                     component: () => import("./views/services/dispose"),
-            
+                },
+                {
+                    path: "/services-adverthome",
+                    name: "servicesAdverthome",
+                    component: () => import("./views/services/dispose/adverthome"),
+                    meta: {
+                        menu: 'servicesDispose',
+                    },
                 },
                 {
                     path: "/services-store",
                     name: "servicesStore",
                     component: () => import("./views/services/store"),
-                              
                 },
                 {
                     path: "/services-storeAdd",

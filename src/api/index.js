@@ -548,12 +548,132 @@ export function getPageList(query) {
   });
 }
 
+// 添加广告
+export function setResources(data) {
+  return request({
+    url: "sfy-mall-v2/m/resources/set",
+    method: "post",
+    data
+  });
+}
+// 广告上下线
+export function setStatus(query) {
+  return request({
+    url: "sfy-mall-v2/m/resources/setStatus",
+    method: "post",
+    params:  query
+  });
+}
+// 删除广告
+export function removeById(query) {
+  return request({
+    url: "sfy-mall-v2/m/resources/removeById",
+    method: "post",
+    params:  query
+  });
+}
+// 广告置顶
+export function setTop(query) {
+  return request({
+    url: "sfy-mall-v2/m/resources/setTop",
+    method: "post",
+    params:  query
+  });
+}
+// 获取单个详情
+export function getResourcesById(query) {
+  return request({
+    url: "sfy-mall-v2/m/resources/getById",
+    method: "get",
+    params:  query
+  });
+}
+
+// 删除商家分类
+export function categoriesRemove(query) {
+  return request({
+    url: "sfy-mall-v2/m/categories/remove",
+    method: "post",
+    params:  query
+  });
+}
+// 设置商家分类
+export function categoriesSet(query) {
+  return request({
+    url: "sfy-mall-v2/m/categories/set",
+    method: "post",
+    params:  query
+  });
+}
+// 获取分类详情
+export function getCategoriesById(query) {
+  return request({
+    url: "sfy-mall-v2/m/categories/getById",
+    method: "get",
+    params:  query
+  });
+}
+
 // 商家是否显示
 export function setShow(query) {
   return request({
     url: "sfy-mall-v2/m/categories/setShow",
     method: "post",
     params:  query
+  });
+}
+// 品牌商家列表
+export function getVipShops(query) {
+  return request({
+    url: "sfy-mall-v2/m/recommend/getVipShops",
+    method: "get",
+    params:  query
+  });
+}
+
+// 选择品牌商家
+export function addVipShops(data) {
+  return request({
+    url: "sfy-mall-v2/m/recommend/addVipShops",
+    method: "post",
+    data
+  });
+}
+
+// 设置推荐
+export function setRecommend(query) {
+  return request({
+    url: "sfy-mall-v2/m/recommend/set",
+    method: "post",
+    params:  query
+  });
+}
+
+
+// 移除推荐
+export function recommendRemove(query) {
+  return request({
+    url: "sfy-mall-v2/m/recommend/remove",
+    method: "post",
+    params:  query
+  });
+}
+
+// 甄选列表
+export function getCheckShops(query) {
+  return request({
+    url: "sfy-mall-v2/m/recommend/getCheckShops",
+    method: "get",
+    params:  query
+  });
+}
+
+// 选择甄选
+export function addCheckShops(data) {
+  return request({
+    url: "sfy-mall-v2/m/recommend/addCheckShops",
+    method: "post",
+    data
   });
 }
 
