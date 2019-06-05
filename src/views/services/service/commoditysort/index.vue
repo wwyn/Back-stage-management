@@ -29,8 +29,8 @@
             v-for="(item,index) in selectSortList"
             :key="item.id"
             :class="{active:count===index}"
-            @click="selectSort(index,item.name)"
-          >{{ item.name }}</div>
+            @click="selectSort(index,item.categoryName,item.id)"
+          >{{ item.categoryName }}</div>
         </div>
         <p>
           您当前选择的饮品是:
@@ -57,8 +57,9 @@
           <el-form-item label="商品分类" prop="name">
             <p>{{ this.value }}</p>
           </el-form-item>
-          <el-form-item label="商品图片" prop="name">
+          <el-form-item label="商品图片" prop="imageUrl">
             <el-upload
+              v-model="ruleForm.imageUrl"
               class="avatar-uploader"
               action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
               :show-file-list="false"
@@ -69,36 +70,36 @@
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
           </el-form-item>
-          <el-form-item label="商品名称" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+          <el-form-item label="商品名称" prop="productName">
+            <el-input v-model="ruleForm.productName"></el-input>
           </el-form-item>
           <el-form-item label="商品标签" prop="tag">
             <el-checkbox-group v-model="ruleForm.tag">
-              <el-checkbox label="随时退" name="tag"></el-checkbox>
-              <el-checkbox label="过期退" name="tag"></el-checkbox>
-              <el-checkbox label="支持退款" name="tag"></el-checkbox>
+              <el-checkbox label="anytimeReturn">随时退</el-checkbox>
+              <el-checkbox label="expiredReturn">过期退</el-checkbox>
+              <el-checkbox label="canReturn">支持退款</el-checkbox>
             </el-checkbox-group>
           </el-form-item>
-          <el-form-item label="商品介绍" prop="name">
-            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          <el-form-item label="商品介绍" prop="description">
+            <el-input type="textarea" v-model="ruleForm.description"></el-input>
           </el-form-item>
-          <el-form-item label="商品原价" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+          <el-form-item label="商品原价" prop="marketPrice">
+            <el-input v-model="ruleForm.marketPrice"></el-input>
           </el-form-item>
-          <el-form-item label="商品现价" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+          <el-form-item label="商品现价" prop="salePrice">
+            <el-input v-model="ruleForm.salePrice"></el-input>
           </el-form-item>
-          <el-form-item v-show="this.value=='券码'" label="优惠详情" prop="name">
-            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          <el-form-item v-show="this.value=='券码'" label="优惠详情" prop="discountExplain">
+            <el-input type="textarea" v-model="ruleForm.discountExplain"></el-input>
           </el-form-item>
-          <el-form-item v-show="this.value=='券码'" label="公告说明" prop="name">
-            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          <el-form-item v-show="this.value=='券码'" label="公告说明" prop="notice">
+            <el-input type="textarea" v-model="ruleForm.notice"></el-input>
           </el-form-item>
-          <el-form-item v-show="this.value=='券码'" label="购买须知" prop="name">
-            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          <el-form-item v-show="this.value=='券码'" label="购买须知" prop="notes">
+            <el-input type="textarea" v-model="ruleForm.notes"></el-input>
           </el-form-item>
-          <el-form-item v-show="this.value=='预定'" label="预定须知" prop="name">
-            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          <el-form-item v-show="this.value=='预定'" label="预定须知" prop="notes">
+            <el-input type="textarea" v-model="ruleForm.notes"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button @click="goSort">上一步,选择商品分类</el-button>
@@ -175,12 +176,14 @@
   </div>
 </template>
 <script>
+import * as api from "@/api";
 export default {
   data() {
     return {
       active: 1,
-      selectSortList: [{ name: "券码", id: 0 }, { name: "预定", id: 1 }],
+      selectSortList: [],
       value: "券码",
+      serveId: "",
       count: 0,
       showSort: true,
       showBasic: false,
@@ -190,11 +193,18 @@ export default {
       // 基本信息
       imageUrl: "",
       ruleForm: {
-        name: "",
-        tag: ""
+        imageUrl: "",
+        productName: "",
+        tag: [],
+        description: "",
+        marketPrice: "",
+        salePrice: "",
+        discountExplain: "",
+        notice: "",
+        notes: ""
       },
       rules: {
-        name: [
+        productName: [
           { required: true, message: "请输入活动名称", trigger: "blur" },
           { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ]
@@ -221,10 +231,58 @@ export default {
       timeList: [{ time: "", number: "" }]
     };
   },
+  mounted() {
+    this.categoryList();
+  },
   methods: {
-    selectSort(index, val) {
+    // 设置服务类商品
+    async setVirtualProduct() {
+      const query = {
+        anytimeReturn:
+          this.ruleForm.tag.indexOf("anytimeReturn") != -1 ? "1" : "0",
+        expiredReturn:
+          this.ruleForm.tag.indexOf("expiredReturn") != -1 ? "1" : "0",
+        canReturn: this.ruleForm.tag.indexOf("canReturn") != -1 ? "1" : "0",
+
+        categoryId: this.ruleForm.serveId || 0,
+        description: this.ruleForm.description || "",
+        discountExplain: this.ruleForm.discountExplain || "",
+        marketPrice: this.ruleForm.marketPrice || 0,
+        notes: this.ruleForm.notes || "",
+        notice: this.ruleForm.notice || "",
+        pic: this.ruleForm.imageUrl || "",
+        productName: this.ruleForm.productName || "",
+        salePrice: this.ruleForm.salePrice || 0
+      };
+      try {
+        const ret = await api.setVirtualProduct(query);
+        if (ret.data.code == 200) {
+          this.active = 4;
+          this.showSort = false;
+          this.showBasic = false;
+          this.showTime = false;
+          this.showSubmit = true;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 商品分类列表
+    async categoryList() {
+      const query = {
+        pid: 1000
+      };
+      try {
+        const ret = await api.categoryList(query);
+        this.selectSortList = ret.data.data.categories;
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    selectSort(index, val, id) {
       this.count = index;
       this.value = val;
+      this.serveId = id;
     },
     goBasic() {
       this.active = 2;
@@ -236,6 +294,7 @@ export default {
     // 基本信息
     handleAvatarSuccess(res, file) {
       this.imageUrl = res.data[0];
+      this.ruleForm.imageUrl = res.data[0];
     },
     beforeAvatarUpload(file) {
       const isJPEG = file.type === "image/jpeg";
@@ -260,6 +319,7 @@ export default {
       this.showSort = false;
       this.showBasic = false;
       this.showSubmit = true;
+      console.log(this.ruleForm, "券码");
     },
     goCommodity() {
       this.$router.push({
@@ -286,21 +346,17 @@ export default {
       this.showTime = true;
     },
     goSubmitTime() {
-      this.active = 4;
-      this.showSort = false;
-      this.showBasic = false;
-      this.showTime = false;
-      this.showSubmit = true;
+      this.setVirtualProduct();
     },
     addTime() {
       this.showModal = true;
     },
     handleEditor() {
-        this.showModal = true;
+      this.showModal = true;
     },
     handleConfirm() {
       this.showModal = false;
-      console.log(this.timeList)
+      console.log(this.timeList);
     },
     handleCancel() {
       this.showModal = false;

@@ -539,6 +539,15 @@ export function productCheckProduct(query) {
     params:  query
   });
 }
+
+// 服务商品管理--添加修改
+export function setVirtualProduct(data) {
+  return request({
+    url: "sfy-mall-v2/m/product/setVirtualProduct",
+    method: "post",
+    data
+  });
+}
 // APP配置--首页配置
 export function getPageList(query) {
   return request({
@@ -674,6 +683,67 @@ export function addCheckShops(data) {
     url: "sfy-mall-v2/m/recommend/addCheckShops",
     method: "post",
     data
+  });
+}
+
+
+// 020--订单系统
+// 获取订单详情
+export function getOrderDetail(query) {
+  return request({
+    url: "sfy-mall-v2/m/order/getDetail",
+    method: "get",
+    params:  query
+  });
+}
+
+// 获取操作日志
+export function getOrderLogs(query) {
+  return request({
+    url: "sfy-mall-v2/m/order/getLogs",
+    method: "get",
+    params:  query
+  });
+}
+// 确认接单
+export function orderMerchantConfirm(query) {
+  return request({
+    url: "sfy-mall-v2/m/order/merchantConfirm",
+    method: "post",
+    params:  query
+  });
+}
+// 修改发票信息
+export function orderSetInvoiceInfo(data) {
+  return request({
+    url: "sfy-mall-v2/m/order/setInvoiceInfo",
+    method: "post",
+    data
+  });
+}
+// 修改收货地址
+export function orderSetDeliveryAddress(data) {
+  return request({
+    url: "sfy-mall-v2/m/order/setDeliveryAddress",
+    method: "post",
+    data
+  });
+}
+// 订单备注
+export function orderRemark(query) {
+  return request({
+    url: "sfy-mall-v2/m/order/remark",
+    method: "post",
+    params:  query
+  });
+}
+
+// 确认消费
+export function getMyOrderCode(query) {
+  return request({
+    url: "sfy-mall-v2/u/order/getMyOrderCode",
+    method: "get",
+    params:  query
   });
 }
 

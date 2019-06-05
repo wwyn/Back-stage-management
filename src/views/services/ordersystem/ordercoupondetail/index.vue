@@ -2,7 +2,7 @@
   <div class="ordercoupondetail">
     <div class="title">
       <span></span>
-      服务券码订单详情-待付款
+      服务券码订单详情-{{orderStatus[Status]}}
     </div>
     <div class="close" @click="handleClose">关闭</div>
     <el-steps :active="1" align-center>
@@ -12,46 +12,63 @@
     </el-steps>
     <div class="ordercoupon-detail-contant">
       <div>
-        <p>当前订单状态:{}</p>
+        <p style="color:red;font-size:18px;">当前订单状态: {{orderStatus[Status]}}</p>
         <div>
           <p @click="confirmConsume">确认消费</p>
+          <p @click="couponVerify">验证券码</p>
           <p @click="remarksOrder">备注订单</p>
         </div>
       </div>
       <div class="table-data">
         <p>基本信息</p>
         <el-table :data="tableDataBasic" border style="width: 100%">
-          <el-table-column prop="date" label="订单编号" width="200" align="center"></el-table-column>
-          <el-table-column prop="name" label="用户账号" width="200" align="center"></el-table-column>
-          <el-table-column prop="address" label="支付方式" width="180" align="center"></el-table-column>
-          <el-table-column prop="name" label="订单来源" align="center"></el-table-column>
+          <el-table-column prop="orderNo" label="订单编号" width="200" align="center"></el-table-column>
+          <el-table-column prop="consigneeMobile" label="用户账号" width="200" align="center"></el-table-column>
+          <el-table-column prop="payName" label="支付方式" width="180" align="center"></el-table-column>
+          <el-table-column prop="orderSource" label="订单来源" align="center"></el-table-column>
         </el-table>
         <p style="margin-top: 20px;">用户信息</p>
         <el-table :data="tableDataUser" border style="width: 100%">
-          <el-table-column prop="date" label="用户姓名" width="180" align="center"></el-table-column>
-          <el-table-column prop="name" label="手机号" width="180" align="center"></el-table-column>
-          <el-table-column prop="name" label width="180" align="center"></el-table-column>
-          <el-table-column prop="address" label align="center"></el-table-column>
+          <el-table-column prop="consignee" label="用户姓名" width="180" align="center"></el-table-column>
+          <el-table-column prop="consigneeMobile" label="手机号" width="180" align="center"></el-table-column>
+          <el-table-column width="180" align="center"></el-table-column>
+          <el-table-column align="center"></el-table-column>
         </el-table>
         <p style="margin-top: 20px;">商品信息</p>
         <el-table :data="tableDataStore" border style="width: 100%">
           <el-table-column prop="date" label="商品图片" width="150" align="center">
             <template slot-scope="scope">
-              <img src alt>
+              <img :src="scope.row.thumbnailsUrl" alt>
             </template>
           </el-table-column>
-          <el-table-column prop="name" label="商品名称" align="center"></el-table-column>
-          <el-table-column prop="name" label="价格" width="250" align="center"></el-table-column>
-          <el-table-column prop="name" label="预定时间" width="250" align="center"></el-table-column>
-          <el-table-column prop="address" label="数量" width="130" align="center"></el-table-column>
+          <el-table-column prop="productName" label="商品名称" align="center"></el-table-column>
+          <el-table-column prop="price" label="价格" width="250" align="center"></el-table-column>
+          <el-table-column prop="quantity" label="数量" width="130" align="center"></el-table-column>
+          <el-table-column label="合计" width="130" align="center">
+            <template slot-scope="scope">
+              <p>{{ scope.row.price* scope.row.quantity }}</p>
+            </template>
+          </el-table-column>
         </el-table>
         <p style="margin-top: 20px;">操作信息</p>
         <el-table :data="tableDataOperation" border style="width: 100%">
-          <el-table-column prop="date" label="操作者" width="160" align="center"></el-table-column>
-          <el-table-column prop="name" label="操作时间" width="180" align="center"></el-table-column>
-          <el-table-column prop="address" label="订单状态" width="160" align="center"></el-table-column>
-          <el-table-column prop="address" label="付款状态" width="160" align="center"></el-table-column>
-          <el-table-column prop="address" label="备注" align="center"></el-table-column>
+          <el-table-column prop="createBy" label="操作者" width="160" align="center"></el-table-column>
+          <el-table-column prop="createTime" label="操作时间" width="180" align="center">
+            <template slot-scope="scope">
+              <p>{{parseTime(scope.row.createTime || '')}}</p>
+            </template>
+          </el-table-column>
+          <el-table-column prop="orderStatus" label="订单状态" width="160" align="center">
+            <template slot-scope="scope">
+              <p>{{ orderStatus[scope.row.orderStatus] }}</p>
+            </template>
+          </el-table-column>
+          <el-table-column label="付款状态" width="160" align="center">
+            <template slot-scope="scope">
+              <p>{{ payStatus[scope.row.payStatus] }}</p>
+            </template>
+          </el-table-column>
+          <el-table-column prop="remark" label="备注" align="center"></el-table-column>
         </el-table>
       </div>
     </div>
@@ -60,7 +77,7 @@
         <div v-if="showRemarksModal" class="modal-box-remarks">
           <div>
             <p>备注订单</p>
-            <i class="iconfont icon-gongjutianjia" @click="resetFormCancel"></i>
+            <i class="iconfont icon-gongjutianjia" @click="remarkFormCancel"></i>
           </div>
           <div>
             <el-form
@@ -74,8 +91,8 @@
                 <el-input type="textarea" v-model="remarksForm.remark"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="submitResetForm">确认</el-button>
-                <el-button @click="resetFormCancel">取消</el-button>
+                <el-button type="primary" @click="submitRemarkForm">确认</el-button>
+                <el-button @click="remarkFormCancel">取消</el-button>
               </el-form-item>
             </el-form>
           </div>
@@ -86,6 +103,7 @@
 </template>
 <script>
 import * as api from "@/api";
+import { parseTime } from "@/utils";
 
 export default {
   data() {
@@ -102,16 +120,129 @@ export default {
         remark: [{ required: true, message: "请填写备注", trigger: "blur" }]
       },
       showModal: false,
-      showRemarksModal: false
+      showRemarksModal: false,
+      Status: "",
+      payStatus: {
+        "-1": "无效",
+        "0": "待支付",
+        "1": "部分支付",
+        "2": "已支付"
+      },
+      orderStatus: {
+        "-1": "无效",
+        "0": "已创建",
+        "5": "已确认",
+        "10": "已支付",
+        "13": "商户确认",
+        "15": "已发货",
+        "20": "已完成",
+        "25": "已取消",
+        "30": "退款中",
+        "35": "已退款"
+      },
+      deliverStatus: {
+        "-1": "无效",
+        "0": "待配送",
+        "1": "配送中",
+        "2": "配送完成"
+      }
     };
   },
-  mounted() {},
+  mounted() {
+    if (this.$route.params.orderNo) {
+      let query = {
+        orderNo: this.$route.params.orderNo
+      };
+      this.getOrderDetail(query);
+      this.getOrderLogs(query);
+    }
+  },
   methods: {
+    parseTime,
     //   关闭页面
     handleClose() {
       this.$router.push({
         name: `servicesOrderCoupon`
       });
+    },
+    // 获取订单详情
+    async getOrderDetail(query) {
+      try {
+        const ret = await api.getOrderDetail(query);
+        console.log(ret, "订单详情");
+        if (ret.data.code == 200 && ret.data.data) {
+          this.Status = ret.data.data.orderStatus;
+          let arrBasic = [];
+          let arrInvoice = [];
+          arrBasic.push(ret.data.data);
+          arrInvoice.push(ret.data.data.orderInvoice);
+          this.tableDatAinvoice = arrInvoice;
+          this.tableDataStore = ret.data.data.orderItems;
+          this.tableDataBasic = arrBasic;
+          this.tableDataUser = arrBasic;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 确认消费
+    async getMyOrderCode() {
+      const query = {
+        orderNo: this.$route.params.orderNo
+      };
+      try {
+        const ret = await api.getMyOrderCode(query);
+        console.log(ret, "确认消费");
+        if (ret.data.code == 200) {
+          this.$message({
+            type: "success",
+            message: "消费成功!"
+          });
+        } else {
+          this.$message({
+            type: "info",
+            message: ret.data.message
+          });
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取操作日志
+    async getOrderLogs(query) {
+      try {
+        const ret = await api.getOrderLogs(query);
+        console.log(ret, "操作日志");
+        if (ret.data.code == 200) {
+          this.tableDataOperation = ret.data.data;
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 备注
+    async orderRemark() {
+      let query = {
+        remark: this.remarksForm.remark || "",
+        orderNo: this.$route.params.orderNo
+      };
+      try {
+        const ret = await api.orderRemark(query);
+        if (ret.data.code == 200) {
+          this.showModal = false;
+          this.showRemarksModal = false;
+          this.remarksForm = {
+            contant: ""
+          };
+        } else {
+          this.$message({
+            type: "info",
+            message: ret.data.message
+          });
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
     },
     //   确认消费
     confirmConsume() {
@@ -121,34 +252,28 @@ export default {
         type: "success"
       })
         .then(() => {
-          this.$message({
-            type: "success",
-            message: "消费成功!"
-          });
+          this.getMyOrderCode();
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消消费"
+            message: "已取消"
           });
         });
     },
+    // 验证券码
+    couponVerify() {},
     //   备注订单
     remarksOrder() {
       this.showModal = true;
       this.showRemarksModal = true;
     },
     // 备注确认
-    submitResetForm() {
-      console.log(this.remarksForm);
-      this.showModal = false;
-      this.showRemarksModal = false;
-      this.remarksForm = {
-        contant: ""
-      };
+    submitRemarkForm() {
+      this.orderRemark();
     },
     //   备注取消
-    resetFormCancel() {
+    remarkFormCancel() {
       this.showModal = false;
       this.showRemarksModal = false;
       this.remarksForm = {

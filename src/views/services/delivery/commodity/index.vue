@@ -162,6 +162,7 @@ export default {
   methods: {
     hendleType(index) {
       this.count = index;
+      
     },
     parseTime,
     // 商品分类列表

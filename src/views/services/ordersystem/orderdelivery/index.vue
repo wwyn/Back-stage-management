@@ -16,13 +16,16 @@
         <el-input v-model="storeForm.code" placeholder="订单编号/商品货号"></el-input>
       </el-form-item>
       <el-form-item label="收货人">
-        <el-input v-model="storeForm.user" placeholder="用户名/手机号"></el-input>
+        <el-input v-model="storeForm.consignee" placeholder="用户名"></el-input>
+      </el-form-item>
+      <el-form-item label="手机号">
+        <el-input v-model="storeForm.consigneeMobile" placeholder="手机号"></el-input>
       </el-form-item>
       <el-form-item label="提交时间">
         <el-date-picker
           type="date"
           placeholder="选择日期"
-          v-model="storeForm.data"
+          v-model="storeForm.beginTime"
           style="width: 100%;"
         ></el-date-picker>
       </el-form-item>
@@ -33,7 +36,7 @@
     </el-form>
     <div class="shop-tools">
       <div class="shop-batch">
-        <p @click="handleBatchLower">批量关闭</p>
+        <p @click="handleBatchClose">批量关闭</p>
         <p @click="handleBatchDel">批量删除</p>
       </div>
     </div>
@@ -47,18 +50,26 @@
       style="width: 100%"
     >
       <el-table-column type="selection" width="50" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="订单编号" width="140" align="center"></el-table-column>
+      <el-table-column prop="orderNo" label="订单编号" width="140" align="center"></el-table-column>
       <el-table-column label="提交时间" width="140" align="center">
         <template slot-scope="scope">
           <p>{{parseTime(scope.row.createTime || '')}}</p>
         </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="用户账号" width="140" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="订单金额" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="支付方式" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="支付状态" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="订单来源" width="100" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="订单状态" width="100" align="center"></el-table-column>
+      <el-table-column prop="consigneeMobile" label="用户账号" width="140" align="center"></el-table-column>
+      <el-table-column prop="totalAmount" label="订单金额" width="100" align="center"></el-table-column>
+      <el-table-column prop="payName" label="支付方式" width="100" align="center"></el-table-column>
+      <el-table-column prop="payStatus" label="支付状态" width="100" align="center">
+        <template slot-scope="scope">
+          <p>{{ payStatus[scope.row.payStatus] }}</p>
+        </template>
+      </el-table-column>
+      <el-table-column prop="orderSource" label="订单来源" width="100" align="center"></el-table-column>
+      <el-table-column prop="orderStatus" label="订单状态" width="100" align="center">
+        <template slot-scope="scope">
+          <p>{{ orderStatus[scope.row.orderStatus] }}</p>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleLooktable(scope.row)">查看订单</el-button>
@@ -93,15 +104,34 @@ export default {
       count: 0,
       storeForm: {
         code: "",
-        user: "",
-        data: ""
+        consignee: "",
+        consigneeMobile: "",
+        beginTime: ""
       },
       tableData: [],
       pageSize: 10,
       currentPage: 1,
       total: 0,
       productIdList: [],
-      loading: true
+      loading: true,
+      payStatus: {
+        "-1": "无效",
+        "0": "待支付",
+        "1": "部分支付",
+        "2": "已支付"
+      },
+      orderStatus: {
+        "-1": "无效",
+        "0": "已创建",
+        "5": "已确认",
+        "10": "已支付",
+        "13": "商户确认",
+        "15": "已发货",
+        "20": "已完成",
+        "25": "已取消",
+        "30": "退款中",
+        "35": "已退款"
+      }
     };
   },
   components: {
@@ -109,7 +139,7 @@ export default {
   },
   mounted: function() {
     let currentPage = this.currentPage;
-    this.productList({ currentPage });
+    this.getOrderList({ currentPage, mode: 0 });
   },
   methods: {
     parseTime,
@@ -118,7 +148,7 @@ export default {
       try {
         const ret = await api.batchPart(data);
         if (ret.data.code == 200) {
-          this.productList({ currentPage: this.currentPage });
+          this.getOrderList({ currentPage: this.currentPage });
         } else {
           console.log("设置列表失败");
         }
@@ -127,26 +157,26 @@ export default {
       }
     },
     // 列表
-    async productList(params) {
+    async getOrderList(params) {
       const query = {
         ...params,
-        shopName: this.storeForm.title || "",
-        productId: this.storeForm.ID || "",
-        productName: this.storeForm.name || "",
-        minPrice: this.storeForm.minMoney || "",
-        maxPrice: this.storeForm.maxMoney || "",
-        minSaleCount: this.storeForm.minNumber || "",
-        maxSaleCount: this.storeForm.maxNumber || "",
-        upSelling: "1",
+        shopId: 5,
+        orderType: "normal",
+        consignee: this.storeForm.consignee || "",
+        consigneeMobile: this.storeForm.consigneeMobile || "",
+        beginTime: this.storeForm.beginTime || "",
+        orderNo: this.storeForm.code || "",
         pageSize: 10
       };
       try {
-        const ret = await api.productList(query);
+        const ret = await api.getOrderList(query);
+        console.log(ret, "配送订单列表");
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
           this.tableData = ret.data.data.pageData;
           this.total = ret.data.data.totalCount;
         } else {
+          this.loading = false;
           this.tableData = [];
           this.total = 0;
         }
@@ -157,20 +187,47 @@ export default {
 
     hendleType(index) {
       this.count = index;
+      switch (index) {
+        case 0:
+          this.getOrderList({ currentPage: 1, mode: 0 });
+          break;
+        case 1:
+          this.getOrderList({ currentPage: 1, mode: 1 });
+          break;
+        case 2:
+          this.getOrderList({ currentPage: 1, mode: 2 });
+          break;
+        case 3:
+          this.getOrderList({ currentPage: 1, mode: 3 });
+          break;
+        case 4:
+          this.getOrderList({ currentPage: 1, mode: 4 });
+          break;
+        case 5:
+          this.getOrderList({ currentPage: 1, mode: 5 });
+          break;
+        case 6:
+          this.getOrderList({ currentPage: 1, mode: 6 });
+          break;
+        case 7:
+          this.getOrderList({ currentPage: 1, mode: 7 });
+          break;
+      }
     },
     // 搜索
     handleSearch(data) {
       const query = {
         currentPage: 1
       };
-      this.productList(query);
+      this.getOrderList(query);
     },
     // 重置
     resetForm() {
       this.storeForm = {
-        city: "",
-        user: "",
-        class: ""
+        code: "",
+        consignee: "",
+        consigneeMobile: "",
+        beginTime: ""
       };
     },
     handleCurrentChange(val) {
@@ -180,11 +237,14 @@ export default {
     // 批量删除
     handleBatchDel() {},
     // 批量关闭
-    handleBatchLower() {},
+    handleBatchClose() {},
     // 查看订单
-    handleLooktable() {
+    handleLooktable(options) {
       this.$router.push({
-        name: `servicesOrderDeliveryDetail`
+        name: `servicesOrderDeliveryDetail`,
+        params: {
+          orderNo: options.orderNo
+        }
       });
     }
   }
