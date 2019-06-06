@@ -168,7 +168,7 @@ export default {
       };
       try {
         const ret = await api.productList(query);
-        console.log(ret,'liebia0')
+        console.log(ret, "liebia0");
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
           this.tableShopData = ret.data.data.pageData;
@@ -234,14 +234,7 @@ export default {
       this.productList({ currentPage: val });
     },
     // 查看订单
-    handleLooktable(options) {
-      this.$router.push({
-        name: `servicesstoreAdd`,
-        params: {
-          id: options.id
-        }
-      });
-    },
+    handleLooktable(options) {},
     // 审核
     handleExaminetable(options) {
       this.showModal = true;

@@ -548,6 +548,34 @@ export function setVirtualProduct(data) {
     data
   });
 }
+// 服务商品管理--获取预约列表
+export function getProdReserveListByPid(query) {
+  return request({
+    url: "sfy-mall-v2/m/prodReserve/getListByPid",
+    method: "get",
+    params:  query
+  });
+}
+
+// 删除预约信息
+export function removeProdReserve(query) {
+  return request({
+    url: "sfy-mall-v2/m/prodReserve/remove",
+    method: "post",
+    params:  query
+  });
+}
+
+// 批量添加时间段
+export function batchAddProdReserve(data) {
+  return request({
+    url: "sfy-mall-v2/m/prodReserve/batchAdd",
+    method: "post",
+    data
+  });
+}
+
+
 // APP配置--首页配置
 export function getPageList(query) {
   return request({
@@ -746,6 +774,8 @@ export function getMyOrderCode(query) {
     params:  query
   });
 }
+
+// 
 
 
 

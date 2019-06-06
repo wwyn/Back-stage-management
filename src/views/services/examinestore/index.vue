@@ -62,9 +62,9 @@
           <i @click="onExamineFormCancel" class="iconfont icon-gongjutianjia"></i>
         </div>
         <div>
-          <el-form ref="storeExamineForm" :model="storeExamineForm" label-width="80px" >
+          <el-form ref="storeExamineForm" :model="storeExamineForm" label-width="80px">
             <el-form-item label="商家名称">
-                <p>{{ storeExamineForm.storeName }}</p>
+              <p>{{ storeExamineForm.storeName }}</p>
               <!-- <el-input v-model="storeExamineForm.storeName"></el-input> -->
             </el-form-item>
             <el-form-item label="商家审核">
@@ -110,7 +110,7 @@ export default {
       total: 0,
       productIdList: [],
       loading: true,
-      showModal: false,
+      showModal: false
     };
   },
   components: {
@@ -199,31 +199,23 @@ export default {
       this.productList({ currentPage: val });
     },
     // 查看订单
-    handleLooktable(options) {
-      this.$router.push({
-        name: `servicesStoreAdd`,
-        params: {
-          id: options.id
-        }
-      });
-    },
+    handleLooktable(options) {},
     // 审核
     handleExaminetable(options) {
-        this.showModal = true;
+      this.showModal = true;
     },
     // 审核确认
     onExamineFormSubmit() {
-        console.log(this.storeExamineForm,'审核表单')
-
+      console.log(this.storeExamineForm, "审核表单");
     },
     // 审核取消
     onExamineFormCancel() {
-       this.showModal = false; 
-        this.storeExamineForm=  {
+      this.showModal = false;
+      this.storeExamineForm = {
         storeName: "",
         examine: "",
         desc: ""
-      }
+      };
     }
   }
 };
@@ -310,8 +302,8 @@ export default {
       > div:nth-child(2) {
         padding: 20px 40px;
         /deep/ .el-textarea__inner {
-            width: 400px;
-            height: 100px;
+          width: 400px;
+          height: 100px;
         }
       }
     }

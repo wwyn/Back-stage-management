@@ -25,6 +25,7 @@
       </div>
       <div>
         <div class="select-sort">
+          <div>选择分类</div>
           <div
             v-for="(item,index) in selectSortList"
             :key="item.id"
@@ -57,16 +58,33 @@
           <el-form-item label="商品分类" prop="name">
             <p>{{ this.value }}</p>
           </el-form-item>
+          <el-form-item label="商品图片" prop="thumbnailsUrl">
+            <el-upload
+              v-model="ruleForm.thumbnailsUrl"
+              class="avatar-uploader-thumbnailsUrl"
+              action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+              :show-file-list="false"
+              :on-success="handleThumbnailsUrlSuccess"
+              :before-upload="beforeThumbnailsUrlUpload"
+            >
+              <img
+                v-if="ruleForm.thumbnailsUrl"
+                :src="ruleForm.thumbnailsUrl"
+                class="avatar-thumbnailsUrl"
+              >
+              <i v-else class="el-icon-plus avatar-uploader-icon-thumbnailsUrl"></i>
+            </el-upload>
+          </el-form-item>
           <el-form-item label="商品图片" prop="imageUrl">
             <el-upload
               v-model="ruleForm.imageUrl"
               class="avatar-uploader"
               action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
               :show-file-list="false"
-              :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload"
+              :on-success="handleImageUrlSuccess"
+              :before-upload="beforeImageUrlUpload"
             >
-              <img v-if="imageUrl" :src="imageUrl" class="avatar">
+              <img v-if="ruleForm.imageUrl" :src="ruleForm.imageUrl" class="avatar">
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
           </el-form-item>
@@ -98,6 +116,9 @@
           <el-form-item v-show="this.value=='券码'" label="购买须知" prop="notes">
             <el-input type="textarea" v-model="ruleForm.notes"></el-input>
           </el-form-item>
+          <el-form-item v-show="this.value=='预定'" label="服务详情" prop="serviceExplain">
+            <el-input type="textarea" v-model="ruleForm.serviceExplain"></el-input>
+          </el-form-item>
           <el-form-item v-show="this.value=='预定'" label="预定须知" prop="notes">
             <el-input type="textarea" v-model="ruleForm.notes"></el-input>
           </el-form-item>
@@ -119,13 +140,13 @@
       <div>
         <div>
           <p @click="addTime">添加时间</p>
-          <el-table :data="tableData" border style="width: 100%">
-            <el-table-column prop="date" label="时间" width="180"></el-table-column>
-            <el-table-column prop="name" label="可约人数" width="180"></el-table-column>
+          <el-table :data="addTimeTableData" border style="width: 100%">
+            <el-table-column prop="time" label="时间" width="180"></el-table-column>
+            <el-table-column prop="quantity" label="可约人数" width="180"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button type="text" size="small" @click="handleEditor">编辑</el-button>
-                <el-button type="text" size="small">删除</el-button>
+                <el-button type="text" size="small" @click="handleEditorTime">编辑</el-button>
+                <el-button type="text" size="small" @click="handleDelTime(scope.row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -167,7 +188,7 @@
           <el-button type="primary" @click="handleTimeAdd">添加时间段</el-button>
           <p></p>
           <el-form-item class="button">
-            <el-button type="primary" @click="handleConfirm">确认</el-button>
+            <el-button type="primary" @click="handleTimeConfirm">确认</el-button>
             <el-button @click="handleCancel">取消</el-button>
           </el-form-item>
         </el-form>
@@ -183,7 +204,7 @@ export default {
       active: 1,
       selectSortList: [],
       value: "券码",
-      serveId: "",
+      serveId: 1001,
       count: 0,
       showSort: true,
       showBasic: false,
@@ -194,6 +215,7 @@ export default {
       imageUrl: "",
       ruleForm: {
         imageUrl: "",
+        thumbnailsUrl: "",
         productName: "",
         tag: [],
         description: "",
@@ -201,67 +223,157 @@ export default {
         salePrice: "",
         discountExplain: "",
         notice: "",
-        notes: ""
+        notes: "",
+        serviceExplain: ""
       },
       rules: {
         productName: [
           { required: true, message: "请输入活动名称", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+          { min: 1, max: 60, message: "长度在 1 到 60 个字符", trigger: "blur" }
+        ],
+        imageUrl: [
+          { required: true, message: "请选择商品图片", trigger: "change" }
+        ],
+        description: [
+          { required: true, message: "请输入商品介绍", trigger: "blur" },
+          {
+            min: 1,
+            max: 200,
+            message: "长度在 1 到 200 个字符",
+            trigger: "blur"
+          }
+        ],
+        marketPrice: [
+          { required: true, message: "请输入商品原价", trigger: "blur" },
+          { min: 1, max: 20, message: "长度在 1 到 20 个字符", trigger: "blur" }
+        ],
+        salePrice: [
+          { required: true, message: "请输入商品现价", trigger: "blur" },
+          { min: 1, max: 20, message: "长度在 1 到 20 个字符", trigger: "blur" }
+        ],
+        discountExplain: [
+          { required: true, message: "请输入优惠详情", trigger: "blur" },
+          {
+            min: 1,
+            max: 200,
+            message: "长度在 1 到 200 个字符",
+            trigger: "blur"
+          }
+        ],
+        notice: [
+          { required: true, message: "请输入公告说明", trigger: "blur" },
+          {
+            min: 1,
+            max: 200,
+            message: "长度在 1 到 200 个字符",
+            trigger: "blur"
+          }
+        ],
+        serviceExplain: [
+          { required: true, message: "请输入服务详情", trigger: "blur" },
+          {
+            min: 1,
+            max: 200,
+            message: "长度在 1 到 200 个字符",
+            trigger: "blur"
+          }
+        ],
+        notes: [
+          { required: true, message: "请输入购买须知", trigger: "blur" },
+          {
+            min: 1,
+            max: 200,
+            message: "长度在 1 到 200 个字符",
+            trigger: "blur"
+          }
         ]
       },
       //   预约
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1518 弄",
-          zip: 200333
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          province: "上海",
-          city: "普陀区",
-          address: "上海市普陀区金沙江路 1517 弄",
-          zip: 200333
-        }
-      ],
+      productId: "",
+      addTimeTableData: [],
       timeList: [{ time: "", number: "" }]
     };
   },
   mounted() {
+    if (this.$route.params.id) {
+      this.productId = this.$route.params.id;
+      this.value = this.$route.params.value;
+      this.getProductDetail({ id: this.$route.params.id });
+      this.goBasic();
+    }
     this.categoryList();
   },
   methods: {
     // 设置服务类商品
-    async setVirtualProduct() {
-      const query = {
+    async setVirtualProduct(query,time) {
+      const _query = {
+        ...query,
         anytimeReturn:
           this.ruleForm.tag.indexOf("anytimeReturn") != -1 ? "1" : "0",
         expiredReturn:
           this.ruleForm.tag.indexOf("expiredReturn") != -1 ? "1" : "0",
         canReturn: this.ruleForm.tag.indexOf("canReturn") != -1 ? "1" : "0",
 
-        categoryId: this.ruleForm.serveId || 0,
+        categoryId: this.serveId || "",
         description: this.ruleForm.description || "",
         discountExplain: this.ruleForm.discountExplain || "",
         marketPrice: this.ruleForm.marketPrice || 0,
         notes: this.ruleForm.notes || "",
         notice: this.ruleForm.notice || "",
         pic: this.ruleForm.imageUrl || "",
+        thumbnailsUrl: this.ruleForm.thumbnailsUrl || "",
         productName: this.ruleForm.productName || "",
-        salePrice: this.ruleForm.salePrice || 0
+        salePrice: this.ruleForm.salePrice || 0,
+        serviceExplain: this.ruleForm.serviceExplain || ""
       };
       try {
-        const ret = await api.setVirtualProduct(query);
+        const ret = await api.setVirtualProduct(_query);
         if (ret.data.code == 200) {
-          this.active = 4;
-          this.showSort = false;
-          this.showBasic = false;
-          this.showTime = false;
-          this.showSubmit = true;
+          console.log(ret, "设置商品");
+          if (time == 0) {
+            this.active = 4;
+            this.showSort = false;
+            this.showBasic = false;
+            this.showTime = false;
+            this.showSubmit = true;
+          } else if (time == 1) {
+            this.active = 3;
+            this.showSort = false;
+            this.showBasic = false;
+            this.showTime = true;
+            this.productId = ret.data.data.id;
+            this.getProdReserveListByPid();
+          }
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取商品详情
+    async getProductDetail(query) {
+      try {
+        const ret = await api.getProductDetail(query);
+        console.log(ret, "商品详情");
+        if (ret.data.code == 200) {
+          let data = ret.data.data;
+          this.ruleForm = {
+            imageUrl: data.mainPic || "",
+            thumbnailsUrl: data.thumbnailsUrl || "",
+            productName: data.productName || "",
+            tag:
+              [
+                data.canReturn == 1 ? "canReturn" : "",
+                data.anytimeReturn == 1 ? "anytimeReturn" : "",
+                data.expiredReturn == 1 ? "expiredReturn" : ""
+              ] || [],
+            description: data.metaDescription || "",
+            marketPrice: data.marketPrice || "",
+            salePrice: data.salePrice || "",
+            discountExplain: data.discountExplain || "",
+            notice: data.notice || "",
+            notes: data.notes || "",
+            serviceExplain: data.serviceExplain || ""
+          };
         }
       } catch (e) {
         console.log(e.message);
@@ -279,6 +391,57 @@ export default {
         console.log(e.message);
       }
     },
+    // 获取时间段列表
+    async getProdReserveListByPid() {
+      let query = {
+        productId: this.productId
+      };
+      try {
+        const ret = await api.getProdReserveListByPid(query);
+        if (ret.data.code == 200) {
+          this.addTimeTableData = ret.data.data.categories;
+        } else {
+          this.addTimeTableData = [];
+          alert(ret.data.message);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 删除预约信息
+    async removeProdReserve(query) {
+      try {
+        const ret = await api.removeProdReserve(query);
+        console.log(ret, "删除预约信息");
+        if (ret.data.code == 200) {
+          this.getProdReserveListByPid();
+        } else {
+          alert(ret.data.message);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 批量添加预约时间
+    async batchAddProdReserve(query) {
+      try {
+        const ret = await api.batchAddProdReserve(query);
+        console.log(ret, "批量添加时间");
+        if (ret.data.code == 200) {
+          this.showModal = false;
+          this.timeList = [{ time: "", number: "" }];
+        } else {
+          alert(ret.data.message);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 删除预约时间
+    handleDelTime(options) {
+      this.removeProdReserve({ id: options.id });
+    },
+
     selectSort(index, val, id) {
       this.count = index;
       this.value = val;
@@ -292,11 +455,27 @@ export default {
       this.showBasic = true;
     },
     // 基本信息
-    handleAvatarSuccess(res, file) {
+    handleThumbnailsUrlSuccess(res, file) {
+      this.ruleForm.thumbnailsUrl = res.data[0];
+    },
+    beforeThumbnailsUrlUpload(file) {
+      const isJPEG = file.type === "image/jpeg";
+      const isPNG = file.type === "image/png";
+      const isJPG = file.type === "image/jpg";
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isJPG && !isPNG && !isJPEG) {
+        this.$message.error("上传头像图片只能是 JPG/PNG/JPEG 格式!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 2MB!");
+      }
+      return (isJPG || isPNG || isJPEG) && isLt2M;
+    },
+    handleImageUrlSuccess(res, file) {
       this.imageUrl = res.data[0];
       this.ruleForm.imageUrl = res.data[0];
     },
-    beforeAvatarUpload(file) {
+    beforeImageUrlUpload(file) {
       const isJPEG = file.type === "image/jpeg";
       const isPNG = file.type === "image/png";
       const isJPG = file.type === "image/jpg";
@@ -315,13 +494,17 @@ export default {
       this.showBasic = false;
     },
     goSubmit() {
-      this.active = 3;
-      this.showSort = false;
-      this.showBasic = false;
-      this.showSubmit = true;
-      console.log(this.ruleForm, "券码");
+      if (this.productId != "") {
+        let query = {productId: this.productId};
+        this.setVirtualProduct(query,"0");
+      } else {
+        let query = {};
+        this.setVirtualProduct(query,"0");
+      }
     },
+    // 返回列表
     goCommodity() {
+      this.productId = "";
       this.$router.push({
         path: "/services-service"
       });
@@ -340,25 +523,33 @@ export default {
       this.showTime = true;
     },
     goTime() {
-      this.active = 3;
+      if (this.productId != "") {
+        let query = {productId: this.productId};
+        this.setVirtualProduct(query,"1");
+      } else {
+        let query = {};
+        this.setVirtualProduct(query,"1");
+      }
+    },
+    // 预约提交
+    goSubmitTime() {
+      this.active = 4;
       this.showSort = false;
       this.showBasic = false;
-      this.showTime = true;
-    },
-    goSubmitTime() {
-      this.setVirtualProduct();
+      this.showSubmit = true;
+      this.showTime = false;
     },
     addTime() {
       this.showModal = true;
     },
-    handleEditor() {
+    handleEditorTime() {
       this.showModal = true;
     },
-    handleConfirm() {
-      this.showModal = false;
-      console.log(this.timeList);
+    handleTimeConfirm() {
+      this.batchAddProdReserve();
     },
     handleCancel() {
+      this.timeList = [{ time: "", number: "" }];
       this.showModal = false;
     },
     handleTimeAdd() {
@@ -544,6 +735,30 @@ export default {
   .el-button--primary {
     background-color: @color;
   }
+  .avatar-thumbnailsUrl {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+  .avatar-uploader-icon-thumbnailsUrl {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar-uploader-thumbnailsUrl /deep/ .el-upload {
+    border: 1px dashed #999;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader-thumbnailsUrl .el-upload:hover {
+    border-color: #409eff;
+  }
+
   .avatar-uploader /deep/ .el-upload {
     border: 1px dashed #999;
     border-radius: 6px;
@@ -557,13 +772,13 @@ export default {
   .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
-    width: 178px;
+    width: 400px;
     height: 178px;
     line-height: 178px;
     text-align: center;
   }
   .avatar {
-    width: 178px;
+    width: 400px;
     height: 178px;
     display: block;
   }

@@ -51,26 +51,26 @@
       style="width: 100%"
     >
       <el-table-column type="selection" width="55" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="编号" width="150" align="center"></el-table-column>
+      <el-table-column prop="productCode" label="编号" width="150" align="center"></el-table-column>
       <el-table-column label="品牌商标" width="120" align="center">
         <template slot-scope="scope">
-          <img class="brandImg" :src="scope.row.logo" alt>
+          <img class="brandImg" :src="scope.row.thumbnailsUrl" alt>
         </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="商品名称" width="180" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="原价" width="120" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="现价" width="120" align="center"></el-table-column>
-      <el-table-column prop="券码" label="类别" width="100" align="center"></el-table-column>
+      <el-table-column prop="productName" label="商品名称" width="180" align="center"></el-table-column>
+      <el-table-column prop="marketPrice" label="原价" width="120" align="center"></el-table-column>
+      <el-table-column prop="salePrice" label="现价" width="120" align="center"></el-table-column>
+      <el-table-column prop="categoryName" label="类别" width="100" align="center"></el-table-column>
       <el-table-column prop="upSelling" label="审核状态" width="130" align="center">
         <template slot-scope="scope">
-          <p>未通过</p>
+          <p>{{scope.row.status==1?'审核通过':'未通过'}}</p>
           <el-button @click="handleDetail(scope.row)" type="text" size="small">审核详情</el-button>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small">查看</el-button>
-          <el-button type="text" size="small" @click="handleEditor">编辑</el-button>
+          <el-button type="text" size="small" @click="handleEditor(scope.row)">编辑</el-button>
           <el-button
             type="text"
             size="small"
@@ -101,7 +101,7 @@
           <p>审核详情</p>
           <i class="iconfont icon-gongjutianjia" @click="hendleclose"></i>
         </div>
-        <el-table :data="tableData" border style="width: 100%">
+        <el-table :data="examineTableData" border style="width: 100%">
           <el-table-column prop="createTime" label="审核时间" width="160" align="center">
             <template slot-scope="scope">
               <p>{{ parseTime(scope.row.createTime) }}</p>
@@ -129,7 +129,7 @@ export default {
         { name: "未上架", number: 10000 },
         { name: "待审核", number: 10000 }
       ],
-      tableData: [],
+      examineTableData: [],
       count: 0,
       formInline: {
         business: "",
@@ -213,9 +213,21 @@ export default {
     async setPart(query) {
       try {
         const ret = await api.setPart(query);
-        console.log(ret, "shezhishangpin");
         if (ret.data.code == 200) {
           this.productList({ currentPage: this.currentPage });
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 审核详情
+    async getLogList(query) {
+      try {
+        const ret = await api.getLogList(query);
+        if (ret.data.code == 200) {
+          this.examineTableData = ret.data.data;
+        } else {
+          alert(ret.data.message);
         }
       } catch (e) {
         console.log(e.message);
@@ -309,9 +321,10 @@ export default {
     // 编辑
     handleEditor(options) {
       this.$router.push({
-        name: `eCommerceCommodity`,
+        name: `servicesServiceCommoditysort`,
         params: {
-          id: options.id
+          id: options.id,
+          value: options.categoryName
         }
       });
     },
@@ -323,7 +336,11 @@ export default {
     },
     // 审核详情
     handleDetail(options) {
-      let id = options.id;
+      const query = {
+        logType: "check_product",
+        target: options.id
+      };
+      this.getLogList(query);
       this.showModal = true;
     },
     hendleclose() {
