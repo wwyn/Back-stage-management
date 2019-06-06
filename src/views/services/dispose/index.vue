@@ -443,6 +443,7 @@ export default {
         if (ret.data.code == 200) {
           this.showModal = false;
           this.showType = false;
+          this.showStore = false;
           this.typeId = "";
           this.typeForm = {
             name: "",
@@ -473,7 +474,6 @@ export default {
     async getCategoriesById(query) {
       try {
         const ret = await api.getCategoriesById(query);
-        console.log(ret, "分类详情");
         if (ret.data.code == 200) {
           this.typeId = ret.data.data.id;
           this.fileList = [{ name: "分类图标", url: ret.data.data.icon }];
@@ -499,6 +499,7 @@ export default {
     haneldeTypeAdd() {
       this.showModal = true;
       this.showType = true;
+      this.showStore = false;
     },
     // 添加分类确认
     submitTypeForm() {
@@ -515,6 +516,7 @@ export default {
     cancelTypeForm() {
       this.showModal = false;
       this.showType = false;
+       this.showStore = false;
       this.typeId = "";
       this.typeForm = {
         name: "",
@@ -526,6 +528,7 @@ export default {
     handleTypeEditor(options) {
       this.showModal = true;
       this.showType = true;
+      this.showStore = false;
       let query = {
         id: options.id
       };
@@ -623,6 +626,7 @@ export default {
         if (ret.data.code == 200) {
           this.showModal = false;
           this.showStore = false;
+          this.showType = false;
           this.shopIds = [];
           this.getVipShops();
         }
@@ -649,6 +653,7 @@ export default {
     haneldeSelectStore() {
       this.showModal = true;
       this.showStore = true;
+      this.showType = false;
       this.isVip = true;
       this.getShopList({ vip: 1 });
     },
@@ -677,6 +682,7 @@ export default {
     cancelSearchStore() {
       this.showModal = false;
       this.showStore = false;
+      this.showType = false;
       this.shopIds = [];
     },
     // 分页
@@ -708,6 +714,7 @@ export default {
         if (ret.data.code == 200) {
           this.showModal = false;
           this.showStore = false;
+          this.showType = false;
           this.shopIds = [];
           this.getCheckShops();
         }
@@ -742,6 +749,7 @@ export default {
     haneldeSelectStoreVip() {
       this.showModal = true;
       this.showStore = true;
+      this.showType = false;
       this.isVip = false;
       this.getShopList({ vip: 0 });
     }
