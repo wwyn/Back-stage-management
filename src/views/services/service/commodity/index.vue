@@ -188,8 +188,8 @@ export default {
       const query = {
         ...params,
         upSelling: 2,
-        shopName: this.formInline.user || "",
-        bigCategoryId: this.formInline.business || "",
+        productName: this.formInline.user || "",
+        categoryId: this.formInline.business || "",
         pageSize: 10,
         virtual: 1
       };

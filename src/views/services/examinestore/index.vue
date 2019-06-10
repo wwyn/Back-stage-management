@@ -32,16 +32,20 @@
       style="width: 100%"
     >
       <!-- <el-table-column type="selection" width="50" align="center"></el-table-column> -->
-      <el-table-column prop="brandName" label="商家名称" width="160" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="所在地区" width="180" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="联系人" width="140" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="联系方式" width="140" align="center"></el-table-column>
+      <el-table-column prop="shopName" label="商家名称" width="160" align="center"></el-table-column>
+      <el-table-column prop="city" label="所在地区" width="180" align="center"></el-table-column>
+      <el-table-column prop="contact" label="联系人" width="140" align="center"></el-table-column>
+      <el-table-column prop="contactPosition" label="联系方式" width="140" align="center"></el-table-column>
       <el-table-column label="创建时间" width="140" align="center">
         <template slot-scope="scope">
-          <p>{{parseTime(scope.row.createTime || '')}}</p>
+          <p>{{parseTime(scope.row.businessHours || '')}}</p>
         </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="状态" width="120" align="center"></el-table-column>
+      <el-table-column prop label="状态" width="120" align="center">
+        <template slot-scope="scope">
+          <p>{{ scope.row.status==2?'已审核':'未审核' }}</p>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleLooktable(scope.row)">查看订单</el-button>
@@ -69,8 +73,8 @@
             </el-form-item>
             <el-form-item label="商家审核">
               <el-radio-group v-model="storeExamineForm.examine">
-                <el-radio label="审核通过"></el-radio>
-                <el-radio label="审核不通过"></el-radio>
+                <el-radio label="2">审核通过</el-radio>
+                <el-radio label="3">审核不通过</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="反馈详情">
@@ -99,7 +103,7 @@ export default {
         type: ""
       },
       storeExamineForm: {
-        storeName: "哈哈哈哈",
+        storeName: "",
         examine: "",
         desc: ""
       },
@@ -110,7 +114,8 @@ export default {
       total: 0,
       productIdList: [],
       loading: true,
-      showModal: false
+      showModal: false,
+      shopId: ""
     };
   },
   components: {
@@ -118,7 +123,7 @@ export default {
   },
   mounted: function() {
     let currentPage = this.currentPage;
-    this.productList({ currentPage });
+    this.getShopList({ currentPage });
     this.getShoptypes();
   },
   methods: {
@@ -136,22 +141,17 @@ export default {
         console.log(e.message);
       }
     },
-    // 列表
-    async productList(params) {
+    // 商家列表
+    async getShopList(params) {
       const query = {
         ...params,
-        shopName: this.examineForm.title || "",
-        productId: this.examineForm.ID || "",
-        productName: this.examineForm.name || "",
-        minPrice: this.examineForm.minMoney || "",
-        maxPrice: this.examineForm.maxMoney || "",
-        minSaleCount: this.examineForm.minNumber || "",
-        maxSaleCount: this.examineForm.maxNumber || "",
-        upSelling: "1",
+        shopName: this.examineForm.name || "",
+        categoryId: this.examineForm.type || "",
         pageSize: 10
       };
       try {
-        const ret = await api.productList(query);
+        const ret = await api.getShopList(query);
+        console.log(ret, "获取商家列表");
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
           this.tableData = ret.data.data.pageData;
@@ -178,7 +178,26 @@ export default {
         console.log(e.message);
       }
     },
-
+    // 商家审核
+    async examineShop(query) {
+      try {
+        const ret = await api.examineShop(query);
+        if (ret.data.code == 200 && ret.data.data) {
+          this.shopId = '';
+          this.showModal = false;
+          this.storeExamineForm = {
+            storeName: "",
+            examine: "",
+            desc: ""
+          };
+          this.getShopList({ currentPage: this.currentPage });
+        } else {
+          alert(ret.data.message);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     // 搜索
     handleSearch(data) {
       const query = {
@@ -193,6 +212,7 @@ export default {
         user: "",
         class: ""
       };
+      this.getShopList({ currentPage: 1 })
     },
     handleCurrentChange(val) {
       this.currentPage = val;
@@ -202,14 +222,22 @@ export default {
     handleLooktable(options) {},
     // 审核
     handleExaminetable(options) {
+      this.shopId = options.id;
+      this.storeExamineForm.storeName = options.shopName;
       this.showModal = true;
     },
     // 审核确认
     onExamineFormSubmit() {
-      console.log(this.storeExamineForm, "审核表单");
+      let query = {
+        shopId: this.shopId,
+        status: this.storeExamineForm.examine,
+        reason: this.storeExamineForm.desc
+      };
+      this.examineShop(query);
     },
     // 审核取消
     onExamineFormCancel() {
+      this.shopId = '';
       this.showModal = false;
       this.storeExamineForm = {
         storeName: "",

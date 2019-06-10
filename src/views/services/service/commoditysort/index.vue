@@ -182,7 +182,7 @@
               ></el-time-select>
             </el-form-item>
             <el-form-item label="可预约人数">
-              <el-input v-model="item.number" placeholder="请填写"></el-input>
+              <el-input v-model="item.quantity" placeholder="请填写"></el-input>
             </el-form-item>
           </div>
           <el-button type="primary" @click="handleTimeAdd">添加时间段</el-button>
@@ -291,7 +291,7 @@ export default {
       //   预约
       productId: "",
       addTimeTableData: [],
-      timeList: [{ time: "", number: "" }]
+      timeList: [{ time: "", quantity: "" }]
     };
   },
   mounted() {
@@ -305,7 +305,7 @@ export default {
   },
   methods: {
     // 设置服务类商品
-    async setVirtualProduct(query,time) {
+    async setVirtualProduct(query, time) {
       const _query = {
         ...query,
         anytimeReturn:
@@ -429,7 +429,7 @@ export default {
         console.log(ret, "批量添加时间");
         if (ret.data.code == 200) {
           this.showModal = false;
-          this.timeList = [{ time: "", number: "" }];
+          this.timeList = [{ time: "", quantity: "" }];
         } else {
           alert(ret.data.message);
         }
@@ -495,11 +495,11 @@ export default {
     },
     goSubmit() {
       if (this.productId != "") {
-        let query = {productId: this.productId};
-        this.setVirtualProduct(query,"0");
+        let query = { productId: this.productId };
+        this.setVirtualProduct(query, "0");
       } else {
         let query = {};
-        this.setVirtualProduct(query,"0");
+        this.setVirtualProduct(query, "0");
       }
     },
     // 返回列表
@@ -524,11 +524,11 @@ export default {
     },
     goTime() {
       if (this.productId != "") {
-        let query = {productId: this.productId};
-        this.setVirtualProduct(query,"1");
+        let query = { productId: this.productId };
+        this.setVirtualProduct(query, "1");
       } else {
         let query = {};
-        this.setVirtualProduct(query,"1");
+        this.setVirtualProduct(query, "1");
       }
     },
     // 预约提交
@@ -546,14 +546,19 @@ export default {
       this.showModal = true;
     },
     handleTimeConfirm() {
-      this.batchAddProdReserve();
+      let query = {
+        productId: this.productId,
+        reserveItems:this.timeList,
+      };
+      console.log(this.timeList,'时间')
+      this.batchAddProdReserve(query);
     },
     handleCancel() {
-      this.timeList = [{ time: "", number: "" }];
+      this.timeList = [{ time: "", quantity: "" }];
       this.showModal = false;
     },
     handleTimeAdd() {
-      this.timeList.push({ time: "", number: "" });
+      this.timeList.push({ time: "", quantity: "" });
     }
   }
 };

@@ -183,8 +183,8 @@ export default {
       const query = {
         ...params,
         upSelling: 2,
-        shopName: this.formInline.user || "",
-        bigCategoryId: this.formInline.business || "",
+        productName: this.formInline.user || "",
+        categoryId: this.formInline.business || "",
         pageSize: 10,
         virtual: 0
       };
@@ -208,7 +208,6 @@ export default {
     async getLogList(query) {
       try {
         const ret = await api.getLogList(query);
-        console.log(ret, "审核详情");
         if (ret.data.code == 200 && ret.data.data) {
           this.detailTableData = ret.data.data;
         } else {
@@ -222,11 +221,10 @@ export default {
     async batchPart(data) {
       try {
         const ret = await api.batchPart(data);
-        console.log(ret, "批量设置");
         if (ret.data.code == 200) {
           this.productList({ currentPage: this.currentPage });
         } else {
-          console.log("设置列表失败");
+          alert(ret.data.message)
         }
       } catch (e) {
         console.log(e.message);

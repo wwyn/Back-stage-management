@@ -21,9 +21,9 @@
         <el-select v-model="examineForm.storeName" placeholder="请选择商家名称">
           <el-option
             v-for="item in storeNameList"
-            :key="item.type"
-            :label="item.name"
-            :value="item.type"
+            :key="item.id"
+            :label="item.shopName"
+            :value="item.shopName"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -47,18 +47,22 @@
       style="width: 100%"
     >
       <!-- <el-table-column type="selection" width="50" align="center"></el-table-column> -->
-      <el-table-column prop="brandName" label="编号" width="90" align="center"></el-table-column>
+      <el-table-column prop="id" label="编号" width="90" align="center"></el-table-column>
       <el-table-column prop="brandName" label="商品图片" width="110" align="center">
         <template slot-scope="scope">
-          <img src alt>
+          <img :src="scope.row.thumbnailsUrl" alt>
         </template>
       </el-table-column>
-      <el-table-column prop="brandName" label="商品名称" width="130" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="价格" width="120" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="所属商家" width="120" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="商品类别" width="120" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="规格" width="110" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="状态" width="120" align="center"></el-table-column>
+      <el-table-column prop="productName" label="商品名称" width="130" align="center"></el-table-column>
+      <el-table-column prop="salePrice" label="价格" width="120" align="center"></el-table-column>
+      <el-table-column prop="shopName" label="所属商家" width="120" align="center"></el-table-column>
+      <el-table-column prop="typeName" label="商品类别" width="120" align="center"></el-table-column>
+      <el-table-column prop="查看" label="规格" width="110" align="center"></el-table-column>
+      <el-table-column prop="status" label="状态" width="120" align="center">
+        <template slot-scope="scope">
+          <p>{{ scope.row.status==0?'未审核':'已审核' }}</p>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="handleLooktable(scope.row)">查看订单</el-button>
@@ -117,7 +121,7 @@ export default {
         storeName: ""
       },
       goodsExamineForm: {
-        goodsName: "哈哈哈哈",
+        goodsName: "",
         examine: "",
         desc: ""
       },
@@ -139,6 +143,7 @@ export default {
   mounted: function() {
     let currentPage = this.currentPage;
     this.productList({ currentPage });
+    this.getShopList();
     this.categoryList();
   },
   methods: {
@@ -157,18 +162,32 @@ export default {
       }
     },
 
+    // 商家列表
+    async getShopList(params) {
+      try {
+        const ret = await api.getShopList(params);
+        if (ret.data.code == 200 && ret.data.data) {
+          this.storeNameList = ret.data.data.pageData;
+        } else {
+          this.storeNameList = [];
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     // 商品列表
     async productList(params) {
       const query = {
         ...params,
         productName: this.examineForm.name || "",
-        bigCategoryId: this.examineForm.type || "",
+        shopName: this.examineForm.storeName || "",
+        categoryId: this.examineForm.type || "",
         upSelling: 2,
         pageSize: 10
       };
       try {
         const ret = await api.productList(query);
-        console.log(ret, "liebia0");
+        console.log(ret, "商品列表");
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
           this.tableShopData = ret.data.data.pageData;
@@ -193,6 +212,7 @@ export default {
           };
           this.productId = "";
           this.showModal = false;
+          this.productList({ currentPage: this.currentPage })
         } else {
           console.log("审核失败");
         }
@@ -228,6 +248,7 @@ export default {
         user: "",
         class: ""
       };
+      this.productList({ currentPage: 1 })
     },
     handleCurrentChange(val) {
       this.currentPage = val;
@@ -252,6 +273,7 @@ export default {
     },
     // 审核取消
     onExamineFormCancel() {
+      this.productId = '';
       this.showModal = false;
       this.goodsExamineForm = {
         goodsName: "",
