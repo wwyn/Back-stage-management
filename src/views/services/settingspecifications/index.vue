@@ -185,8 +185,6 @@ export default {
         const ret = await api.getSpecsByShopId(query);
         console.log(ret, "获取规格列表");
         if (ret.data.code == 200 && ret.data.data) {
-          // this.tableData = ret.data.data;
-          console.log(this.tableData,'tableData11')
           const max = Math.max(
             ...ret.data.data.map(item => item.values.length)
           );
@@ -196,9 +194,7 @@ export default {
           for (let i = 1; i <= max; i++) {
             souceData.push({ label: `规格值${i}`, prop: `value${i}` });
           }   
-          console.log(souceData,'souceData')  
           this.columns = souceData;
-          console.log(this.columns,'columns') 
           const tableData = [];
           ret.data.data.forEach(item => {
             const values = item.values.reduce(
@@ -213,7 +209,6 @@ export default {
             });
           });
           this.tableData = tableData;
-          console.log(this.tableData,'this.tableData')
         } else {
           this.tableData = [];
         }

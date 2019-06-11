@@ -28,7 +28,7 @@
           >{{ item.name }}</div>
         </div>
         <p>
-          您当前选择的饮品是:
+          您当前选择的商品类别是:
           <span>{{ sortValue }}</span>
         </p>
         <el-button type="primary" @click="goBasic">下一步，填写商品信息</el-button>
@@ -49,10 +49,10 @@
           label-width="100px"
           class="demo-ruleForm"
         >
-          <el-form-item label="商品分类" prop="name">
+          <el-form-item label="商品分类" prop="type">
             <p>{{ this.sortValue }}</p>
           </el-form-item>
-          <el-form-item label="商品图片" prop="name">
+          <el-form-item label="商品图片" prop="imageUrl">
             <el-upload
               class="avatar-uploader"
               action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
@@ -60,33 +60,48 @@
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
             >
-              <img v-if="imageUrl" :src="imageUrl" class="avatar">
+              <img v-if="ruleForm.imageUrl" :src="ruleForm.imageUrl" class="avatar">
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="商品图片" prop="imageUrlBig">
+            <el-upload
+              class="avatar-uploader-big"
+              action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccessBig"
+              :before-upload="beforeAvatarUploadBig"
+            >
+              <img v-if="ruleForm.imageUrlBig" :src="ruleForm.imageUrlBig" class="avatar-big">
+              <i v-else class="el-icon-plus avatar-uploader-icon-big"></i>
             </el-upload>
           </el-form-item>
           <el-form-item label="商品名称" prop="name">
             <el-input v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="商品介绍" prop="name">
-            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          <el-form-item label="商品介绍" prop="introduce">
+            <el-input type="textarea" v-model="ruleForm.introduce"></el-input>
           </el-form-item>
-          <el-form-item label="商品销售价" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+          <el-form-item label="商品销售价" prop="sellingprice">
+            <el-input v-model="ruleForm.sellingprice"></el-input>
           </el-form-item>
-          <el-form-item label="折扣" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+          <el-form-item label="折扣" prop="discount">
+            <el-input v-model="ruleForm.discount"></el-input>
           </el-form-item>
-          <el-form-item label="打包费" prop="name">
-            <el-input v-model="ruleForm.name"></el-input>
+          <el-form-item label="打包费" prop="packprice">
+            <el-input v-model="ruleForm.packprice"></el-input>
           </el-form-item>
-          <el-form-item label="计量单位" prop="region">
-            <el-select v-model="ruleForm.region" placeholder="请选择活动区域">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+          <el-form-item label="计量单位" prop="metering">
+            <el-select v-model="ruleForm.metering" placeholder="请选择活动区域">
+              <el-option label="份" value="1"></el-option>
+              <el-option label="克" value="2"></el-option>
+              <el-option label="个" value="3"></el-option>
+              <el-option label="盒" value="4"></el-option>
+              <el-option label="束" value="5"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="备注" prop="name">
-            <el-input type="textarea" v-model="ruleForm.name"></el-input>
+          <el-form-item label="备注" prop="remarks">
+            <el-input type="textarea" v-model="ruleForm.remarks"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button @click="goSort">上一步,选择商品分类</el-button>
@@ -123,7 +138,7 @@
         </div>
         <div class="add-norms-btn">
           <div>
-            <p @click="addpriceBtn('标价')">添加商品标价</p>
+            <p @click="addpriceBtn">添加商品标价</p>
           </div>
         </div>
         <div>
@@ -142,7 +157,7 @@
         </div>
         <div class="add-norms-btn">
           <div>
-            <p @click="addpriceBtn('加价')">添加规格加价</p>
+            <p @click="addbatchingBtn">添加配料</p>
           </div>
         </div>
         <el-table :data="pricetableData" border style="width: 100%">
@@ -158,18 +173,18 @@
           <div>
             <el-form :model="selectForm" label-width="80px">
               <el-form-item
-                v-for="item in citiesList"
-                :key="item.name"
-                :label="item.name"
-                class="cities-list"
+                v-for="item in normList"
+                :key="item.spec"
+                :label="item.spec"
+                class="norm-list"
               >
-                <el-checkbox-group v-model="item.checkedCities">
-                  <el-checkbox v-for="val in item.children" :label="val" :key="val">{{val}}</el-checkbox>
+                <el-checkbox-group v-model="item.checkednorm" @change="handleCheckednormChange">
+                  <el-checkbox v-for="val in item.values" :label="val" :key="val.id">{{ val.value }}</el-checkbox>
                 </el-checkbox-group>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="onSubmit">确认</el-button>
-                <el-button>取消</el-button>
+                <el-button type="primary" @click="onAddnormsSubmit">确认</el-button>
+                <el-button @click="onAddnormsCancel">取消</el-button>
               </el-form-item>
             </el-form>
           </div>
@@ -201,6 +216,21 @@
           </div>
         </div>
       </div>
+      <div v-if="showAddBatching" class="addprice-modal">
+        <div>
+          <p>添加商品配料</p>
+          <div>
+            <span style="margin-bottom: 20px;display:inline-block;">配料选择:</span>
+            <el-checkbox-group v-model="checkedBatching" @change="handleCheckedBatchingChange">
+              <el-checkbox v-for="val in batchingList" :label="val" :key="val.id">{{ val.name }}</el-checkbox>
+            </el-checkbox-group>
+            <div style="margin-top: 20px;text-align: right;">
+              <el-button type="primary" @click="onAddBatchingSubmit">确认</el-button>
+              <el-button @click="onAddBatchingCancel">取消</el-button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div v-show="showSubmit" class="show-submmit">
       <p>
@@ -214,7 +244,7 @@
   </div>
 </template>
 <script>
-import { debug } from "util";
+import * as api from "@/api";
 export default {
   data() {
     return {
@@ -232,22 +262,42 @@ export default {
       showNorms: false,
       showSubmit: false,
       // 基本信息
-      imageUrl: "",
       ruleForm: {
-        name: ""
+        type: "",
+        name: "",
+        imageUrl: "",
+        imageUrlBig: "",
+        introduce: "",
+        sellingprice: "",
+        discount: "",
+        packprice: "",
+        metering: ""
       },
       rules: {
-        name: [
+        imageUrl: [
           { required: true, message: "请输入活动名称", trigger: "blur" },
           { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+        ],
+        imageUrlBig: [
+          { required: true, message: "请输入活动名称", trigger: "blur" },
+          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+        ],
+        sellingprice: [
+          { required: true, message: "请输入销售价格", trigger: "blur" },
+          { min: 1, max: 10, message: "长度在 1 到 10 个字符", trigger: "blur" }
+        ],
+        name: [
+          { required: true, message: "请输入商品名称", trigger: "blur" },
+          { min: 1, max: 30, message: "长度在 1 到 30 个字符", trigger: "blur" }
+        ],
+        introduce: [
+          { required: true, message: "请输入商品介绍", trigger: "blur" },
+          { min: 1, max: 60, message: "长度在 1 到 60 个字符", trigger: "blur" }
         ]
       },
       showAddnorms: false,
       selectForm: {},
-      citiesList: [
-        { name: "上海", children: ["闵行", "浦东", "宝山"], checkedCities: [] },
-        { name: "北京", children: ["闵行", "浦东", "宝山"], checkedCities: [] }
-      ],
+      normList: [],
       tableData: [
         {
           id: "12987122",
@@ -289,6 +339,9 @@ export default {
           label: "加料"
         }
       ],
+      showAddBatching: false,
+      checkedBatching: [],
+      batchingList: [],
       optionsvalue: "",
       pricetableData: [
         {
@@ -303,6 +356,46 @@ export default {
     };
   },
   methods: {
+    // 获取规格列表
+    async getSpecsByShopId() {
+      const query = {
+        shopId: 5
+      };
+      try {
+        const ret = await api.getSpecsByShopId(query);
+        console.log(ret, "获取规格列表");
+        if (ret.data.code == 200 && ret.data.data) {
+          let arr = ret.data.data;
+          let newArr = arr.map(item => ({
+            ...item,
+            checkednorm: []
+          }));
+          this.normList = newArr;
+        } else {
+          this.normList = [];
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取配料列表
+    async getParts() {
+      const query = {
+        shopId: 5
+      };
+      try {
+        const ret = await api.getParts(query);
+        console.log(ret, "获取配料列表");
+        if (ret.data.code == 200 && ret.data.data) {
+          this.batchingList = ret.data.data;
+        } else {
+          this.batchingList = [];
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    handleCheckednormChange(val) {},
     selectSort(index, val) {
       this.count = index;
       this.sortValue = val;
@@ -315,9 +408,25 @@ export default {
     },
     // 基本信息
     handleAvatarSuccess(res, file) {
-      this.imageUrl = res.data[0];
+      this.ruleForm.imageUrl = res.data[0];
     },
     beforeAvatarUpload(file) {
+      const isJPEG = file.type === "image/jpeg";
+      const isPNG = file.type === "image/png";
+      const isJPG = file.type === "image/jpg";
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isJPG && !isPNG && !isJPEG) {
+        this.$message.error("上传头像图片只能是 JPG/PNG/JPEG 格式!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 2MB!");
+      }
+      return (isJPG || isPNG || isJPEG) && isLt2M;
+    },
+    handleAvatarSuccessBig(res, file) {
+      this.ruleForm.imageUrlBig = res.data[0];
+    },
+    beforeAvatarUploadBig(file) {
       const isJPEG = file.type === "image/jpeg";
       const isPNG = file.type === "image/png";
       const isJPG = file.type === "image/jpg";
@@ -362,13 +471,22 @@ export default {
     },
     selectnormsBtn() {
       this.showAddnorms = true;
+      this.getSpecsByShopId();
     },
     selectNorms(val) {
       let arr = this.tableData.filter(item => item.id === val);
       this.pricetable = arr[0].values;
     },
-    addpriceBtn(val) {
+    addpriceBtn() {
       this.showAddPrice = true;
+    },
+    // 添加配料
+    addbatchingBtn() {
+      this.showAddBatching = true;
+      this.getParts();
+    },
+    handleCheckedBatchingChange() {
+
     },
     hendleAddprice() {
       this.showAddPrice = false;
@@ -378,8 +496,23 @@ export default {
       this.showAddPrice = false;
       this.pricetable = [];
     },
-    onSubmit() {
+    // 选择规格确认
+    onAddnormsSubmit() {
+      console.log(this.normList, "hhhhh");
       this.showAddnorms = false;
+    },
+    // 选择规格取消
+    onAddnormsCancel() {
+      this.showAddnorms = false;
+    },
+    // 选择配料确认
+    onAddBatchingSubmit() {
+      console.log(this.checkedBatching, "hhhhh");
+      this.showAddBatching = false;
+    },
+    // 选择配料取消
+    onAddBatchingCancel() {
+      this.showAddBatching = false;
     }
   }
 };
@@ -536,6 +669,30 @@ export default {
     height: 178px;
     display: block;
   }
+  //
+  .avatar-uploader-big /deep/ .el-upload {
+    border: 1px dashed #999;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader-big .el-upload:hover {
+    border-color: #409eff;
+  }
+  .avatar-uploader-icon-big {
+    font-size: 28px;
+    color: #8c939d;
+    width: 400px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar-big {
+    width: 400px;
+    height: 178px;
+    display: block;
+  }
   .add-norms-box {
     display: flex;
     justify-content: flex-start;
@@ -596,7 +753,7 @@ export default {
           background-color: #f1f1f1;
         }
       }
-      .cities-list {
+      .norm-list {
         margin-bottom: 0px;
       }
     }

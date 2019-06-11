@@ -35,6 +35,7 @@
     <div class="shop-tools">
       <div class="shop-batch">
         <p>数据列表</p>
+        <p @click="handleBatchAudit">批量审核</p>
       </div>
     </div>
     <el-table
@@ -44,11 +45,12 @@
       element-loading-background="#fff"
       :data="tableShopData"
       border
+      @selection-change="handleSelectionChange"
       style="width: 100%"
     >
-      <!-- <el-table-column type="selection" width="50" align="center"></el-table-column> -->
+      <el-table-column type="selection" width="50" align="center"></el-table-column>
       <el-table-column prop="id" label="编号" width="90" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="商品图片" width="110" align="center">
+      <el-table-column label="商品图片" width="110" align="center">
         <template slot-scope="scope">
           <img :src="scope.row.thumbnailsUrl" alt>
         </template>
@@ -84,7 +86,7 @@
         </div>
         <div>
           <el-form ref="goodsExamineForm" :model="goodsExamineForm" label-width="80px">
-            <el-form-item label="商家名称">
+            <el-form-item v-if="!isBatch" label="商家名称">
               <p>{{ goodsExamineForm.goodsName }}</p>
               <!-- <el-input v-model="goodsExamineForm.goodsName"></el-input> -->
             </el-form-item>
@@ -98,7 +100,8 @@
               <el-input type="textarea" v-model="goodsExamineForm.desc"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="onExamineFormSubmit">确定</el-button>
+              <el-button v-if="!isBatch" type="primary" @click="onExamineFormSubmit">确定</el-button>
+              <el-button v-if="isBatch" type="primary" @click="onBatchExamineFormSubmit">确定</el-button>
               <el-button @click="onExamineFormCancel">取消</el-button>
             </el-form-item>
           </el-form>
@@ -134,7 +137,8 @@ export default {
       productId: "",
       productIdList: [],
       loading: true,
-      showModal: false
+      showModal: false,
+      isBatch: false
     };
   },
   components: {
@@ -212,7 +216,7 @@ export default {
           };
           this.productId = "";
           this.showModal = false;
-          this.productList({ currentPage: this.currentPage })
+          this.productList({ currentPage: this.currentPage });
         } else {
           console.log("审核失败");
         }
@@ -220,18 +224,46 @@ export default {
         console.log(e.message);
       }
     },
-    // 批量设置商品列表
-    async batchPart(data) {
+    // 批量审核商品
+    async batchCheckProduct(data) {
       try {
-        const ret = await api.batchPart(data);
+        const ret = await api.batchCheckProduct(data);
+        console.log(ret,'piliang')
         if (ret.data.code == 200) {
+          this.showModal = flase;
+          this.isBatch = false;
+          this.goodsExamineForm = {
+            goodsName: "",
+            examine: "",
+            desc: ""
+          };
+          this.productIdList = [];
           this.productList({ currentPage: this.currentPage });
         } else {
-          console.log("设置列表失败");
+          alert(ret.data.message)
         }
       } catch (e) {
         console.log(e.message);
       }
+    },
+    // 批量审核
+    handleBatchAudit() {
+      this.showModal = true;
+      this.isBatch = true;
+    },
+    // 批量审核确认
+    onBatchExamineFormSubmit() {
+      const query = {
+        productIds: this.productIdList,
+        status: +this.goodsExamineForm.examine,
+        reason: this.goodsExamineForm.desc
+      };
+      this.batchCheckProduct(query);
+    },
+    handleSelectionChange(val) {
+      this.productIdList = val.map(item => {
+        return item.id;
+      });
     },
 
     // 搜索
@@ -248,7 +280,7 @@ export default {
         user: "",
         class: ""
       };
-      this.productList({ currentPage: 1 })
+      this.productList({ currentPage: 1 });
     },
     handleCurrentChange(val) {
       this.currentPage = val;
@@ -273,13 +305,14 @@ export default {
     },
     // 审核取消
     onExamineFormCancel() {
-      this.productId = '';
+      this.productId = "";
       this.showModal = false;
       this.goodsExamineForm = {
         goodsName: "",
         examine: "",
         desc: ""
       };
+      this.productIdList = [];
     }
   }
 };
@@ -305,9 +338,21 @@ export default {
     }
   }
   .shop-tools {
-    p {
+    .shop-batch {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    p:nth-child(1) {
       margin: 20px 0;
       font-size: 16px;
+    }
+    p:nth-child(2) {
+      padding: 10px;
+      border-radius: 2px;
+      background-color: @color;
+      font-size: 16px;
+      color: #fff;
     }
   }
   .el-input {

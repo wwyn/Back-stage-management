@@ -547,6 +547,14 @@ export function productCheckProduct(query) {
     params:  query
   });
 }
+// 批量审核商品
+export function batchCheckProduct(query) {
+  return request({
+    url: "sfy-mall-v2/m/product/batchCheckProduct",
+    method: "post",
+    params:  query
+  });
+}
 
 // 服务商品管理--添加修改
 export function setVirtualProduct(data) {
