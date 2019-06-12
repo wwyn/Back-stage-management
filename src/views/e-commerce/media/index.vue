@@ -8,7 +8,7 @@
       <el-upload
         class="upload-demo"
         ref="upload"
-        action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+        action="http://192.168.1.23:18899/sfy-resource/resource/upload"
         :on-success="handleSuccess"
       >
         <el-button slot="trigger" size="small" type="success" @click="submitUpload">选取文件</el-button>

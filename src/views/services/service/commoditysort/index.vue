@@ -62,7 +62,7 @@
             <el-upload
               v-model="ruleForm.thumbnailsUrl"
               class="avatar-uploader-thumbnailsUrl"
-              action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+              action="http://192.168.1.23:18899/sfy-resource/resource/upload"
               :show-file-list="false"
               :on-success="handleThumbnailsUrlSuccess"
               :before-upload="beforeThumbnailsUrlUpload"
@@ -79,7 +79,7 @@
             <el-upload
               v-model="ruleForm.imageUrl"
               class="avatar-uploader"
-              action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+              action="http://192.168.1.23:18899/sfy-resource/resource/upload"
               :show-file-list="false"
               :on-success="handleImageUrlSuccess"
               :before-upload="beforeImageUrlUpload"

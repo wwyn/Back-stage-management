@@ -59,8 +59,8 @@
       <el-table-column prop="salePrice" label="价格" width="120" align="center"></el-table-column>
       <el-table-column prop="shopName" label="所属商家" width="120" align="center"></el-table-column>
       <el-table-column prop="typeName" label="商品类别" width="120" align="center"></el-table-column>
-      <el-table-column prop="查看" label="规格" width="110" align="center"></el-table-column>
-      <el-table-column prop="status" label="状态" width="120" align="center">
+      <el-table-column prop="查看" label="规格" width="100" align="center"></el-table-column>
+      <el-table-column prop="status" label="状态" width="100" align="center">
         <template slot-scope="scope">
           <p>{{ scope.row.status==0?'未审核':'已审核' }}</p>
         </template>

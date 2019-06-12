@@ -107,7 +107,7 @@
                                         <el-input v-model="addColor.valueName" placeholder="备注（偏深或者偏浅）"></el-input>
                                         <el-upload
                                                 class="avatar-uploader"
-                                                action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+                                                action="http://192.168.1.23:18899/sfy-resource/resource/upload"
                                                 :show-file-list="false"
                                                 :on-remove="handleRemove"
                                                 :beforeUpload="beforeAvatarUpload"
@@ -213,7 +213,7 @@
                             <template>
                                 <el-upload
                                         class="shoppingimg"
-                                        action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+                                        action="http://192.168.1.23:18899/sfy-resource/resource/upload"
                                         :file-list="shopImageList"
                                         list-type="picture-card"
                                         :limit="6"
@@ -270,7 +270,7 @@
                             <el-upload
                                     class="avatar-uploader--quill"
                                     style="visibility: hidden;"
-                                    action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+                                    action="http://192.168.1.23:18899/sfy-resource/resource/upload"
                                     :show-file-list="false"
                                     :on-success="uploadSuccess"
                                     :on-error="uploadError"
@@ -397,7 +397,7 @@ export default {
             shopImageVisible: false,
             shopImageUrl: "",
             shopImageUrlList: [],
-            uploadUrl: "http://192.168.1.23:8899/resource-service-v1/resource/upload",
+            uploadUrl: "http://192.168.1.23:18899/sfy-resource/resource/upload",
             videoImageUrl: "",
             videoVisible: false,
             videoFlag: false,

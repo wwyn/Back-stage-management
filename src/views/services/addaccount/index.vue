@@ -14,7 +14,7 @@
     >
       <el-upload
         class="avatar-uploader"
-        action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+        action="http://192.168.1.23:18899/sfy-resource/resource/upload"
         :show-file-list="false"
         :on-success="handleAvatarSuccess"
         :before-upload="beforeAvatarUpload"

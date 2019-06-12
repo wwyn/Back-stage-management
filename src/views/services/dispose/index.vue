@@ -184,7 +184,7 @@
               <el-form-item label="分类图标" prop="file">
                 <el-upload
                   class="upload-demo"
-                  action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+                  action="http://192.168.1.23:18899/sfy-resource/resource/upload"
                   :on-remove="handleRemove"
                   :on-success="handleSuccess"
                   :before-remove="beforeRemove"

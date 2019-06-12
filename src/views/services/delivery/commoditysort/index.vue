@@ -55,7 +55,7 @@
           <el-form-item label="商品图片" prop="imageUrl">
             <el-upload
               class="avatar-uploader"
-              action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+              action="http://192.168.1.23:18899/sfy-resource/resource/upload"
               :show-file-list="false"
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
@@ -67,7 +67,7 @@
           <el-form-item label="商品图片" prop="imageUrlBig">
             <el-upload
               class="avatar-uploader-big"
-              action="http://192.168.1.23:8899/resource-service-v1/resource/upload"
+              action="http://192.168.1.23:18899/sfy-resource/resource/upload"
               :show-file-list="false"
               :on-success="handleAvatarSuccessBig"
               :before-upload="beforeAvatarUploadBig"
