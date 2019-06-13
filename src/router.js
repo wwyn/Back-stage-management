@@ -1,9 +1,12 @@
 import Vue from "vue";
 import Router from "vue-router";
+import * as api from "@/api";
+import Cookies from "js-cookie";
 
 Vue.use(Router);
 
-export default new Router({
+
+ const router = new Router({
     mode: "history",
     base: process.env.BASE_URL,
     routes: [
@@ -278,3 +281,23 @@ export default new Router({
         return { x: 0, y: 0 }
       }
 });
+
+// router.beforeEach(async(to, from, next) => {
+//     try {
+//         if(to.name === 'login') {
+//             return next();
+//         }
+//         const ret = await api.getUserInfo();
+//         // if(ret.data.username && ret.data.id) {
+//         //     console.log('chenggong')
+//         //     Cookies.set('username', username)
+//         //     next();
+//         // } else {
+//         //     return router.push('/login')
+//         // }
+//     } catch(err) {
+//         // return router.push('/login')
+//         console.log(err)
+//     }
+// })
+export default router;

@@ -17,9 +17,20 @@
             @keyup.enter.native="enterLogin"
             prop="password"
             type="password"
-            @focus="handleChange"
           ></el-input>
+          <div class="verification">
+            <el-input
+              v-model="loginForm.verification"
+              placeholder="请输入验证码"
+              @keyup.enter.native="enterLogin"
+              prop="verification"
+              @focus="handleChange"
+              style="width: 200px;margin:0"
+            ></el-input>
+            <img class="verification-img" :src="verificationImg">
+          </div>
           <el-button
+            :disabled="isBtnLoading"
             v-bind:class="{active:isChange}"
             @click="handleLogin"
             :loading="isBtnLoading"
@@ -47,17 +58,23 @@ export default {
       },
       loginForm: {
         username: "",
-        password: ""
+        password: "",
+        verification: ""
       },
       loginRules: {
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" }
         ],
-        password: [{ required: true, message: "请输入密码", trigger: "blur" }]
+        password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+        verification: [
+          { required: true, message: "请输入验证码", trigger: "blur" }
+        ]
       },
       isBtnLoading: false,
       isChange: false,
-      err: false
+      err: false,
+      verificationImg: "",
+      randomN: ""
     };
   },
   computed: {
@@ -66,31 +83,49 @@ export default {
       return "登录";
     }
   },
+  mounted() {
+    let Newrandom = Math.ceil(Math.random() * 1000);
+    this.randomN = Newrandom;
+    this.verificationImg =
+      "http://192.168.1.23:18899/sfy-user/valid/imageCode?requestId=" +
+      Newrandom;
+    // this.getImageCode();
+  },
   methods: {
-    // 登录
+    // 获取图片验证码
+    // async getImageCode() {
+    //   const query = {
+    //     requestId: 2
+    //   };
+    //   try {
+    //     const ret = await api.getImageCode(query);
+    //     console.log(ret, "获取验证码");
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // },
+    // 系统登录
     handleChange() {
       this.isChange = true;
     },
-    async login(data) {
+    async sysUserLogin() {
       const query = {
-        data
+        imageCode: this.loginForm.verification || '',
+        password: this.loginForm.password || '',
+        requestId: this.randomN || '',
+        username: this.loginForm.username || '',
       };
       try {
-        // const ret = await api.fromLogin(query);
-        const token = {
-          username: "admin"
-        };
-        this.setCookie(token);
-        if (
-          this.loginForm.username === "admin" &&
-          this.loginForm.password === "123"
-        ) {
+        const ret = await api.sysUserLogin(query);
+        if (ret.data.code == 200){
+          this.setCookie(ret.data.data.accessToken);
+          console.log(1111)
+          this.$router.push("/");
           this.$notify({
             type: "success",
             message: "欢迎你," + this.loginForm.username + "!",
             duration: 3000
           });
-          this.$router.push("/e-commerce-home");
         } else {
           this.err = true;
           this.isBtnLoading = false;
@@ -107,7 +142,7 @@ export default {
     },
     handleLogin() {
       this.isBtnLoading = true;
-      this.login();
+      this.sysUserLogin();
     },
     async setCookie(token) {
       try {
@@ -140,10 +175,24 @@ export default {
     margin-left: -400px;
     box-shadow: 0 0 4px 0 rgba(191, 191, 191, 0.5);
     border-radius: 6px;
-    img {
+    > img {
       width: 400px;
       height: 460px;
       vertical-align: middle;
+    }
+    .verification {
+      width: 280px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      .verification-img {
+        display: inline-block;
+        width: 100px;
+        height: 38px;
+        border: 1px solid #ccc;
+        vertical-align: middle;
+      }
     }
   }
 }
@@ -177,6 +226,15 @@ export default {
     margin-bottom: 30px;
   }
   .el-input + .el-button {
+    width: 280px;
+    background: #999999;
+    border-radius: 2px;
+    font-size: 18px;
+    color: #ffffff;
+    margin-top: 10px;
+    margin-bottom: 14px;
+  }
+  .el-button {
     width: 280px;
     background: #999999;
     border-radius: 2px;

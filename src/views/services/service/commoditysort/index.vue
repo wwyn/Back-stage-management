@@ -141,11 +141,11 @@
         <div>
           <p @click="addTime">添加时间</p>
           <el-table :data="addTimeTableData" border style="width: 100%">
-            <el-table-column prop="time" label="时间" width="180"></el-table-column>
-            <el-table-column prop="quantity" label="可约人数" width="180"></el-table-column>
+            <el-table-column prop="serviceTime" label="时间" width="180"></el-table-column>
+            <el-table-column prop="serviceStock" label="可约人数" width="180"></el-table-column>
             <el-table-column label="操作">
               <template slot-scope="scope">
-                <el-button type="text" size="small" @click="handleEditorTime">编辑</el-button>
+                <!-- <el-button type="text" size="small" @click="handleEditorTime">编辑</el-button> -->
                 <el-button type="text" size="small" @click="handleDelTime(scope.row)">删除</el-button>
               </template>
             </el-table-column>
@@ -174,9 +174,9 @@
               <el-time-select
                 v-model="item.time"
                 :picker-options="{
-                        start: '08:30',
-                        step: '00:30',
-                        end: '18:30'
+                        start: '09:00',
+                        step: '01:00',
+                        end: '18:00'
                     }"
                 placeholder="选择时间"
               ></el-time-select>
@@ -328,8 +328,8 @@ export default {
       };
       try {
         const ret = await api.setVirtualProduct(_query);
+        console.log(ret, "设置商品");
         if (ret.data.code == 200) {
-          console.log(ret, "设置商品");
           if (time == 0) {
             this.active = 4;
             this.showSort = false;
@@ -344,6 +344,8 @@ export default {
             this.productId = ret.data.data.id;
             this.getProdReserveListByPid();
           }
+        } else {
+          alert(ret.data.message)
         }
       } catch (e) {
         console.log(e.message);
@@ -353,7 +355,6 @@ export default {
     async getProductDetail(query) {
       try {
         const ret = await api.getProductDetail(query);
-        console.log(ret, "商品详情");
         if (ret.data.code == 200) {
           let data = ret.data.data;
           this.ruleForm = {
@@ -399,7 +400,7 @@ export default {
       try {
         const ret = await api.getProdReserveListByPid(query);
         if (ret.data.code == 200) {
-          this.addTimeTableData = ret.data.data.categories;
+          this.addTimeTableData = ret.data.data;
         } else {
           this.addTimeTableData = [];
           alert(ret.data.message);
@@ -412,7 +413,6 @@ export default {
     async removeProdReserve(query) {
       try {
         const ret = await api.removeProdReserve(query);
-        console.log(ret, "删除预约信息");
         if (ret.data.code == 200) {
           this.getProdReserveListByPid();
         } else {
@@ -426,10 +426,10 @@ export default {
     async batchAddProdReserve(query) {
       try {
         const ret = await api.batchAddProdReserve(query);
-        console.log(ret, "批量添加时间");
         if (ret.data.code == 200) {
           this.showModal = false;
           this.timeList = [{ time: "", quantity: "" }];
+          this.getProdReserveListByPid();
         } else {
           alert(ret.data.message);
         }
@@ -523,10 +523,13 @@ export default {
       this.showTime = true;
     },
     goTime() {
+      console.log(111)
       if (this.productId != "") {
+        console.log(111222)
         let query = { productId: this.productId };
         this.setVirtualProduct(query, "1");
       } else {
+        console.log(111333)
         let query = {};
         this.setVirtualProduct(query, "1");
       }
@@ -543,7 +546,7 @@ export default {
       this.showModal = true;
     },
     handleEditorTime() {
-      this.showModal = true;
+      // this.showModal = true;
     },
     handleTimeConfirm() {
       let query = {

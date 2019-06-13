@@ -1,8 +1,32 @@
 import request from "@/utils/request";
+// 获取图形验证码
+export function getImageCode(data) {
+  return request({
+    url: "sfy-user/valid/imageCode",
+    method: "get",
+    params: data
+  });
+}
+// 系统登录
+export function sysUserLogin(data) {
+  return request({
+    url: "sfy-user/sysUser/sysUserLogin",
+    method: "post",
+    data
+  });
+}
+// 获取登录用户信息
+export function getUserInfo(data) {
+  return request({
+    url: "sfy-user/auth/user/getUserInfo",
+    method: "get",
+    params: data
+  });
+}
 // 登录
 export function fromLogin(data) {
   return request({
-    url: "sfy-mall-v2/m/product/list",
+    url: "sfy-biz-mall/auth/m/product/list",
     method: "post",
     params: data
   });
@@ -10,7 +34,7 @@ export function fromLogin(data) {
 // 商品列表
 export function productList(query) {
   return request({
-    url: "sfy-mall-v2/m/product/list",
+    url: "sfy-biz-mall/auth/m/product/list",
     method: "get",
     params: query
   });
@@ -18,7 +42,7 @@ export function productList(query) {
 // 分类列表
 export function categoryList(query) {
   return request({
-    url: "sfy-mall-v2/m/product/category/getCategories",
+    url: "sfy-biz-mall/auth/m/product/category/getCategories",
     method: "get",
     params: query
   });
@@ -26,7 +50,7 @@ export function categoryList(query) {
 // 分类列表删除
 export function categoryListDel(data) {
   return request({
-    url: "sfy-mall-v2/m/product/category/del",
+    url: "sfy-biz-mall/auth/m/product/category/del",
     method: "post",
     params: data
   });
@@ -34,7 +58,7 @@ export function categoryListDel(data) {
 // 获取分类
 export function category(query) {
   return request({
-    url: "sfy-mall-v2/m/product/category/getCategoriesByPid",
+    url: "sfy-biz-mall/auth/m/product/category/getCategoriesByPid",
     method: "get",
     params: query
   });
@@ -42,7 +66,7 @@ export function category(query) {
 // 单个设置商品
 export function setPart(data) {
   return request({
-    url: "sfy-mall-v2/m/product/setPart",
+    url: "sfy-biz-mall/auth/m/product/setPart",
     method: "post",
     params:data
   });
@@ -51,7 +75,7 @@ export function setPart(data) {
 // 新建分类
 export function addProductCategory(data) {
   return request({
-    url: "sfy-mall-v2/m/product/category/set",
+    url: "sfy-biz-mall/auth/m/product/category/set",
     method: "post",
     params: data
   });
@@ -59,7 +83,7 @@ export function addProductCategory(data) {
 // 上传商品图片
 export function setProductImage(data) {
   return request({
-    url: "sfy-mall-v2/m/resource/upload",
+    url: "sfy-biz-mall/auth/m/resource/upload",
     method: "post",
     params: data
   });
@@ -67,7 +91,7 @@ export function setProductImage(data) {
 // 获取类目列表
 export function typeList(query) {
   return request({
-    url: "sfy-mall-v2/m/product/type/list",
+    url: "sfy-biz-mall/auth/m/product/type/list",
     method: "get",
     params: query
   });
@@ -75,7 +99,7 @@ export function typeList(query) {
 // 添加修改类目
 export function typeSet(data) {
   return request({
-    url: "sfy-mall-v2/m/product/type/set",
+    url: "sfy-biz-mall/auth/m/product/type/set",
     method: "post",
     params: data
   });
@@ -83,7 +107,7 @@ export function typeSet(data) {
 // 删除类目
 export function typeDel(data) {
   return request({
-    url: "sfy-mall-v2/m/product/type/del",
+    url: "sfy-biz-mall/auth/m/product/type/del",
     method: "post",
     params: data
   });
@@ -100,7 +124,7 @@ export function typeDel(data) {
 // 获取默认规格工具
 export function getSpecs(query) {
   return request({
-    url: "sfy-mall-v2/m/common/getSpecs",
+    url: "sfy-biz-mall/auth/m/common/getSpecs",
     method: "get",
     params: query
   });
@@ -108,7 +132,7 @@ export function getSpecs(query) {
 // 添加自定义规格
 export function addSpecValue(data) {
   return request({
-    url: "sfy-mall-v2/m/common/addSpecValue",
+    url: "sfy-biz-mall/auth/m/common/addSpecValue",
     method: "post",
     data
   });
@@ -116,7 +140,7 @@ export function addSpecValue(data) {
 // 删除自定义的规格名称
 export function delSpec(query) {
   return request({
-    url: "sfy-mall-v2/m/common/delSpec",
+    url: "sfy-biz-mall/auth/m/common/delSpec",
     method: "post",
     params: query
   });
@@ -124,7 +148,7 @@ export function delSpec(query) {
 // 删除自定义规格数值
 export function delSpecValue(query) {
   return request({
-    url: "sfy-mall-v2/m/common/delSpecValue",
+    url: "sfy-biz-mall/auth/m/common/delSpecValue",
     method: "post",
     params: query
   });
@@ -132,7 +156,7 @@ export function delSpecValue(query) {
 // 获取默认属性
 export function getAttrs(query) {
   return request({
-    url: "sfy-mall-v2/m/common/getAttrs",
+    url: "sfy-biz-mall/auth/m/common/getAttrs",
     method: "get",
     params: query
   });
@@ -140,7 +164,7 @@ export function getAttrs(query) {
 // 保存自定义属性
 export function setAttrValue(data) {
   return request({
-    url: "sfy-mall-v2/m/common/setAttrValue",
+    url: "sfy-biz-mall/auth/m/common/setAttrValue",
     method: "post",
     data
   });
@@ -148,7 +172,7 @@ export function setAttrValue(data) {
 // 删除自定义属性
 export function delAttr(data) {
   return request({
-    url: "sfy-mall-v2/m/common/delAttr",
+    url: "sfy-biz-mall/auth/m/common/delAttr",
     method: "post",
     params: data
   });
@@ -156,7 +180,7 @@ export function delAttr(data) {
 // 删除属性值
 export function delAttrValue(data) {
   return request({
-    url: "sfy-mall-v2/m/common/delAttrValue",
+    url: "sfy-biz-mall/auth/m/common/delAttrValue",
     method: "post",
     params: data
   });
@@ -164,7 +188,7 @@ export function delAttrValue(data) {
 // 获取品牌类表
 export function brandList(query) {
   return request({
-    url: "sfy-mall-v2/m/brand/list",
+    url: "sfy-biz-mall/auth/m/brand/list",
     method: "get",
     params: query
   });
@@ -172,7 +196,7 @@ export function brandList(query) {
 // 新建(修改)品牌列表
 export function brandSet(data) {
   return request({
-    url: "sfy-mall-v2/m/brand/set",
+    url: "sfy-biz-mall/auth/m/brand/set",
     method: "post",
     data
   });
@@ -181,7 +205,7 @@ export function brandSet(data) {
 // 获取品牌列表详情
 export function getById(query) {
   return request({
-    url: "sfy-mall-v2/m/brand/getById",
+    url: "sfy-biz-mall/auth/m/brand/getById",
     method: "get",
     params: query
   });
@@ -190,7 +214,7 @@ export function getById(query) {
 // 删除品牌类表
 export function brandDel(query) {
   return request({
-    url: "sfy-mall-v2/m/brand/del",
+    url: "sfy-biz-mall/auth/m/brand/del",
     method: "post",
     params: query
   });
@@ -199,7 +223,7 @@ export function brandDel(query) {
 // 获取模板列表
 export function getTemplates(query) {
   return request({
-    url: "sfy-mall-v2/m/delivery/getTemplates",
+    url: "sfy-biz-mall/auth/m/delivery/getTemplates",
     method: "get",
     params: query
   });
@@ -208,7 +232,7 @@ export function getTemplates(query) {
 // 获取配送模板
 export function getTemplate(query) {
   return request({
-    url: "sfy-mall-v2/m/delivery/getTemplate",
+    url: "sfy-biz-mall/auth/m/delivery/getTemplate",
     method: "get",
     params: query
   });
@@ -216,7 +240,7 @@ export function getTemplate(query) {
 // 设置配送模板
 export function setTemplate(data) {
   return request({
-    url: "sfy-mall-v2/m/delivery/setTemplate",
+    url: "sfy-biz-mall/auth/m/delivery/setTemplate",
     method: "post",
     data
   });
@@ -225,7 +249,7 @@ export function setTemplate(data) {
 // 删除配送模板
 export function delTemplate(data) {
   return request({
-    url: "sfy-mall-v2/m/delivery/delTemplate",
+    url: "sfy-biz-mall/auth/m/delivery/delTemplate",
     method: "post",
     params: data
   });
@@ -234,7 +258,7 @@ export function delTemplate(data) {
 // 获取地区
 export function geoList(query) {
   return request({
-    url: "sfy-mall-v2/geo/list",
+    url: "sfy-biz-mall/geo/list",
     method: "get",
     params: query
   });
@@ -242,7 +266,7 @@ export function geoList(query) {
 // 删除区域
 export function delRegion(data) {
   return request({
-    url: "sfy-mall-v2/m/delivery/delRegion",
+    url: "sfy-biz-mall/auth/m/delivery/delRegion",
     method: "post",
     params: data
   });
@@ -251,7 +275,7 @@ export function delRegion(data) {
 // 设置区域明细
 export function setRegionItems(data) {
   return request({
-    url: "sfy-mall-v2/m/delivery/setRegionItems",
+    url: "sfy-biz-mall/auth/m/delivery/setRegionItems",
     method: "post",
     data
   });
@@ -260,7 +284,7 @@ export function setRegionItems(data) {
 // 批量设置商品列表
 export function batchPart(data) {
   return request({
-    url: "sfy-mall-v2/m/product/batchPart",
+    url: "sfy-biz-mall/auth/m/product/batchPart",
     method: "post",
     data
   });
@@ -269,7 +293,7 @@ export function batchPart(data) {
 // 商品发布
 export function setProductDetail(data) {
   return request({
-    url: "sfy-mall-v2/m/product/setProductDetail",
+    url: "sfy-biz-mall/auth/m/product/setProductDetail",
     method: "post",
     data
   });
@@ -278,7 +302,7 @@ export function setProductDetail(data) {
 // 获取商品详情信息
 export function getProductDetail(query) {
   return request({
-    url: "sfy-mall-v2/m/product/getById",
+    url: "sfy-biz-mall/auth/m/product/getById",
     method: "get",
     params:  query
   });
@@ -287,7 +311,7 @@ export function getProductDetail(query) {
 // 获取订单列表
 export function getOrderList(query) {
   return request({
-    url: "sfy-mall-v2/m/order/getList",
+    url: "sfy-biz-mall/auth/m/order/getList",
     method: "get",
     params:  query
   });
@@ -296,7 +320,7 @@ export function getOrderList(query) {
 // 分类列表排序
 export function categorySort(query) {
   return request({
-    url: "sfy-mall-v2/m/product/category/sort",
+    url: "sfy-biz-mall/auth/m/product/category/sort",
     method: "post",
     params:  query
   });
@@ -305,7 +329,7 @@ export function categorySort(query) {
 // 类目排序
 export function typeSort(query) {
   return request({
-    url: "sfy-mall-v2/m/product/type/sort",
+    url: "sfy-biz-mall/auth/m/product/type/sort",
     method: "post",
     params:  query
   });
@@ -372,7 +396,7 @@ export function changeWeightBanner(data) {
 // 商家管理首页--商家列表
 export function getShopList(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/list/",
+    url: "sfy-biz-mall/auth/m/shop/list/",
     method: "get",
     params:  query
   });
@@ -380,7 +404,7 @@ export function getShopList(query) {
 // 商家审核
 export function examineShop(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/checkShop",
+    url: "sfy-biz-mall/auth/m/shop/checkShop",
     method: "post",
     params:  query
   });
@@ -388,7 +412,7 @@ export function examineShop(query) {
 // 商家信息
 export function getShopById(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/getById/",
+    url: "sfy-biz-mall/auth/m/shop/getById/",
     method: "get",
     params:  query
   });
@@ -396,7 +420,7 @@ export function getShopById(query) {
 // 删除商户
 export function shopDel(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/del/",
+    url: "sfy-biz-mall/auth/m/shop/del/",
     method: "post",
     params:  query
   });
@@ -405,7 +429,7 @@ export function shopDel(query) {
 // 单个开通/禁用
 export function shopChecked(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/checked/",
+    url: "sfy-biz-mall/auth/m/shop/checked/",
     method: "post",
     params:  query
   });
@@ -414,7 +438,7 @@ export function shopChecked(query) {
 // 批量开通/禁用/删除
 export function shopBatchChecked(data) {
   return request({
-    url: "sfy-mall-v2/m/shop/batchChecked",
+    url: "sfy-biz-mall/auth/m/shop/batchChecked",
     method: "post",
     data
   });
@@ -424,7 +448,7 @@ export function shopBatchChecked(data) {
 // 获取商家类型
 export function getShoptypes(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/getTypes",
+    url: "sfy-biz-mall/auth/m/shop/getTypes",
     method: "get",
     params:  query
   });
@@ -433,7 +457,7 @@ export function getShoptypes(query) {
 // 获取商家品类
 export function getCategoriesList(query) {
   return request({
-    url: "sfy-mall-v2/m/categories/getList/",
+    url: "sfy-biz-mall/auth/m/categories/getList/",
     method: "get",
     params:  query
   });
@@ -442,7 +466,7 @@ export function getCategoriesList(query) {
 // 获取佣金方式
 export function getFeeTypes(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/getFeeTypes/",
+    url: "sfy-biz-mall/auth/m/shop/getFeeTypes/",
     method: "get",
     params:  query
   });
@@ -451,7 +475,7 @@ export function getFeeTypes(query) {
 // 获取业务员
 export function getSalesMan(query) {
   return request({
-    url: "sfy-mall-v2/m/shop/getSalesMan/",
+    url: "sfy-biz-mall/auth/m/shop/getSalesMan/",
     method: "get",
     params:  query
   });
@@ -460,7 +484,7 @@ export function getSalesMan(query) {
 // 新增商家
 export function setShop(data) {
   return request({
-    url: "sfy-mall-v2/m/shop/set/",
+    url: "sfy-biz-mall/auth/m/shop/set/",
     method: "post",
     data
   });
@@ -469,7 +493,7 @@ export function setShop(data) {
 // 020规格设置---获取规格列表
 export function getSpecsByShopId(query) {
   return request({
-    url: "sfy-mall-v2/m/common/getSpecsByShopId",
+    url: "sfy-biz-mall/auth/m/common/getSpecsByShopId",
     method: "get",
     params:  query
   });
@@ -477,7 +501,7 @@ export function getSpecsByShopId(query) {
 // 获取规格值
 export function getSpec(query) {
   return request({
-    url: "sfy-mall-v2/m/common/getSpec",
+    url: "sfy-biz-mall/auth/m/common/getSpec",
     method: "get",
     params:  query
   });
@@ -485,7 +509,7 @@ export function getSpec(query) {
 // 设置规格值
 export function setSpecValue(data) {
   return request({
-    url: "sfy-mall-v2/m/common/setSpecValue",
+    url: "sfy-biz-mall/auth/m/common/setSpecValue",
     method: "post",
     data
   });
@@ -493,7 +517,7 @@ export function setSpecValue(data) {
 // 获取配料列表
 export function getParts(query) {
   return request({
-    url: "sfy-mall-v2/m/parts/getParts",
+    url: "sfy-biz-mall/auth/m/parts/getParts",
     method: "get",
     params:  query
   });
@@ -501,7 +525,7 @@ export function getParts(query) {
 // 批量设置配料
 export function batchAddParts(data) {
   return request({
-    url: "sfy-mall-v2/m/parts/batchAddParts",
+    url: "sfy-biz-mall/auth/m/parts/batchAddParts",
     method: "post",
     data
   });
@@ -509,7 +533,7 @@ export function batchAddParts(data) {
 // 设置配料
 export function setParts(data) {
   return request({
-    url: "sfy-mall-v2/m/parts/setParts",
+    url: "sfy-biz-mall/auth/m/parts/setParts",
     method: "post",
     data
   });
@@ -517,7 +541,7 @@ export function setParts(data) {
 // 删除配料
 export function removeParts(data) {
   return request({
-    url: "sfy-mall-v2/m/parts/remove",
+    url: "sfy-biz-mall/auth/m/parts/remove",
     method: "post",
     data
   });
@@ -525,7 +549,7 @@ export function removeParts(data) {
 // 获取配料信息
 export function getPart(query) {
   return request({
-    url: "sfy-mall-v2/m/parts/getPart",
+    url: "sfy-biz-mall/auth/m/parts/getPart",
     method: "get",
     params:  query
   });
@@ -534,7 +558,7 @@ export function getPart(query) {
 // 配送商品管理--获取审核详情
 export function getLogList(query) {
   return request({
-    url: "sfy-mall-v2/m/log/list",
+    url: "sfy-biz-mall/auth/m/log/list",
     method: "get",
     params:  query
   });
@@ -542,7 +566,7 @@ export function getLogList(query) {
 // 审核商品
 export function productCheckProduct(query) {
   return request({
-    url: "sfy-mall-v2/m/product/checkProduct",
+    url: "sfy-biz-mall/auth/m/product/checkProduct",
     method: "post",
     params:  query
   });
@@ -550,7 +574,7 @@ export function productCheckProduct(query) {
 // 批量审核商品
 export function batchCheckProduct(query) {
   return request({
-    url: "sfy-mall-v2/m/product/batchCheckProduct",
+    url: "sfy-biz-mall/auth/m/product/batchCheckProduct",
     method: "post",
     params:  query
   });
@@ -559,7 +583,7 @@ export function batchCheckProduct(query) {
 // 服务商品管理--添加修改
 export function setVirtualProduct(data) {
   return request({
-    url: "sfy-mall-v2/m/product/setVirtualProduct",
+    url: "sfy-biz-mall/auth/m/product/setVirtualProduct",
     method: "post",
     data
   });
@@ -567,7 +591,7 @@ export function setVirtualProduct(data) {
 // 服务商品管理--获取预约列表
 export function getProdReserveListByPid(query) {
   return request({
-    url: "sfy-mall-v2/m/prodReserve/getListByPid",
+    url: "sfy-biz-mall/auth/m/prodReserve/getListByPid",
     method: "get",
     params:  query
   });
@@ -576,7 +600,7 @@ export function getProdReserveListByPid(query) {
 // 删除预约信息
 export function removeProdReserve(query) {
   return request({
-    url: "sfy-mall-v2/m/prodReserve/remove",
+    url: "sfy-biz-mall/auth/m/prodReserve/remove",
     method: "post",
     params:  query
   });
@@ -585,7 +609,7 @@ export function removeProdReserve(query) {
 // 批量添加时间段
 export function batchAddProdReserve(data) {
   return request({
-    url: "sfy-mall-v2/m/prodReserve/batchAdd",
+    url: "sfy-biz-mall/auth/m/prodReserve/batchAdd",
     method: "post",
     data
   });
@@ -595,7 +619,7 @@ export function batchAddProdReserve(data) {
 // APP配置--首页配置
 export function getPageList(query) {
   return request({
-    url: "sfy-mall-v2/m/resources/getPageList",
+    url: "sfy-biz-mall/auth/m/resources/getPageList",
     method: "get",
     params:  query
   });
@@ -604,7 +628,7 @@ export function getPageList(query) {
 // 添加广告
 export function setResources(data) {
   return request({
-    url: "sfy-mall-v2/m/resources/set",
+    url: "sfy-biz-mall/auth/m/resources/set",
     method: "post",
     data
   });
@@ -612,7 +636,7 @@ export function setResources(data) {
 // 广告上下线
 export function setStatus(query) {
   return request({
-    url: "sfy-mall-v2/m/resources/setStatus",
+    url: "sfy-biz-mall/auth/m/resources/setStatus",
     method: "post",
     params:  query
   });
@@ -620,7 +644,7 @@ export function setStatus(query) {
 // 删除广告
 export function removeById(query) {
   return request({
-    url: "sfy-mall-v2/m/resources/removeById",
+    url: "sfy-biz-mall/auth/m/resources/removeById",
     method: "post",
     params:  query
   });
@@ -628,7 +652,7 @@ export function removeById(query) {
 // 广告置顶
 export function setTop(query) {
   return request({
-    url: "sfy-mall-v2/m/resources/setTop",
+    url: "sfy-biz-mall/auth/m/resources/setTop",
     method: "post",
     params:  query
   });
@@ -636,7 +660,7 @@ export function setTop(query) {
 // 获取单个详情
 export function getResourcesById(query) {
   return request({
-    url: "sfy-mall-v2/m/resources/getById",
+    url: "sfy-biz-mall/auth/m/resources/getById",
     method: "get",
     params:  query
   });
@@ -645,7 +669,7 @@ export function getResourcesById(query) {
 // 删除商家分类
 export function categoriesRemove(query) {
   return request({
-    url: "sfy-mall-v2/m/categories/remove",
+    url: "sfy-biz-mall/auth/m/categories/remove",
     method: "post",
     params:  query
   });
@@ -653,7 +677,7 @@ export function categoriesRemove(query) {
 // 设置商家分类
 export function categoriesSet(query) {
   return request({
-    url: "sfy-mall-v2/m/categories/set",
+    url: "sfy-biz-mall/auth/m/categories/set",
     method: "post",
     params:  query
   });
@@ -661,7 +685,7 @@ export function categoriesSet(query) {
 // 获取分类详情
 export function getCategoriesById(query) {
   return request({
-    url: "sfy-mall-v2/m/categories/getById",
+    url: "sfy-biz-mall/auth/m/categories/getById",
     method: "get",
     params:  query
   });
@@ -670,7 +694,7 @@ export function getCategoriesById(query) {
 // 商家是否显示
 export function setShow(query) {
   return request({
-    url: "sfy-mall-v2/m/categories/setShow",
+    url: "sfy-biz-mall/auth/m/categories/setShow",
     method: "post",
     params:  query
   });
@@ -678,7 +702,7 @@ export function setShow(query) {
 // 品牌商家列表
 export function getVipShops(query) {
   return request({
-    url: "sfy-mall-v2/m/recommend/getVipShops",
+    url: "sfy-biz-mall/auth/m/recommend/getVipShops",
     method: "get",
     params:  query
   });
@@ -687,7 +711,7 @@ export function getVipShops(query) {
 // 选择品牌商家
 export function addVipShops(data) {
   return request({
-    url: "sfy-mall-v2/m/recommend/addVipShops",
+    url: "sfy-biz-mall/auth/m/recommend/addVipShops",
     method: "post",
     data
   });
@@ -696,7 +720,7 @@ export function addVipShops(data) {
 // 设置推荐
 export function setRecommend(query) {
   return request({
-    url: "sfy-mall-v2/m/recommend/set",
+    url: "sfy-biz-mall/auth/m/recommend/set",
     method: "post",
     params:  query
   });
@@ -706,7 +730,7 @@ export function setRecommend(query) {
 // 移除推荐
 export function recommendRemove(query) {
   return request({
-    url: "sfy-mall-v2/m/recommend/remove",
+    url: "sfy-biz-mall/auth/m/recommend/remove",
     method: "post",
     params:  query
   });
@@ -715,7 +739,7 @@ export function recommendRemove(query) {
 // 甄选列表
 export function getCheckShops(query) {
   return request({
-    url: "sfy-mall-v2/m/recommend/getCheckShops",
+    url: "sfy-biz-mall/auth/m/recommend/getCheckShops",
     method: "get",
     params:  query
   });
@@ -724,7 +748,7 @@ export function getCheckShops(query) {
 // 选择甄选
 export function addCheckShops(data) {
   return request({
-    url: "sfy-mall-v2/m/recommend/addCheckShops",
+    url: "sfy-biz-mall/auth/m/recommend/addCheckShops",
     method: "post",
     data
   });
@@ -735,7 +759,7 @@ export function addCheckShops(data) {
 // 获取订单详情
 export function getOrderDetail(query) {
   return request({
-    url: "sfy-mall-v2/m/order/getDetail",
+    url: "sfy-biz-mall/auth/m/order/getDetail",
     method: "get",
     params:  query
   });
@@ -744,7 +768,7 @@ export function getOrderDetail(query) {
 // 获取操作日志
 export function getOrderLogs(query) {
   return request({
-    url: "sfy-mall-v2/m/order/getLogs",
+    url: "sfy-biz-mall/auth/m/order/getLogs",
     method: "get",
     params:  query
   });
@@ -752,7 +776,7 @@ export function getOrderLogs(query) {
 // 确认接单
 export function orderMerchantConfirm(query) {
   return request({
-    url: "sfy-mall-v2/m/order/merchantConfirm",
+    url: "sfy-biz-mall/auth/m/order/merchantConfirm",
     method: "post",
     params:  query
   });
@@ -760,7 +784,7 @@ export function orderMerchantConfirm(query) {
 // 修改发票信息
 export function orderSetInvoiceInfo(data) {
   return request({
-    url: "sfy-mall-v2/m/order/setInvoiceInfo",
+    url: "sfy-biz-mall/auth/m/order/setInvoiceInfo",
     method: "post",
     data
   });
@@ -768,7 +792,7 @@ export function orderSetInvoiceInfo(data) {
 // 修改收货地址
 export function orderSetDeliveryAddress(data) {
   return request({
-    url: "sfy-mall-v2/m/order/setDeliveryAddress",
+    url: "sfy-biz-mall/auth/m/order/setDeliveryAddress",
     method: "post",
     data
   });
@@ -776,7 +800,7 @@ export function orderSetDeliveryAddress(data) {
 // 订单备注
 export function orderRemark(query) {
   return request({
-    url: "sfy-mall-v2/m/order/remark",
+    url: "sfy-biz-mall/auth/m/order/remark",
     method: "post",
     params:  query
   });
@@ -785,7 +809,7 @@ export function orderRemark(query) {
 // 确认消费
 export function getMyOrderCode(query) {
   return request({
-    url: "sfy-mall-v2/u/order/getMyOrderCode",
+    url: "sfy-biz-mall/u/order/getMyOrderCode",
     method: "get",
     params:  query
   });

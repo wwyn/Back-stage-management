@@ -17,12 +17,13 @@ export default {
     async getCookie() {
       try {
         let ret = await auth.getToken();
+        console.log(ret,'enenen')
         if (ret === undefined) {
           this.$router.push({
             path: "/login"
           });
         } else {
-           this.userInfo = JSON.parse(ret);
+          //  this.userInfo = JSON.parse(ret);
         }
 
       } catch (err) {

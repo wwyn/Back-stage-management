@@ -1,11 +1,17 @@
 import axios from "axios";
 import { Message } from "element-ui";
 import store from "@/store";
-const BASE_API = "http://192.168.1.23:8899/";
+import Cookies from "js-cookie";
+const BASE_API = "http://192.168.1.23:18899/";
 
 const service = axios.create({
   baseURL: BASE_API,
-  timeout: 5000 // request timeout
+  timeout: 5000, // request timeout
+  headers: {
+    'access-token': Cookies.get('accessToken'),
+    'phone': 123,
+    'device-id':  12
+   }
 });
 
 // request interceptor
