@@ -282,22 +282,21 @@ Vue.use(Router);
       }
 });
 
-// router.beforeEach(async(to, from, next) => {
-//     try {
-//         if(to.name === 'login') {
-//             return next();
-//         }
-//         const ret = await api.getUserInfo();
-//         // if(ret.data.username && ret.data.id) {
-//         //     console.log('chenggong')
-//         //     Cookies.set('username', username)
-//         //     next();
-//         // } else {
-//         //     return router.push('/login')
-//         // }
-//     } catch(err) {
-//         // return router.push('/login')
-//         console.log(err)
-//     }
-// })
+router.beforeEach(async(to, from, next) => {
+    try {
+        if(to.name === 'login') {
+            return next();
+        }
+        const ret = await api.getUserInfo();
+        if(ret.data.username && ret.data.id) {
+            // Cookies.set('username', username)
+            return next();
+        } else {
+            return router.push('/login')
+        }
+    } catch(err) {
+        return router.push('/login')
+        console.log(err)
+    }
+})
 export default router;

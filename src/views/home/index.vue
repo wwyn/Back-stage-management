@@ -3,6 +3,7 @@
 </template>
 <script>
 import menu from "@/menu";
+import * as api from "@/api";
 import * as auth from "@/utils/auth";
 
 export default {
@@ -12,20 +13,26 @@ export default {
   }),
   mounted() {
     this.getCookie();
+    this.getUserInfo();
   },
   methods: {
+    async getUserInfo() {
+      try {
+        let ret = await api.getUserInfo();
+          this.userInfo = ret.data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
     async getCookie() {
       try {
         let ret = await auth.getToken();
-        console.log(ret,'enenen')
         if (ret === undefined) {
           this.$router.push({
             path: "/login"
           });
         } else {
-          //  this.userInfo = JSON.parse(ret);
         }
-
       } catch (err) {
         console.log(err);
       }

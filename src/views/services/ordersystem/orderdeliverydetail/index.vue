@@ -5,7 +5,7 @@
       配送订单-{{orderStatus[Status]}}
     </div>
     <div class="close" @click="handleClose">关闭</div>
-    <el-steps :active="2" align-center>
+    <el-steps :active="active" align-center>
       <el-step title="提交订单" description="2019-05-31"></el-step>
       <el-step title="支付订单" description="未支付"></el-step>
       <el-step title="商家发货" description></el-step>
@@ -302,7 +302,8 @@ export default {
         "0": "待配送",
         "1": "配送中",
         "2": "配送完成"
-      }
+      },
+      active: 1,
     };
   },
   mounted() {
@@ -338,6 +339,16 @@ export default {
           this.tableDataStore = ret.data.data.orderItems;
           this.tableDataBasic = arrBasic;
           this.tableDataUser = arrBasic;
+          let Nstatus = ret.data.data.orderStatus;
+          if(Nstatus<=5 || Nstatus>20) {
+            this.active = 1;
+          } else if(Nstatus>5 &&  Nstatus<=10) {
+            this.active = 2;
+          } else if (Nstatus == 13) {
+            this.active = 3;
+          } else if (Nstatus >=15 && Nstatus<= 20) {
+            this.active = 4;
+          }
         }
       } catch (e) {
         console.log(e.message);

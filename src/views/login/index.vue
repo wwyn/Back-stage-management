@@ -119,7 +119,6 @@ export default {
         const ret = await api.sysUserLogin(query);
         if (ret.data.code == 200){
           this.setCookie(ret.data.data.accessToken);
-          console.log(1111)
           this.$router.push("/");
           this.$notify({
             type: "success",
