@@ -522,6 +522,14 @@ export function getParts(query) {
     params:  query
   });
 }
+// 获取配料列表
+export function getMyParts(query) {
+  return request({
+    url: "sfy-biz-mall/auth/m/parts/getMyParts",
+    method: "get",
+    params:  query
+  });
+}
 // 批量设置配料
 export function batchAddParts(data) {
   return request({
@@ -555,6 +563,7 @@ export function getPart(query) {
   });
 }
 
+
 // 配送商品管理--获取审核详情
 export function getLogList(query) {
   return request({
@@ -579,6 +588,34 @@ export function batchCheckProduct(query) {
     params:  query
   });
 }
+// 设置商品
+export function setGeneralProduct(data) {
+  return request({
+    url: "sfy-biz-mall/auth/m/product/setGeneralProduct",
+    method: "post",
+    data
+  });
+}
+// 设置商品规格020
+export function setProductSpecs(data) {
+  return request({
+    url: "sfy-biz-mall/auth/m/product/setProductSpecs",
+    method: "post",
+    data
+  });
+}
+
+// 获取配送商品分类
+export function getCategoriesByShop(query) {
+  return request({
+    url: "sfy-biz-mall/auth/m/product/category/getCategoriesByShop",
+    method: "get",
+    params:  query
+  });
+}
+
+
+
 
 // 服务商品管理--添加修改
 export function setVirtualProduct(data) {
@@ -612,6 +649,15 @@ export function batchAddProdReserve(data) {
     url: "sfy-biz-mall/auth/m/prodReserve/batchAdd",
     method: "post",
     data
+  });
+}
+
+// 订单跟踪
+export function getLogs(query) {
+  return request({
+    url: "sfy-biz-mall/auth/m/delivery/getLogs",
+    method: "get",
+    params:  query
   });
 }
 

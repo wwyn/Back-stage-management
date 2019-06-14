@@ -15,11 +15,11 @@
       <div>
         <p style="color:red;font-size:18px;">当前订单状态: {{orderStatus[Status]}}</p>
         <div>
-          <p @click="confirmOrder">确认接单</p>
-          <p @click="invoiceModify">修改发票信息</p>
-          <p @click="consigneeModify">修改收货人信息</p>
-          <p>发布配送单</p>
-          <p @click="orderTrack">订单跟踪</p>
+          <p v-if="active==2" @click="confirmOrder">确认接单</p>
+          <p v-if="active==2" @click="invoiceModify">修改发票信息</p>
+          <p v-if="active==2" @click="consigneeModify">修改收货人信息</p>
+          <p v-if="active==3">发布配送单</p>
+          <p   @click="orderTrack">订单跟踪</p>
           <p @click="remarksOrder">备注订单</p>
         </div>
       </div>
@@ -581,7 +581,10 @@ export default {
     // 订单追踪
     orderTrack() {
       this.$router.push({
-        name: `servicesOrderDeliveryTrack`
+        name: `servicesOrderDeliveryTrack`,
+        params: {
+          orderNo: this.$route.params.orderNo,
+        }
       });
     },
     //   备注订单

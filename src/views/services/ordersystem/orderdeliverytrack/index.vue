@@ -28,6 +28,7 @@
   </div>
 </template>
 <script>
+import * as api from "@/api";
 export default {
   data() {
     return {
@@ -56,7 +57,24 @@ export default {
       ]
     };
   },
+  mounted() {
+    console.log(this.$route.params.orderNo)
+    this.getLogs();
+  },
   methods: {
+    // 获取订单跟踪
+    async getLogs() {
+      const query = {
+        orderNo: this.$route.params.orderNo,
+      }
+      try {
+        const ret = await api.getLogs(query);
+        console.log(ret,'订单跟踪')
+      }
+      catch(err) {
+        console.log(err)
+      }
+    },
     closeOrder() {
       this.$router.push({
         name: `servicesOrderDeliveryDetail`

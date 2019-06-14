@@ -24,7 +24,7 @@
             v-for="(item,index) in selectSortList"
             :key="item.id"
             :class="{active:count===index}"
-            @click="selectSort(index,item.name)"
+            @click="selectSort(index,item.name,item.id)"
           >{{ item.name }}</div>
         </div>
         <p>
@@ -92,12 +92,12 @@
             <el-input v-model="ruleForm.packprice"></el-input>
           </el-form-item>
           <el-form-item label="计量单位" prop="metering">
-            <el-select v-model="ruleForm.metering" placeholder="请选择活动区域">
-              <el-option label="份" value="1"></el-option>
-              <el-option label="克" value="2"></el-option>
-              <el-option label="个" value="3"></el-option>
-              <el-option label="盒" value="4"></el-option>
-              <el-option label="束" value="5"></el-option>
+            <el-select v-model="ruleForm.metering" placeholder="请选择计量单位">
+              <el-option label="份" value="份"></el-option>
+              <el-option label="克" value="克"></el-option>
+              <el-option label="个" value="个"></el-option>
+              <el-option label="盒" value="盒"></el-option>
+              <el-option label="束" value="束"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="备注" prop="remarks">
@@ -162,7 +162,7 @@
         </div>
         <el-table :data="pricetableData" border style="width: 100%">
           <el-table-column prop="name" label="规格"></el-table-column>
-          <el-table-column v-for="item in pricetable" :key="item" :label="item"></el-table-column>
+          <el-table-column v-for="item in pricetable" :key="item.id" :label="item.value"></el-table-column>
         </el-table>
         <el-button @click="goBasic">上一步,填写商品信息</el-button>
         <el-button type="primary" @click="goSubmit">提交</el-button>
@@ -196,18 +196,13 @@
           <div>
             <span>规格选择:</span>
             <el-select v-model="optionsvalue" @change="selectNorms">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
+              <el-option v-for="item in normList" :key="item.id" :label="item.spec" :value="item"></el-option>
             </el-select>
           </div>
           <el-table :data="pricetableData" border style="width: 100%">
             <el-table-column prop="name" label="规格"></el-table-column>
-            <el-table-column v-for="item in pricetable" :key="item" :label="item">
-              <input type="text">
+            <el-table-column v-for="item in pricetable" :key="item.id" :label="item.value">
+              <input v-model="item.price" type="text">
             </el-table-column>
           </el-table>
           <div style="text-align: right;">
@@ -249,13 +244,10 @@ export default {
   data() {
     return {
       active: 1,
-      selectSortList: [
-        { name: "蔬菜", id: 0 },
-        { name: "水果", id: 1 },
-        { name: "海鲜", id: 2 },
-        { name: "零食", id: 3 }
-      ],
+      selectSortList: [{ name: "", id: 0 }],
       sortValue: "",
+      sortId: "",
+      productId: "",
       count: Number,
       showSort: true,
       showBasic: false,
@@ -325,37 +317,66 @@ export default {
         }
       ],
       showAddPrice: false,
-      options: [
-        {
-          value: "12987122",
-          label: "口味"
-        },
-        {
-          value: "12987123",
-          label: "容量"
-        },
-        {
-          value: "12987124",
-          label: "加料"
-        }
-      ],
       showAddBatching: false,
       checkedBatching: [],
       batchingList: [],
       optionsvalue: "",
-      pricetableData: [
-        {
-          id: "12987123",
-          name: "价格",
-          amount1: "1L",
-          amount2: "2L",
-          amount3: "3L"
-        }
-      ],
-      pricetable: []
+      pricetableData: [],
+      pricetable: [],
+      productItems: [],
+      specList: [],
+      parts: []
     };
   },
+  mounted() {
+    this.getCategoriesByShop();
+  },
   methods: {
+    // 设置配送商品
+    async setGeneralProduct(options) {
+      const query = {
+        ...options,
+        categoryId: this.sortId || "",
+        description: this.ruleForm.introduce || "",
+        discount: this.ruleForm.discount || "",
+        packFee: this.ruleForm.packprice || "",
+        pic: this.ruleForm.imageUrlBig || "",
+        productName: this.ruleForm.name || "",
+        remark: this.ruleForm.remarks || "",
+        salePrice: this.ruleForm.sellingprice || "",
+        thumbnailsUrl: this.ruleForm.imageUrl || "",
+        unit: this.ruleForm.metering || ""
+      };
+      try {
+        const ret = await api.setGeneralProduct(query);
+        console.log(ret, "设置配送商品");
+        if (ret.data.code == 200) {
+          this.active = 3;
+          this.showBasic = false;
+          this.showNorms = true;
+          this.productId = ret.data.data.id;
+        } else {
+          alert(ret.data.message);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取配送商品分类
+    async getCategoriesByShop() {
+      try {
+        const ret = await api.getCategoriesByShop();
+        console.log(ret, "获取配送商品分类");
+        if (ret.data.code == 200 && ret.data.data) {
+          this.selectSortList = ret.data.data;
+        } else {
+          alert(ret.data.message);
+          this.selectSortList = [{ name: "", id: 0 }];
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     // 获取规格列表
     async getSpecsByShopId() {
       const query = {
@@ -379,12 +400,9 @@ export default {
       }
     },
     // 获取配料列表
-    async getParts() {
-      const query = {
-        shopId: 5
-      };
+    async getMyParts() {
       try {
-        const ret = await api.getParts(query);
+        const ret = await api.getMyParts();
         console.log(ret, "获取配料列表");
         if (ret.data.code == 200 && ret.data.data) {
           this.batchingList = ret.data.data;
@@ -395,10 +413,39 @@ export default {
         console.log(e.message);
       }
     },
+    // 设置商品规格
+    async setProductSpecs() {
+      const query = {
+        parts: this.parts,
+        productId: this.productId,
+        productItems: this.productItems,
+        specList: this.specList
+      };
+      try {
+        const ret = await api.setProductSpecs(query);
+        console.log(ret, "设置规格信息");
+        if (ret.data.code == 200) {
+          this.active = 4;
+          this.showSort = false;
+          this.showBasic = false;
+          this.showNorms = false;
+          this.showSubmit = true;
+          this.productItems = [];
+          this.specList = [];
+          this.parts = [];
+        } else {
+          alert(ret.data.message);
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+
     handleCheckednormChange(val) {},
-    selectSort(index, val) {
+    selectSort(index, val, id) {
       this.count = index;
       this.sortValue = val;
+      this.sortId = id;
     },
     goBasic() {
       this.active = 2;
@@ -439,10 +486,18 @@ export default {
       }
       return (isJPG || isPNG || isJPEG) && isLt2M;
     },
+    // 提交配送信息
     goNorms() {
-      this.active = 3;
       this.showBasic = false;
       this.showNorms = true;
+      if (this.productId != "") {
+        let query = {
+          productId: this.productId
+        };
+        this.setGeneralProduct(query);
+      } else {
+        this.setGeneralProduct({});
+      }
     },
     goSort() {
       this.active = 1;
@@ -451,13 +506,10 @@ export default {
       this.showNorms = false;
     },
     goSubmit() {
-      this.active = 4;
-      this.showSort = false;
-      this.showBasic = false;
-      this.showNorms = false;
-      this.showSubmit = true;
+      this.setProductSpecs();
     },
     goCommodity() {
+      this.productId = "";
       this.$router.push({
         path: "/services-delivery"
       });
@@ -474,45 +526,74 @@ export default {
       this.getSpecsByShopId();
     },
     selectNorms(val) {
-      let arr = this.tableData.filter(item => item.id === val);
-      this.pricetable = arr[0].values;
+      this.optionsvalue = val.spec;
+      this.pricetableData = [val];
+      let arr = this.normList.filter(item => item.id === val.id);
+      this.pricetable = arr[0].values.map(item => ({
+        ...item,
+        price: ""
+      }));
     },
     addpriceBtn() {
       this.showAddPrice = true;
+      this.getSpecsByShopId();
     },
     // 添加配料
     addbatchingBtn() {
       this.showAddBatching = true;
-      this.getParts();
+      this.getMyParts();
     },
-    handleCheckedBatchingChange() {
-
-    },
+    handleCheckedBatchingChange() {},
+    // 添加商品标价确认
     hendleAddprice() {
+      this.specList = [
+        {
+          id: this.pricetable[0].specId,
+          spec: this.pricetable[0].specName,
+          values: this.pricetable.map(item => {
+            return {
+              id: item.id,
+              value: item.value
+            };
+          })
+        }
+      ];
       this.showAddPrice = false;
       this.pricetable = [];
     },
     hendleCancelprice() {
       this.showAddPrice = false;
+      this.this.specList = [];
       this.pricetable = [];
     },
     // 选择规格确认
     onAddnormsSubmit() {
-      console.log(this.normList, "hhhhh");
+      this.productItems = this.normList.checkednorm.map(item => {
+        return {
+          specId: item.specId,
+          specName: item.specName,
+          valueId: item.id,
+          valueName: item.value
+        };
+      });
       this.showAddnorms = false;
     },
     // 选择规格取消
     onAddnormsCancel() {
+      this.productItems = [];
       this.showAddnorms = false;
     },
     // 选择配料确认
     onAddBatchingSubmit() {
-      console.log(this.checkedBatching, "hhhhh");
+      this.parts = this.checkedBatching.map(item => {
+        return item.id;
+      });
       this.showAddBatching = false;
     },
     // 选择配料取消
     onAddBatchingCancel() {
       this.showAddBatching = false;
+      this.parts = [];
     }
   }
 };

@@ -14,9 +14,9 @@
       <div>
         <p style="color:red;font-size:18px;">当前订单状态: {{orderStatus[Status]}}</p>
         <div>
-          <p @click="confirmConsume">确认消费</p>
-          <p @click="couponVerify">验证券码</p>
-          <p @click="remarksOrder">备注订单</p>
+          <p v-if="active==2"  @click="confirmConsume">消费确认</p>
+          <p v-if="active==2" @click="couponVerify">验证券码</p>
+          <p v-if="active==1" @click="remarksOrder">备注订单</p>
         </div>
       </div>
       <div class="table-data">
