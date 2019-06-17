@@ -24,8 +24,8 @@
             v-for="(item,index) in selectSortList"
             :key="item.id"
             :class="{active:count===index}"
-            @click="selectSort(index,item.name,item.id)"
-          >{{ item.name }}</div>
+            @click="selectSort(index,item.categoryName,item.id)"
+          >{{ item.categoryName }}</div>
         </div>
         <p>
           您当前选择的商品类别是:
@@ -124,14 +124,16 @@
           </div>
         </div>
         <div>
-          <el-table :data="tableData" border style="width: 100%">
-            <el-table-column prop="name" label="规格名称" width="100"></el-table-column>
-            <el-table-column prop="amount1" width="100" label="规格值 1"></el-table-column>
-            <el-table-column prop="amount2" width="100" label="规格值 2"></el-table-column>
-            <el-table-column prop="amount3" width="100" label="规格值 3"></el-table-column>
-            <el-table-column label="操作" width="200">
+          <el-table :data="normsTableData" border style="width: 100%">
+            <el-table-column
+              v-for="item in columns"
+              :key="item.prop"
+              :prop="item.prop"
+              :label="item.label"
+            />
+            <el-table-column v-if="normsTableData.length>0" label="操作" width="200">
               <template slot-scope="scope">
-                <el-button size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                <el-button size="mini" @click="handleNormDelete(scope.$index, scope.row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -141,29 +143,57 @@
             <p @click="addpriceBtn">添加商品标价</p>
           </div>
         </div>
-        <div>
-          <el-table :data="tableData" border style="width: 100%">
-            <el-table-column prop="name" label="规格名称" width="100"></el-table-column>
-            <el-table-column prop="amount1" width="100" label="规格值 1"></el-table-column>
-            <el-table-column prop="amount2" width="100" label="规格值 2"></el-table-column>
-            <el-table-column prop="amount3" width="100" label="规格值 3"></el-table-column>
-            <el-table-column label="操作" width="200">
-              <template slot-scope="scope">
-                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-                <el-button size="mini" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
+        <div class="price-tableData">
+          <div v-if="this.pricetable.length>0">
+            <div>
+              <p>{{this.pricetable[0].specName}}</p>
+              <p v-for="item in pricetable" :key="item.id">{{ item.value }}</p>
+            </div>
+            <div>
+              <p>价格</p>
+              <p v-for="item in pricetable" :key="item.id">{{ item.price }}</p>
+            </div>
+            <div>
+              <p>操作</p>
+              <p
+                style="color: #1260fb"
+                v-for="(item,index) in pricetable"
+                :key="item.id"
+                @click="handlePriceDel(index)"
+              >删除</p>
+            </div>
+          </div>
+          <div
+            v-if="this.pricetable.length==0"
+            style="text-align: center;color: #999;height: 45px;line-height: 45px;padding: 10px;"
+          >暂无数据</div>
         </div>
         <div class="add-norms-btn">
           <div>
             <p @click="addbatchingBtn">添加配料</p>
           </div>
         </div>
-        <el-table :data="pricetableData" border style="width: 100%">
-          <el-table-column prop="name" label="规格"></el-table-column>
-          <el-table-column v-for="item in pricetable" :key="item.id" :label="item.value"></el-table-column>
-        </el-table>
+        <div class="price-tableData">
+          <div v-if="this.batchTableData.length>0">
+            <div>
+              <p>配料名称</p>
+              <p v-for="item in batchTableData" :key="item.id">{{ item.name }}</p>
+            </div>
+            <div>
+              <p>操作</p>
+              <p
+                style="color: #1260fb"
+                v-for="(item,index) in batchTableData"
+                :key="item.id"
+                @click="handleBatchDel(index)"
+              >删除</p>
+            </div>
+          </div>
+          <div
+            v-if="this.batchTableData.length==0"
+            style="text-align: center;color: #999;height: 45px;line-height: 45px;padding: 10px;"
+          >暂无数据</div>
+        </div>
         <el-button @click="goBasic">上一步,填写商品信息</el-button>
         <el-button type="primary" @click="goSubmit">提交</el-button>
       </div>
@@ -199,8 +229,8 @@
               <el-option v-for="item in normList" :key="item.id" :label="item.spec" :value="item"></el-option>
             </el-select>
           </div>
-          <el-table :data="pricetableData" border style="width: 100%">
-            <el-table-column prop="name" label="规格"></el-table-column>
+          <el-table :data="addpricetableData" border style="width: 100%">
+            <el-table-column prop="spec" label="规格"></el-table-column>
             <el-table-column v-for="item in pricetable" :key="item.id" :label="item.value">
               <input v-model="item.price" type="text">
             </el-table-column>
@@ -290,38 +320,16 @@ export default {
       showAddnorms: false,
       selectForm: {},
       normList: [],
-      tableData: [
-        {
-          id: "12987122",
-          name: "口味",
-          values: ["甜辣", "微辣", "麻辣"],
-          amount1: "甜辣",
-          amount2: "微辣",
-          amount3: "麻辣"
-        },
-        {
-          id: "12987123",
-          name: "容量",
-          values: ["1L", "2L", "3L"],
-          amount1: "1L",
-          amount2: "2L",
-          amount3: "3L"
-        },
-        {
-          id: "12987124",
-          name: "加料",
-          values: ["红豆", "马蹄", "粉圆"],
-          amount1: "红豆",
-          amount2: "马蹄",
-          amount3: "粉圆"
-        }
-      ],
+      normsTableData: [],
+      columns: [],
+      batchTableData: [],
       showAddPrice: false,
       showAddBatching: false,
       checkedBatching: [],
       batchingList: [],
       optionsvalue: "",
-      pricetableData: [],
+      priceColumns: [],
+      addpricetableData: [],
       pricetable: [],
       productItems: [],
       specList: [],
@@ -368,7 +376,7 @@ export default {
         const ret = await api.getCategoriesByShop();
         console.log(ret, "获取配送商品分类");
         if (ret.data.code == 200 && ret.data.data) {
-          this.selectSortList = ret.data.data;
+          this.selectSortList = ret.data.data.categories;
         } else {
           alert(ret.data.message);
           this.selectSortList = [{ name: "", id: 0 }];
@@ -423,7 +431,6 @@ export default {
       };
       try {
         const ret = await api.setProductSpecs(query);
-        console.log(ret, "设置规格信息");
         if (ret.data.code == 200) {
           this.active = 4;
           this.showSort = false;
@@ -433,6 +440,7 @@ export default {
           this.productItems = [];
           this.specList = [];
           this.parts = [];
+          this.pricetable = [];
         } else {
           alert(ret.data.message);
         }
@@ -442,6 +450,7 @@ export default {
     },
 
     handleCheckednormChange(val) {},
+    // 选择商品分类
     selectSort(index, val, id) {
       this.count = index;
       this.sortValue = val;
@@ -488,8 +497,6 @@ export default {
     },
     // 提交配送信息
     goNorms() {
-      this.showBasic = false;
-      this.showNorms = true;
       if (this.productId != "") {
         let query = {
           productId: this.productId
@@ -527,7 +534,7 @@ export default {
     },
     selectNorms(val) {
       this.optionsvalue = val.spec;
-      this.pricetableData = [val];
+      this.addpricetableData = [val];
       let arr = this.normList.filter(item => item.id === val.id);
       this.pricetable = arr[0].values.map(item => ({
         ...item,
@@ -559,16 +566,61 @@ export default {
         }
       ];
       this.showAddPrice = false;
-      this.pricetable = [];
+      // this.pricetable = [];
     },
     hendleCancelprice() {
       this.showAddPrice = false;
       this.this.specList = [];
-      this.pricetable = [];
+      // this.pricetable = [];
+    },
+    // 删除biaojia
+    handlePriceDel(index) {
+      this.pricetable.splice(index, 1);
+      this.specList = [
+        {
+          id: this.pricetable[0].specId,
+          spec: this.pricetable[0].specName,
+          values: this.pricetable.map(item => {
+            return {
+              id: item.id,
+              value: item.value
+            };
+          })
+        }
+      ];
+      console.log(index, "qq");
     },
     // 选择规格确认
     onAddnormsSubmit() {
-      this.productItems = this.normList.checkednorm.map(item => {
+      const max = Math.max.apply(
+        null,
+        this.normList.map(item => item.checkednorm.length)
+      );
+      // 构建table数据
+      const souceData = [{ label: "规格名称", prop: "spec" }];
+      for (let i = 1; i <= max; i++) {
+        souceData.push({ label: `规格值${i}`, prop: `value${i}` });
+      }
+      this.columns = souceData;
+      const tableData = [];
+      this.normList.forEach(item => {
+        const values = item.checkednorm.reduce(
+          (obj, child, i) =>
+            Object.assign(obj, { [`value${i + 1}`]: child.value }),
+          {}
+        );
+        tableData.push({
+          spec: item.spec,
+          id: item.id,
+          ...values
+        });
+      });
+      this.normsTableData = tableData;
+      let arr = this.normList.reduce(
+        (arr, item) => arr.concat(item.checkednorm),
+        []
+      );
+      this.productItems = arr.map(item => {
         return {
           specId: item.specId,
           specName: item.specName,
@@ -583,8 +635,17 @@ export default {
       this.productItems = [];
       this.showAddnorms = false;
     },
+    // 规格删除
+    handleNormDelete(index) {
+      this.normsTableData.splice(index, 1);
+    },
     // 选择配料确认
     onAddBatchingSubmit() {
+      console.log(this.checkedBatching, "配料");
+      this.batchTableData = this.checkedBatching;
+      // this.values = this.checkedBatching.map(item => {
+      //   return item.name;
+      // });
       this.parts = this.checkedBatching.map(item => {
         return item.id;
       });
@@ -594,6 +655,14 @@ export default {
     onAddBatchingCancel() {
       this.showAddBatching = false;
       this.parts = [];
+    },
+    // 删除配料名称
+    handleBatchDel(index) {
+      this.checkedBatching.splice(index, 1);
+      this.batchTableData = this.checkedBatching;
+      this.parts = this.checkedBatching.map(item => {
+        return item.id;
+      });
     }
   }
 };
@@ -620,6 +689,28 @@ export default {
   }
   .sign {
     margin: 20px 0;
+  }
+  .price-tableData {
+    margin-bottom: 20px;
+    > div {
+      width: 720px;
+      border: 1px solid #f1f1f1;
+      > div {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        border-bottom: 1px solid #999;
+        width: 100%;
+        height: 45px;
+        line-height: 45px;
+        border-bottom: 1px solid #f1f1f1;
+        p {
+          width: 110px;
+          text-align: center;
+          border-right: 1px solid #f1f1f1;
+        }
+      }
+    }
   }
   /deep/ .el-step__title.is-finish {
     color: @color;

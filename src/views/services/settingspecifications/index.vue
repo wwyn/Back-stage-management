@@ -188,7 +188,6 @@ export default {
           const max = Math.max(
             ...ret.data.data.map(item => item.values.length)
           );
-          console.log(max,'max')
           // 构建table数据
           const souceData = [{ label: "规格名称", prop: "specName" }];
           for (let i = 1; i <= max; i++) {
