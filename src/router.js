@@ -164,6 +164,14 @@ Vue.use(Router);
                     },
                 },
                 {
+                    path: "/services-accountauthority",
+                    name: "servicesAccountauthority",
+                    component: () => import("./views/services/accountauthority"),
+                    meta: {
+                        menu: 'servicesAccount',
+                    },
+                },
+                {
                     path: "/services-examinestore",
                     name: "servicesExaminestore",
                     component: () => import("./views/services/examinestore"),

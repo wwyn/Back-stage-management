@@ -37,10 +37,14 @@
       <el-form-item label="确认密码:" prop="checkPass">
         <el-input type="password" v-model="userForm.checkPass" autocomplete="off"></el-input>
       </el-form-item>
-      <el-form-item label="所属商家:" prop="region">
-        <el-select v-model="userForm.region" placeholder="全部">
-          <el-option label="区域一" value="shanghai"></el-option>
-          <el-option label="区域二" value="beijing"></el-option>
+      <el-form-item label="所属商家">
+        <el-select v-model="userForm.shopId" placeholder="请选择商家">
+          <el-option
+            v-for="item in shopList"
+            :key="item.id"
+            :label="item.shopName"
+            :value="item.id"
+          ></el-option>
         </el-select>
       </el-form-item>
       <p class="explain">选择所属商家后默认继承商家权限，可在商家列表中单独设置权限</p>
@@ -80,32 +84,107 @@ export default {
         Email: "",
         pass: "",
         checkPass: "",
-        region: ""
+        shopId: ""
       },
+      shopList: [],
       imageUrl: "",
       rules: {
         pass: [{ validator: validatePass, trigger: "blur" }],
         checkPass: [{ validator: validatePass2, trigger: "blur" }],
         username: [
           { required: true, message: "请输入用户名称", trigger: "blur" },
-          { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
+          { min: 1, max: 20, message: "长度在 1 到 20 个字符", trigger: "blur" }
         ],
         Email: [
           { required: true, message: "请输入Email", trigger: "blur" },
-          { min: 2, max: 10, message: "长度在 2 到 30 个字符", trigger: "blur" }
+          { min: 1, max: 30, message: "长度在 1 到 30 个字符", trigger: "blur" }
         ],
-        region: [
+        shopId: [
           { required: true, message: "请选择所属商家", trigger: "change" }
         ]
       }
     };
   },
 
-  mounted: function() {},
+  mounted() {
+    this.getShopList();
+    if (this.$route.params.id) {
+      const query = {
+        userId: this.$route.params.id
+      };
+      this.getSysUser(query);
+    }
+  },
   methods: {
+    // 设置用户信息
+    async setSysUser(params) {
+      const query = {
+        ...params,
+        accountNumber: "",
+        email: this.userForm.Email || "",
+        imageUrl: this.imageUrl || "",
+        password: this.userForm.pass || "",
+        shopId: this.userForm.shopId || "",
+        username: this.userForm.username || ""
+      };
+      try {
+        const ret = await api.setSysUser(query);
+        if (ret.data.code == 200 && ret.data.data) {
+          this.$router.push({
+            name: "servicesAccount"
+          });
+        } else {
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取商家列表
+    async getShopList() {
+      const query = {};
+      try {
+        const ret = await api.getShopList(query);
+        if (ret.data.code == 200 && ret.data.data) {
+          this.shopList = ret.data.data.pageData;
+        } else {
+          this.shopList = [];
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    // 获取用户详情
+    async getSysUser(query) {
+      try {
+        const ret = await api.getSysUser(query);
+        if (ret.data.code == 200 && ret.data.data) {
+          this.imageUrl = ret.data.data.imageUrl || '';
+          this.userForm = {
+            username: ret.data.data.username || '',
+            Email: ret.data.data.email || '',
+            pass: '',
+            checkPass: '',
+            shopId: ret.data.data.shopId || ''
+          };
+        } else {
+          this.shopList = [];
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
+          if(this.$route.params.id) {
+            let query = {
+              userId: this.$route.params.id
+            }
+            this.setSysUser(query);
+          } else {
+            this.setSysUser({});
+          }
+          
         } else {
           console.log("error submit!!");
           return false;
@@ -176,18 +255,18 @@ export default {
   .el-form {
     text-align: center;
     .explain {
-        margin-left: 230px;
-        color: #999;
+      margin-left: 230px;
+      color: #999;
     }
     p {
-        margin-bottom: 10px;
-        color: @color;
-        margin-left: 60px;
+      margin-bottom: 10px;
+      color: @color;
+      margin-left: 60px;
     }
     .el-form-item {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     /deep/ .el-form-item__content {
       width: 280px;
@@ -203,9 +282,9 @@ export default {
       width: 280px;
     }
     .el-button {
-        background-color: @color;
-        color: #fff;
-        margin-left: 100px;
+      background-color: @color;
+      color: #fff;
+      margin-left: 100px;
     }
   }
   //   头像部分

@@ -8,19 +8,23 @@
         <el-input v-model="formInline.user" placeholder="用户名/姓名"></el-input>
       </el-form-item>
       <el-form-item label="所属商家">
-        <el-input v-model="formInline.business" placeholder="全部"></el-input>
+        <el-select v-model="formInline.business" placeholder="请选择商家">
+          <el-option
+            v-for="item in shopList"
+            :key="item.id"
+            :label="item.shopName"
+            :value="item.id"
+          ></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleSearch">查询结果</el-button>
+        <el-button style="background-color: #999;border: none" @click="resetForm">重置</el-button>
       </el-form-item>
     </el-form>
     <div class="shop-tools">
       <div class="shop-type">
         <p class="add" @click="handlerAddaccount">添加</p>
-      </div>
-      <div class="shop-batch">
-        <p @click="handleBatchLower">批量下架</p>
-        <p @click="handleBatchDel">批量删除</p>
       </div>
     </div>
     <el-table
@@ -32,23 +36,37 @@
       border
       style="width: 100%"
     >
-      <el-table-column type="selection" width="55" align="center"></el-table-column>
+      <!-- <el-table-column type="selection" width="55" align="center"></el-table-column> -->
       <el-table-column type="index" label="序号" width="54" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="用户名" width="107" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="邮箱地址" width="126" align="center"></el-table-column>
-      <el-table-column prop="brandName" label="所属商家" width="146" align="center"></el-table-column>
-      <el-table-column prop="createTime" label="添加时间" width="156" align="center"></el-table-column>
-      <el-table-column label="最后登录" width="156" align="center">
+      <el-table-column prop="username" label="用户名" width="140" align="center"></el-table-column>
+      <el-table-column prop="email" label="邮箱地址" width="140" align="center"></el-table-column>
+      <el-table-column prop="shopName" label="所属商家" width="120" align="center"></el-table-column>
+      <el-table-column label="添加时间" width="180" align="center">
         <template slot-scope="scope">
           <p>{{parseTime(scope.row.createTime || '')}}</p>
         </template>
       </el-table-column>
-      <el-table-column prop="upSelling" label="是否禁用" width="90" align="center"></el-table-column>
-      <el-table-column fixed="right" label="操作" width="148" align="center">
+      <el-table-column label="最后登录" width="180" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="small">权限设置</el-button>
-          <el-button type="text" size="small" @click="handleRevisetable(scope.row)">修改</el-button>
-          <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button>
+          <p>{{parseTime(scope.row.updateTime || '')}}</p>
+        </template>
+      </el-table-column>
+      <el-table-column prop="enabled" label="是否禁用" width="100" align="center">
+        <template slot-scope="scope">
+          <el-switch
+            :value="scope.row.enabled.toString()"
+            active-value="1"
+            inactive-value="0"
+            active-color="#1260fb"
+            @change="checkEnabled($event,scope.row)"
+          ></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" align="center">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="handleAuthority(scope.row)">权限设置</el-button>
+          <el-button type="text" size="small" @click="handleRevisetable(scope.row)">编辑</el-button>
+          <!-- <el-button @click="handleDeltable(scope.row)" type="text" size="small">删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -72,6 +90,7 @@ export default {
         business: "",
         user: ""
       },
+      shopList: [],
       tableData: [],
       pageSize: 10,
       currentPage: 1,
@@ -85,42 +104,25 @@ export default {
   },
   mounted: function() {
     let currentPage = this.currentPage;
-    this.productList({ currentPage });
+    this.getSysUserList({ currentPage });
+    this.getShopList();
   },
   methods: {
     parseTime,
-    // 批量设置商品列表
-    async batchPart(data) {
-      try {
-        const ret = await api.batchPart(data);
-        if (ret.data.code == 200) {
-          this.productList({ currentPage: this.currentPage });
-        } else {
-          console.log("设置列表失败");
-        }
-      } catch (e) {
-        console.log(e.message);
-      }
-    },
-    // 列表
-    async productList(params) {
+    // 系统用户列表
+    async getSysUserList(params) {
       const query = {
         ...params,
-        shopName: this.formInline.title || "",
-        productId: this.formInline.ID || "",
-        productName: this.formInline.name || "",
-        minPrice: this.formInline.minMoney || "",
-        maxPrice: this.formInline.maxMoney || "",
-        minSaleCount: this.formInline.minNumber || "",
-        maxSaleCount: this.formInline.maxNumber || "",
-        upSelling: "1",
-        pageSize: 10
+        pageSize: 10,
+        sysUserName: this.formInline.user || "",
+        accountNumber: "",
+        shopId: this.formInline.business || ""
       };
       try {
-        const ret = await api.productList(query);
+        const ret = await api.getSysUserList(query);
         if (ret.data.code == 200 && ret.data.data) {
           this.loading = false;
-          this.tableData = ret.data.data.pageData;
+          this.tableData = ret.data.data.records;
           this.total = ret.data.data.totalCount;
         } else {
           this.tableData = [];
@@ -130,55 +132,52 @@ export default {
         console.log(e.message);
       }
     },
-    // 单个设置商品
-    async setPart(query) {
+    // 获取商家列表
+    async getShopList() {
+      const query = {};
       try {
-        const ret = await api.setPart(query);
-        if (ret.data.code == 200) {
-          this.productList({ currentPage: this.currentPage });
+        const ret = await api.getShopList(query);
+        if (ret.data.code == 200 && ret.data.data) {
+          this.shopList = ret.data.data.pageData;
+        } else {
+          this.shopList = [];
         }
       } catch (e) {
         console.log(e.message);
       }
     },
-    // 单个删除
-    handleDeltable(options) {
-      this.brandDel({ id: options.id });
+    // 单个设置商品
+    async setEnabled(query) {
+      try {
+        const ret = await api.setEnabled(query);
+        if (ret.data.code == 200) {
+          this.getSysUserList({ currentPage: this.currentPage });
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
+    },
+    checkEnabled(val,options) {
+      const query = {
+        userId: options.id,
+        enabled: +val
+      };
+      this.setEnabled(query);
     },
     // 搜索
     handleSearch(data) {
       const query = {
         currentPage: 1
       };
-      this.productList(query);
+      this.getSysUserList(query);
     },
     // 重置
     resetForm() {
       this.formInline = {
-        title: "",
-        ID: "",
-        name: "",
-        minMoney: "",
-        maxMoney: "",
-        minNumber: "",
-        maxNumber: ""
+        business: "",
+        user: ""
       };
-    },
-    // 批量删除
-    handleBatchDel() {
-      const query = {
-        productIds: this.productIdList,
-        hide: "1"
-      };
-      this.batchPart(query);
-    },
-    // 批量下架
-    handleBatchLower() {
-      const query = {
-        productIds: this.productIdList,
-        upSelling: "0"
-      };
-      this.batchPart(query);
+      this.getSysUserList({ currentPage: 1 });
     },
     handleCurrentChange(val) {
       this.currentPage = val;
@@ -200,25 +199,28 @@ export default {
       };
       this.setPart(query);
     },
-    // 编辑
-    handleEditor(options) {
-      this.$router.push({
-        name: `eCommerceCommodity`,
-        params: {
+    // 权限设置
+    handleAuthority(options) {
+       this.$router.push({
+        name: "servicesAccountauthority",
+         params: {
           id: options.id
         }
       });
     },
     // 添加
     handlerAddaccount() {
-        this.$router.push({
+      this.$router.push({
         name: "servicesAddaccount"
       });
     },
     // 修改
     handleRevisetable(options) {
-        this.$router.push({
-        name: "servicesAddaccount"
+      this.$router.push({
+        name: "servicesAddaccount",
+        params: {
+          id: options.id
+        }
       });
     }
   }
@@ -318,7 +320,7 @@ export default {
   border: none;
 }
 /deep/ .el-table .cell {
-  padding: 0 20px 0 0;
+  // padding: 0 20px 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

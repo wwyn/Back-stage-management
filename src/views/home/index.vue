@@ -5,6 +5,7 @@
 import menu from "@/menu";
 import * as api from "@/api";
 import * as auth from "@/utils/auth";
+import Cookies from "js-cookie";
 
 export default {
   data: () => ({
@@ -19,7 +20,8 @@ export default {
     async getUserInfo() {
       try {
         let ret = await api.getUserInfo();
-          this.userInfo = ret.data;
+        console.log(ret, "用户信息");
+        this.userInfo = ret.data;
       } catch (err) {
         console.log(err);
       }

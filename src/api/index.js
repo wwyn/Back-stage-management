@@ -861,8 +861,42 @@ export function getMyOrderCode(query) {
   });
 }
 
-// 
+// 系统用户列表
+export function getSysUserList(query) {
+  return request({
+    url: "sfy-user/auth/sysUser/getSysUserList",
+    method: "get",
+    params:  query
+  });
+}
 
+// 设置用户信息
+export function setSysUser(data) {
+  return request({
+    url: "sfy-user/auth/sysUser/setSysUser",
+    method: "post",
+    data
+  });
+}
+
+// 获取用户信息
+export function getSysUser(query) {
+  return request({
+    url: "sfy-user/auth/sysUser/getSysUser",
+    method: "get",
+    params:  query
+  });
+}
+
+
+// 设置是否禁用
+export function setEnabled(query) {
+  return request({
+    url: "sfy-user/auth/user/setEnabled",
+    method: "post",
+    params:  query
+  });
+}
 
 
 
