@@ -170,9 +170,12 @@ export default {
       };
       try {
         let ret = await api.getOrderList(options);
-        if (ret.data.code == 200) {
+        if (ret.data.code == 200 && ret.data.data) {
           this.tableData = ret.data.data.pageData;
           this.total = ret.data.data.totalCount;
+        } else {
+          this.tableData = [];
+          this.total = 0;
         }
       } catch (err) {
         console.log(err);

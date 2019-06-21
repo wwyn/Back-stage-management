@@ -5,18 +5,29 @@
     </div>
     <search :formInline="formInline" @handleSearch="handleSearch" @resetForm="resetForm"></search>
     <div class="shop-tools">
-      <div class="shop-type">
-        <p class="active">自营商品</p>
-        <p>品牌店商品</p>
-        <p v-if="isSearch">共搜索到：{{ total }} 条相关商品</p>
-      </div>
       <div class="shop-batch">
         <p @click="handleBatchLower">批量下架</p>
         <p @click="handleBatchDel">批量删除</p>
       </div>
+      <div class="shop-type">
+        <p v-if="isSearch">共搜索到：{{ total }} 条相关商品</p>
+      </div>
     </div>
-    <brandlist :table-data="tableData" :sell="true" :loading="loading" @handleSelectionChange="handleSelectionChange" @handleEditor="handleEditor" @handleupSelling="handleupSelling" @handleDel="handleDel"></brandlist>
-    <pagination :page-size="pageSize" :current-page="currentPage" :total="total" @handleCurrentChange="handleCurrentChange" ></pagination>
+    <brandlist
+      :table-data="tableData"
+      :sell="true"
+      :loading="loading"
+      @handleSelectionChange="handleSelectionChange"
+      @handleEditor="handleEditor"
+      @handleupSelling="handleupSelling"
+      @handleDel="handleDel"
+    ></brandlist>
+    <pagination
+      :page-size="pageSize"
+      :current-page="currentPage"
+      :total="total"
+      @handleCurrentChange="handleCurrentChange"
+    ></pagination>
   </div>
 </template>
 <script>
@@ -41,7 +52,7 @@ export default {
       pageSize: 10,
       currentPage: 1,
       total: 0,
-      productIdList:[],
+      productIdList: [],
       isSearch: false,
       loading: true
     };
@@ -61,7 +72,7 @@ export default {
       try {
         const ret = await api.batchPart(data);
         if (ret.data.code == 200) {
-          this.productList({ currentPage:this.currentPage });
+          this.productList({ currentPage: this.currentPage });
         } else {
           console.log("设置列表失败");
         }
@@ -79,29 +90,29 @@ export default {
     handleBatchDel() {
       const query = {
         productIds: this.productIdList,
-        hide:'1'
-      }
+        hide: "1"
+      };
       this.batchPart(query);
     },
     // 批量下架
     handleBatchLower() {
       const query = {
         productIds: this.productIdList,
-        upSelling:'0',
-      }
+        upSelling: "0"
+      };
       this.batchPart(query);
     },
     // 列表
     async productList(params) {
       const query = {
         ...params,
-        shopName: this.formInline.title||'',
-        productId: this.formInline.ID||'',
-        productName:this.formInline.name||'',
-        minPrice:this.formInline.minMoney||'',
-        maxPrice:this.formInline.maxMoney||'',
-        minSaleCount:this.formInline.minNumber||'',
-        maxSaleCount:this.formInline.maxNumber||'',
+        shopName: this.formInline.title || "",
+        productId: this.formInline.ID || "",
+        productName: this.formInline.name || "",
+        minPrice: this.formInline.minMoney || "",
+        maxPrice: this.formInline.maxMoney || "",
+        minSaleCount: this.formInline.minNumber || "",
+        maxSaleCount: this.formInline.maxNumber || "",
         upSelling: "1",
         pageSize: 10
       };
@@ -124,7 +135,7 @@ export default {
       try {
         const ret = await api.setPart(query);
         if (ret.data.code == 200) {
-          this.productList({currentPage: this.currentPage});
+          this.productList({ currentPage: this.currentPage });
         }
       } catch (e) {
         console.log(e.message);
@@ -159,26 +170,26 @@ export default {
     handleupSelling(type) {
       let query = {
         productId: type.id,
-        upSelling:'0'
-      }
+        upSelling: "0"
+      };
       this.setPart(query);
     },
     // 单个删除
     handleDel(content) {
       let query = {
         productId: content.id,
-        hide: '1',
-      }
+        hide: "1"
+      };
       this.setPart(query);
     },
     // 编辑
     handleEditor(options) {
-       this.$router.push({
+      this.$router.push({
         name: `eCommerceCommodity`,
         params: {
           id: options.id
         }
-      })
+      });
     }
   }
 };
@@ -218,18 +229,14 @@ export default {
         line-height: 42px;
       }
     }
-    .shop-type {
-      .active {
-        background-color: #F1F1F1;
-      }
-    }
     .shop-batch {
+      margin-bottom: 10px;
       p {
         width: 84px;
         height: 34px;
         line-height: 34px;
-        background-color: #F1F1F1;
-        margin-left: 10px;
+        background-color: #f1f1f1;
+        margin-right: 10px;
       }
     }
   }
