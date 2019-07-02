@@ -1,6 +1,6 @@
 <template>
   <div class="g-services">
-    <g-layout :userInfo="userInfo"  title="上方元电商系统" :menu="menu" />
+    <g-layout :userInfo="userInfo"  title="诺电商系统" :menu="menu" />
   </div>
 </template>
 

@@ -2,7 +2,7 @@
   <div class="g-header">
     <div class="logo-header">
       <img src="../../assets/image/logo.png" alt>
-      <p>上方元系统管理后台</p>
+      <p>诺系统管理后台</p>
     </div>
     <div class="user-name">
       <i class="iconfont icon-xiaoxi-wu"></i>

@@ -44,7 +44,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: "上方元管理系统"
+      default: "诺管理系统"
     },
     menu: {
       type: Array,

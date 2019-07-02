@@ -3,7 +3,7 @@
     <div class="login-from">
       <img src="../../assets/image/loadbanner.png" alt>
       <div class="from">
-        <div class="title">上方元智能管理平台</div>
+        <div class="title">诺智能管理平台</div>
         <el-form ref="loginForm" :rules="loginRules" :model="loginForm" class="demo-ruleForm">
           <el-input
             v-model="loginForm.username"
@@ -40,7 +40,7 @@
         </el-form>
       </div>
     </div>
-    <div class="copyright">上方元智能科技（上海）有限公司 2019 版权所有</div>
+    <div class="copyright">诺智能科技（上海）有限公司 2019 版权所有</div>
   </div>
 </template>
 <script>
